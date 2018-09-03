@@ -1,5 +1,10 @@
 ---Section One (Ripper)---
 Create working settings.json file so that users can modify select information that may differ between computers
+    Have the base location for rips be customizable through the settings.json file
+        --Done--New folder will have to be generated before running console as the console won't do this for you
+         folder will also have to be passed as a var so that the command can pick it up and append it to the file path
+         Ripping command: "makemkvcon.exe -r mkv disc:{driveNameVar} {titleNumberVar} "SettingJson configured filepath\{DVDFolderVar}""
+            Ex: makemkvcon.exe -r mkv disc:0 0 "C:\MovieRips\MyMovie"
 --Done--Interpert DVD drives with discs loaded and write drive names to vars to be called later
     Use command "makemkvcon.exe -r info DRV:index > "node directory\DriveLog.txt"" (inside of MakeMKV directory) to get DriveLog.txt file to use to pull drive names from
         Ex: makemkvcon.exe -r info DRV:index > "C:\AutoRip\logs\DriveLog.txt"
@@ -8,17 +13,16 @@ Create working settings.json file so that users can modify select information th
         Ex: makemkvcon.exe -r info disc:0 > "C:\AutoRip\logs\TitlesLog.txt"
 --Done--use that TitlesLog.txt file to get the longest title and add that title number (in console format i.e. 0,1,2 not 1,2,3) to a var that can be called later
 --Done--Call the title number var into the dvd rip command to rip that disc to desired location
-    Have the base location for rips be customizable through the settings.json file
-    --Done--New folder will have to be generated before running console as the console won't do this for you
-        folder will also have to be passed as a var so that the command can pick it up and append it to the file path
-    Ripping command: "makemkvcon.exe -r mkv disc:{driveNameVar} {titleNumberVar} "SettingJson configured filepath\{DVDFolderVar}""
-        Ex: makemkvcon.exe -r mkv disc:0 0 "C:\MovieRips\MyMovie"
 --Done--Be able to rip all DVDs loged to vars one at a time without restarting code (i.e. run file once and it'll rip all dvds one at a time)
-Create info.txt file to explain how the settings file works and recomendations for each setting along with use cases
 --Done--Publish to GitHub
 Fix Ripping so that DVDs rip synchronously insted of asynchronously
-Add time stamps to log messages
+--Done--Add time stamps to log messages
+--Done--Add char subtractors to remove chars that aren't valid in a file name from being used to generate folder names
+--Done--Add Batch file into release version
+Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
+Add exception handling in sections that lack it
 
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)
+    This may be a part of a seperate github project or not published at all (still unsure at this time)
 --More tasks to come--

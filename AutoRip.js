@@ -5,7 +5,7 @@ console.log('The full licence file can be found in the root folder of this softw
 console.log('Please fully read the README.md file found in the root folder before using this software.');
 console.log('');
 console.log('');
-console.log('---Welcome to MakeMKV Auto Rip V0.1.0---');
+console.log('---Welcome to MakeMKV Auto Rip V0.2.1---');
 console.log('---Running in Dev Mode---');
 console.log('');
 console.log('---Devloped by Zac Ingoglia---');
@@ -37,7 +37,8 @@ prompt("Rip or Dip? ")
         switch (TA) {
             case '1'
                 : var msg = 'Beginning AutoRip... Please Wait.';
-                console.log(msg);
+                 const moment = require('moment');
+                console.log(moment().format('LTS') + ' - ' + msg);
                 const makeMKV = '\"C:\\Program Files (x86)\\MakeMKV\\makemkvcon.exe\"';
                 const exec = require('child_process').exec;
 
@@ -72,7 +73,15 @@ prompt("Rip or Dip? ")
                 function makeTitleValidFolderPath(title) {
                     //escape out any chars that are not valid for file name. \
                     // TODO: make sure that we only return a valid folder path.
-                    return title.replace(/['"]+/g, '');;
+                    return title.replace("\\", '')
+                        .replace("/", '')
+                        .replace(":", '')
+                        .replace("*", '')
+                        .replace("?", '')
+                        .replace("<", '')
+                        .replace(">", '')
+                        .replace("|", '')
+                        .replace(/['"]+/g, '');;
                 }
 
                 function getTimeInSeconds(timeArray) {
@@ -174,7 +183,7 @@ prompt("Rip or Dip? ")
 
                     return new Promise((resolve, reject) => {
 
-                        console.info('Getting info for all discs...');
+                        console.info(moment().format('LTS') + ' - ' + 'Getting info for all discs...');
                         exec(makeMKV + ' -r info disc:index', (err, stdout, stderr) => {
 
                             if (stderr) {
@@ -182,7 +191,7 @@ prompt("Rip or Dip? ")
                             }
 
                             //get the data for drives with discs.
-                            console.info('Getting drive info...');
+                            console.info(moment().format('LTS') + ' - ' + 'Getting drive info...');
                             var driveInfo = getDriveInfo(stdout);
 
                             //get an array of promises to get the file numbers for the longest file from each valid disc.
@@ -190,7 +199,7 @@ prompt("Rip or Dip? ")
 
                                 return new Promise((resolve, reject) => {
 
-                                    console.info('Getting file number for drive title ' + driveInfo.driveNumber + '-' + driveInfo.title + '.');
+                                    console.info(moment().format('LTS') + ' - ' + 'Getting file number for drive title ' + driveInfo.driveNumber + '-' + driveInfo.title + '.');
                                     exec(makeMKV + ' -r info disc:' + driveInfo.driveNumber, (err, stdout, stderr) => {
 
                                         if (stderr) {
@@ -198,7 +207,7 @@ prompt("Rip or Dip? ")
                                         }
 
                                         var fileNumber = getFileNumber(stdout);
-                                        console.info('Got file info for ' + driveInfo.driveNumber + '-' + driveInfo.title + '.');
+                                        console.info(moment().format('LTS') + ' - ' + 'Got file info for ' + driveInfo.driveNumber + '-' + driveInfo.title + '.');
                                         resolve({
                                             driveNumber: driveInfo.driveNumber,
                                             title: driveInfo.title,
@@ -234,13 +243,13 @@ prompt("Rip or Dip? ")
 
                                 var dir = createUniqueFolder(outputPath, commandDataItem.title);
 
-                                console.info('Ripping Title ' + commandDataItem.title + '...');
+                                console.info(moment().format('LTS') + ' - ' + 'Ripping Title ' + commandDataItem.title + '...');
                                 exec(makeMKV + ' -r mkv disc:' + commandDataItem.driveNumber + ' ' + commandDataItem.fileNumber + ' ' + '\"' + dir + '\"', (err, stdout, stderr) => {
 
                                     if (stderr) {
-                                        console.error('Critical Error Ripping ' + commandDataItem.title, stderr);
+                                        console.error(moment().format('LTS') + ' - ' + 'Critical Error Ripping ' + commandDataItem.title, stderr);
                                     } else {
-                                        console.info('Done Ripping ' + commandDataItem.title);
+                                        console.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title);
                                     }
 
                                 });
@@ -249,7 +258,7 @@ prompt("Rip or Dip? ")
 
                         })
                         .catch(err => {
-                            console.error(err);
+                            console.error(moment().format('LTS') + ' - ' + err);
                         });
                 }
 
