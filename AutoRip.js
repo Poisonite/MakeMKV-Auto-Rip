@@ -5,7 +5,7 @@ console.log('The full licence file can be found in the root folder of this softw
 console.log('Please fully read the README.md file found in the root folder before using this software.');
 console.log('');
 console.log('');
-console.log('---Welcome to MakeMKV Auto Rip V0.3.0---');
+console.log('---Welcome to MakeMKV Auto Rip V0.3.1---');
 console.log('---Running in Production Mode---');
 console.log('');
 console.log('---Devloped by Zac Ingoglia---');
@@ -262,7 +262,6 @@ prompt("Rip or Dip? ")
 
                             console.info(moment().format('LTS') + ' - ' + 'All Discs have been ripped, exiting now...')
                             process.exit();
-                            break;
 
                         })
                         .catch(err => {
