@@ -19,6 +19,7 @@
 --Done--Add char subtractors to remove chars that aren't valid in a file name from being used to generate folder names
 --Done--Add Batch file into release version
 --Done--Add Exit section to exit out of AutoRip when it's run from a bat file
+--Done--Fix config file so that AutoRip.js actually calls it
 Fix config file so that single slashes can be used
 Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it

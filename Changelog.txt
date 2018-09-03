@@ -1,7 +1,7 @@
 ---MakeMKV Auto Rip Changelog---
 Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
 Newest Versions are at the bottom
-Current version: v0.3.1
+Current version: v0.3.2
 
 Version 0.1.0 - Initial Upload
 This version is for testing purposes only and is not publicly usable. The coming versions will be made proper and useful to the public, but for now adapting it to your personal use case requires changing device unique info in the AutoRip.js file.
@@ -68,4 +68,21 @@ AutoRip.js Changes
 	Fixed the batch file running fix that was applied in 0.3.0 as that one didn't work correctly.
 Node Package Changes
 	Version Update: 0.3.0 > 0.3.1
+	Published updated package version
+
+Version 0.3.2 - Critical Patch for User Config
+Changelog.txt Changes
+	Version Update: 0.3.1 > 0.3.2
+ToDo.txt Changes
+	Completed items marked as such
+README.md Changes
+	Version Update: 0.3.1 > 0.3.2
+	Updated Documentation to reflect new configuration file name
+package.json Changes
+	Version Update: 0.3.1 > 0.3.2
+AutoRip.js Changes
+	Version Update: 0.3.1 > 0.3.2
+	Fixed the config file so that it actually loaded and used now (file is has been renamed FROM Config.json TO Default.json)
+Node Package Changes
+	Version Update: 0.3.1 > 0.3.2
 	Published updated package version

@@ -1,4 +1,4 @@
-# MakeMKV-Auto-Rip v0.3.1
+# MakeMKV-Auto-Rip v0.3.2
 Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
 
 # Disclaimer
@@ -9,14 +9,14 @@ Automatically rips DVDs using the MakeMKV console and saves them to unique folde
 	Please read the LICENCE.md file for more info
 
 # General Info
-You can now configure system unique info from the Config.json file and as such MakeMKV Auto Rip is now recommended to the general public!!
+You can now configure system unique info from the Default.json file and as such MakeMKV Auto Rip is now recommended to the general public!!
 
 MakeMKV is not included in this software and it never will be, however, the use of this software is dependent upon MakeMKV and as such the end user should download and install it from the MakeMKV website on any system where MakeMKV Auto Rip will be used.
 
 MakeMKV Auto Rip is only intended to run on windows based machines and will only be tested for Windows 10 unless stated otherwise, should you wish to attempt to run this software on a different operating system you are free to do so but should go into the endeavor with the knowledge that MakeMKV Auto Rip has never been tested for such a scenario.
 
-# Config.json Configuration
-Inside the config.json file located within the config folder in the root MakeMKV Auto Rip folder there are a few settings which must be configured prior to running MakeMKV Auto Rip.
+# Default.json Configuration
+Inside the Default.json file located within the config folder in the root MakeMKV Auto Rip folder there are a few settings which must be configured prior to running MakeMKV Auto Rip.
 
 The setting for mkvDir (that is to say the "Dir" variable which is nested within mkvDir) controls where the program will search for the MakeMKV program directory.
 By default the config file is configured to look in the default install path for MakeMKV (as of version 1.12.3), due to this if you installed MakeMKV to its default location on the C drive this setting can be left alone.

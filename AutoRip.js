@@ -5,7 +5,7 @@ console.log('The full licence file can be found in the root folder of this softw
 console.log('Please fully read the README.md file found in the root folder before using this software.');
 console.log('');
 console.log('');
-console.log('---Welcome to MakeMKV Auto Rip V0.3.1---');
+console.log('---Welcome to MakeMKV Auto Rip v0.3.2---');
 console.log('---Running in Production Mode---');
 console.log('');
 console.log('---Devloped by Zac Ingoglia---');
