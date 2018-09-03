@@ -1,0 +1,10 @@
+{
+    "Path": {
+        "mkvDir": {
+            "Dir": "C:\\Program Files (x86)\\MakeMKV"
+        },
+        "movieRips": {
+            "Dir": "C:\\"
+        }
+    }
+}

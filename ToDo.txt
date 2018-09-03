@@ -1,6 +1,6 @@
 ---Section One (Ripper)---
-Create working settings.json file so that users can modify select information that may differ between computers
-    Have the base location for rips be customizable through the settings.json file
+--Done--Create working settings.json file so that users can modify select information that may differ between computers
+    --Done--Have the base location for rips be customizable through the settings.json file
         --Done--New folder will have to be generated before running console as the console won't do this for you
          folder will also have to be passed as a var so that the command can pick it up and append it to the file path
          Ripping command: "makemkvcon.exe -r mkv disc:{driveNameVar} {titleNumberVar} "SettingJson configured filepath\{DVDFolderVar}""
@@ -15,12 +15,13 @@ Create working settings.json file so that users can modify select information th
 --Done--Call the title number var into the dvd rip command to rip that disc to desired location
 --Done--Be able to rip all DVDs loged to vars one at a time without restarting code (i.e. run file once and it'll rip all dvds one at a time)
 --Done--Publish to GitHub
-Fix Ripping so that DVDs rip synchronously insted of asynchronously
 --Done--Add time stamps to log messages
 --Done--Add char subtractors to remove chars that aren't valid in a file name from being used to generate folder names
 --Done--Add Batch file into release version
+--Done--Add Exit section to exit out of AutoRip when it's run from a bat file
 Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it
+Fix Ripping so that DVDs rip synchronously insted of asynchronously
 
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)

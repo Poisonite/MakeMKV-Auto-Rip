@@ -1,0 +1,55 @@
+---MakeMKV Auto Rip Changelog---
+Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
+Newest Versions are at the bottom
+Current version: v0.3.0
+
+Version 0.1.0 - Initial Upload
+This version is for testing purposes only and is not publicly usable. The coming versions will be made proper and useful to the public, but for now adapting it to your personal use case requires changing device unique info in the AutoRip.js file.
+
+Version 0.2.1 - The first code-based update
+AutoRip.bat Changes
+	Created
+	INFO: This was added so that running the AutoRip.js doesn't have to be run from the command line
+ToDo.txt Changes
+	Updated and reorganized
+README.md Changes
+	Version Update: 0.1.0 > 0.2.1
+package.json Changes
+	Version Update: 0.1.0 > 0.2.1
+AutoRip.js Changes
+	Version Update: 0.1.0 > 0.2.1
+	Show time stamps for each message (this is why moment was added in 0.1.0)
+	Title scrubbing now removes all characters that are invalid in a windows folder name (not just ")
+Node Package Changes
+	Version Update: 0.1.0 > 0.2.0 > 0.2.1
+	Published updated package version
+	
+Version 0.3.0 - General Public Approved
+Changelog.txt Changes
+	Created
+	INFO: Created to keep a chronological list of every change made in every version published to GitHub
+	Version Update: Null > 0.3.0
+Config.json Changes
+	Created
+	INFO: Configures MakeMKV root directory and root directory for movie rips
+ToDo.txt Changes
+	Updated and reorganized
+README.md Changes
+	Version Update: 0.2.1 > 0.3.0
+	Added documentation for new Config.json file
+	Removed general public warning since it's no longer valid
+package.json Changes
+	Version Update: 0.2.1 > 0.3.0
+	Added "config" module
+		INFO: config is the module used for linking together all of the configuration file stuff
+AutoRip.js Changes
+	Version Update: 0.2.1 > 0.3.0
+	Movie rip root directory and MakeMKV root directory now configured in Config.json instead of being hard coded into the AutoRip.js file
+	If AutoRip.js is run from within a batch file the program should now exit when finished instead of hanging
+	Added warning in opening header about configuring the Config.json file before running
+	Changed running mode to "Production"
+Node Package Changes
+	Version Update: 0.2.1 > 0.3.0
+	Published updated package version
+	Added "config" module
+		INFO: config is the module used for linking together all of the configuration file stuff

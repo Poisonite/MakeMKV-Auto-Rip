@@ -5,12 +5,14 @@ console.log('The full licence file can be found in the root folder of this softw
 console.log('Please fully read the README.md file found in the root folder before using this software.');
 console.log('');
 console.log('');
-console.log('---Welcome to MakeMKV Auto Rip V0.2.1---');
-console.log('---Running in Dev Mode---');
+console.log('---Welcome to MakeMKV Auto Rip V0.3.0---');
+console.log('---Running in Production Mode---');
 console.log('');
 console.log('---Devloped by Zac Ingoglia---');
 console.log('---Copyright 2018 Zac Ingoglia---');
 console.log('');
+console.log('');
+console.log('WARNING--Ensure that you have configured the Config.json file before ripping--WARNING');
 console.log('');
 console.log('Would you like to Auto Rip all inserted DVDs now?');
 console.log('This includes both internal and USB DVD and Bluray drives.');
@@ -37,9 +39,12 @@ prompt("Rip or Dip? ")
         switch (TA) {
             case '1'
                 : var msg = 'Beginning AutoRip... Please Wait.';
-                 const moment = require('moment');
+                const moment = require('moment');
+                const config = require('config');
+                var mkvDir = config.get('Path.mkvDir.Dir');
+                var movieRips = config.get('Path.movieRips.Dir');
                 console.log(moment().format('LTS') + ' - ' + msg);
-                const makeMKV = '\"C:\\Program Files (x86)\\MakeMKV\\makemkvcon.exe\"';
+                const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
                 const exec = require('child_process').exec;
 
                 function validateFileDate() {
@@ -71,8 +76,7 @@ prompt("Rip or Dip? ")
                 }
 
                 function makeTitleValidFolderPath(title) {
-                    //escape out any chars that are not valid for file name. \
-                    // TODO: make sure that we only return a valid folder path.
+                    //escape out any chars that are not valid for file name.
                     return title.replace("\\", '')
                         .replace("/", '')
                         .replace(":", '')
@@ -256,13 +260,17 @@ prompt("Rip or Dip? ")
 
                             });
 
+                            console.info(moment().format('LTS') + ' - ' + 'All Discs have been ripped, exiting now...')
+                            process.exit();
+                            break;
+
                         })
                         .catch(err => {
                             console.error(moment().format('LTS') + ' - ' + err);
                         });
                 }
 
-                ripDVDs('C:\\Users\\Win10 Test Drive\\Desktop\\Raw_MKV_Movies\\Upstream');
+                ripDVDs(movieRips);
                 break;
             case '2'
                 : var msg = 'Exiting...';
