@@ -20,12 +20,11 @@
     "DVD",
     "Ripping",
     "Automatic",
-    "Windows",
     "Nodejs",
     "Node"
   ],
   "author": "Zac Ingoglia",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/poisonite101/MakeMKV-Auto-Rip/issues"
   },
