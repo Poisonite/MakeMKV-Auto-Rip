@@ -1,0 +1,36 @@
+{
+  "name": "makemkv-auto-rip",
+  "version": "0.1.0",
+  "description": "Automatically rips DVDs using the MakeMKV console and saves them to unique folders.",
+  "main": "AutoRip.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/poisonite101/MakeMKV-Auto-Rip.git"
+  },
+  "keywords": [
+    "Poisonite",
+    "Poisonite101",
+    "MakeMKV",
+    "Auto",
+    "Rip",
+    "AutoRip",
+    "DVD",
+    "Ripping",
+    "Automatic",
+    "Windows",
+    "Nodejs",
+    "Node"
+  ],
+  "author": "Zac Ingoglia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/poisonite101/MakeMKV-Auto-Rip/issues"
+  },
+  "homepage": "https://github.com/poisonite101/MakeMKV-Auto-Rip#readme",
+  "dependencies": {
+    "moment": "^2.22.2"
+  }
+}
