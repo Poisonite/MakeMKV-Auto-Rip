@@ -86,3 +86,21 @@ AutoRip.js Changes
 Node Package Changes
 	Version Update: 0.3.1 > 0.3.2
 	Published updated package version
+
+Version 0.4.0 - The Synchronous Update
+Changelog.txt Changes
+	Version Update: 0.3.2 > 0.4.0
+ToDo.txt Changes
+	Completed items were marked as such
+	Many new tasks were added
+README.md Changes
+	Version Update: 0.3.2 > 0.4.0
+package.json Changes
+	Version Update: 0.3.2 > 0.4.0
+AutoRip.js Changes
+	Version Update: 0.3.2 > 0.4.0
+	DVDs now rip synchronously insted of asynchronously (this should fix large slow downs on systems that are writing to a HDD, have a weak CPU, and/ or have a low amount of system RAM)
+	Updated config warning message to reflect new config file name
+Node Package Changes
+	Version Update: 0.3.2 > 0.4.0
+	Published updated package version

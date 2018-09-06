@@ -20,10 +20,24 @@
 --Done--Add Batch file into release version
 --Done--Add Exit section to exit out of AutoRip when it's run from a bat file
 --Done--Fix config file so that AutoRip.js actually calls it
-Fix config file so that single slashes can be used
+--Done--Fix Ripping so that DVDs rip synchronously insted of asynchronously
+--On Hold--Fix config file so that single slashes can be used
 Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it
-Fix Ripping so that DVDs rip synchronously insted of asynchronously
+    True successfully saved MSG codes
+        MSG:5005 - X titles saved
+        MSG:5036 - Copy complete X titles saved
+    True Failed to save MSG codes
+        MSG:3042 - IFO file for VTS #X is corrupt, VOB file must be scanned... (this one may not always return fail)
+        MSG:3035 - Cellwalk algorithm failed trying calltrim algorithm
+        MSG:3002 - Calculated BUP offset for VTS #X does not match one in IFO header (this may be the most accurate "fail" message code)
+        MSG:5010 - Failed to open disc
+Clean up and reorganize code to be more readable (due to the mess caused by the syncronous conversion update)
+Add logging option to send all STDout messages to log files instead of keeping them hidden in variables
+Add color messages to make console more readable
+Add feature to delete folders created for failed discs
+Fix issues with some bluray discs not ripping for some reason (may be an unfixable disc speific issue)
+Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
 
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)

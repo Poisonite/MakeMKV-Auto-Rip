@@ -5,14 +5,14 @@ console.log('The full licence file can be found in the root folder of this softw
 console.log('Please fully read the README.md file found in the root folder before using this software.');
 console.log('');
 console.log('');
-console.log('---Welcome to MakeMKV Auto Rip v0.3.2---');
+console.log('---Welcome to MakeMKV Auto Rip v0.4.0---');
 console.log('---Running in Production Mode---');
 console.log('');
 console.log('---Devloped by Zac Ingoglia---');
 console.log('---Copyright 2018 Zac Ingoglia---');
 console.log('');
 console.log('');
-console.log('WARNING--Ensure that you have configured the Config.json file before ripping--WARNING');
+console.log('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING');
 console.log('');
 console.log('Would you like to Auto Rip all inserted DVDs now?');
 console.log('This includes both internal and USB DVD and Bluray drives.');

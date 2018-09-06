@@ -1,4 +1,4 @@
-# MakeMKV-Auto-Rip v0.3.2
+# MakeMKV-Auto-Rip v0.4.0
 Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
 
 # Disclaimer
