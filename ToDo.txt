@@ -41,6 +41,7 @@ Add feature to delete folders created for failed discs
 Fix issues with some bluray discs not ripping for some reason (may be an unfixable disc speific issue)
 Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
 Add ability for user to send logs to file and choose log path
+
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)
     This may be a part of a seperate github project or not published at all (still unsure at this time)
