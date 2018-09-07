@@ -19,10 +19,12 @@ console.log('This includes both internal and USB DVD and Bluray drives.');
 console.log('Press 1 to Rip.');
 console.log('Press 2 to exit.');
 
+//All of the constants required throughout the script
 const user = {};
 const moment = require('moment');
 const config = require('config');
 const mkvDir = config.get('Path.mkvDir.Dir');
+const movieRips = config.get('Path.movieRips.Dir');
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
 
@@ -46,24 +48,54 @@ prompt("Rip or Dip? ")
                 process.exit();
                 break;
         }
+    console.log('');
+    console.log('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING');
+    console.log('');
+}
 
-    })
-    .catch((error) => {
-        console.log("Critical Error, Must Abort!");
-        console.log(error);
-        process.exit();
-    })
+//Run program or exit
+function ripOrDip() {
+    console.log('Would you like to Auto Rip all inserted DVDs now?');
+    console.log('This includes both internal and USB DVD and Bluray drives.');
+    console.log('Press 1 to Rip.');
+    console.log('Press 2 to exit.');
 
-function prompt(question) {
-    return new Promise((resolve, reject) => {
-        const { stdin, stdout } = process;
+    prompt("Rip or Dip? ")
+        .then((TA) => {
+            user.TA = TA;
 
-        stdin.resume();
-        stdout.write(question);
+            switch (TA) {
+                case '1':
+                    console.log(moment().format('LTS') + ' - ' + 'Beginning AutoRip... Please Wait.');
+                    ripDVDs(movieRips);
+                    break;
+                case '2':
+                    console.log(moment().format('LTS') + ' - ' + 'Exiting...');
+                    process.exit();
+                    break;
+                default:
+                    process.exit();
+                    break;
+            }
 
-        stdin.on('data', data => resolve(data.toString().trim()));
-        stdin.on('error', err => reject(err));
-    });
+        })
+        .catch((error) => {
+            console.log("Critical Error, Must Abort!");
+            console.log(error);
+            process.exit();
+        })
+
+    function prompt(question) {
+        return new Promise((resolve, reject) => {
+            const { stdin, stdout } = process;
+
+            stdin.resume();
+            stdout.write(question);
+
+            stdin.on('data', data => resolve(data.toString().trim()));
+            stdin.on('error', err => reject(err));
+        });
+    }
 }
 
 function validateFileDate() {
@@ -94,37 +126,38 @@ function validateDriveFileDate() {
     return; // "You have a bad file";
 }
 
-function makeTitleValidFolderPath(title) {
-    //escape out any chars that are not valid for file name.
-    return title.replace("\\", '')
-        .replace("/", '')
-        .replace(":", '')
-        .replace("*", '')
-        .replace("?", '')
-        .replace("<", '')
-        .replace(">", '')
-        .replace("|", '')
-        .replace(/['"]+/g, '');;
-}
+function getDriveInfo(data) {
 
-function getTimeInSeconds(timeArray) {
-    return (+timeArray[0]) * 60 * 60 + (+timeArray[1]) * 60 + (+timeArray[2]);
-}
-
-function createUniqueFolder(outputPath, folderName) {
-
-    var fs = require('fs');
-    //console.log(outputPath, folderName)
-    var dir = outputPath + '\\' + folderName;
-    var folderCounter = 1;
-    if (fs.existsSync(dir)) {
-        while (fs.existsSync(dir + '-' + folderCounter)) {
-            folderCounter++;
-        }
-        dir += '-' + folderCounter;
+    var validationMessage = validateDriveFileDate(data);
+    if (validationMessage) {
+        return validationMessage;
     }
-    fs.mkdirSync(dir);
-    return dir;
+
+    var lines = data.split("\n");
+    var validLines = lines
+        .filter(line => {
+            //Get array of line attributes
+            var lineArray = line.split(",");
+
+            //make sure that the first element starts with "DRV:"
+            if ((lineArray[0].startsWith("DRV:"))) {
+
+                //Ensure that the number in the second element is = 2...meaning we have media
+                return (lineArray[1] == 2);
+            }
+
+        })
+        .map(line => {
+            var driveInfo = {
+                driveNumber: line.split(",")[0].substring(4),
+                title: makeTitleValidFolderPath(line.split(",")[5])
+            }
+            return driveInfo;
+
+        });
+
+    return validLines;
+
 }
 
 function getFileNumber(data) {
@@ -165,38 +198,37 @@ function getFileNumber(data) {
 
 }
 
-function getDriveInfo(data) {
+function makeTitleValidFolderPath(title) {
+    //escape out any chars that are not valid for file name.
+    return title.replace("\\", '')
+        .replace("/", '')
+        .replace(":", '')
+        .replace("*", '')
+        .replace("?", '')
+        .replace("<", '')
+        .replace(">", '')
+        .replace("|", '')
+        .replace(/['"]+/g, '');;
+}
 
-    var validationMessage = validateDriveFileDate(data);
-    if (validationMessage) {
-        return validationMessage;
+function getTimeInSeconds(timeArray) {
+    return (+timeArray[0]) * 60 * 60 + (+timeArray[1]) * 60 + (+timeArray[2]);
+}
+
+function createUniqueFolder(outputPath, folderName) {
+
+    var fs = require('fs');
+    //console.log(outputPath, folderName)
+    var dir = outputPath + '\\' + folderName;
+    var folderCounter = 1;
+    if (fs.existsSync(dir)) {
+        while (fs.existsSync(dir + '-' + folderCounter)) {
+            folderCounter++;
+        }
+        dir += '-' + folderCounter;
     }
-
-    var lines = data.split("\n");
-    var validLines = lines
-        .filter(line => {
-            //Get array of line attributes
-            var lineArray = line.split(",");
-
-            //make sure that the first element starts with "DRV:"
-            if ((lineArray[0].startsWith("DRV:"))) {
-
-                //Ensure that the number in the second element is = 2...meaning we have media
-                return (lineArray[1] == 2);
-            }
-
-        })
-        .map(line => {
-            var driveInfo = {
-                driveNumber: line.split(",")[0].substring(4),
-                title: makeTitleValidFolderPath(line.split(",")[5])
-            }
-            return driveInfo;
-
-        });
-
-    return validLines;
-
+    fs.mkdirSync(dir);
+    return dir;
 }
 
 function getCommandData() {

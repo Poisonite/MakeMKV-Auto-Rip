@@ -5,6 +5,10 @@
         },
         "movieRips": {
             "Dir": "D:\\AutoRip\\Rips"
+        },
+        "logToFiles": {
+            "Enabled": "True",
+            "Path": "C:\\"
         }
     }
 }
