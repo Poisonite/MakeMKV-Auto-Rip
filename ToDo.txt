@@ -39,6 +39,7 @@ Add exception handling in sections that lack it
 Add logging option to send all STDout messages to log files instead of keeping them hidden in variables
 Add feature to delete folders created for failed discs
 Fix issues with some bluray discs not ripping for some reason (may be an unfixable disc speific issue)
+    Must run a bluray through the raw console to discover the error
 Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
 Add ability for user to send logs to file and choose log path
 

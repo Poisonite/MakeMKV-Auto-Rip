@@ -8,7 +8,7 @@
         },
         "logToFiles": {
             "Enabled": "True",
-            "Path": "C:\\"
+            "Dir": "C:\\"
         }
     }
 }

@@ -4,6 +4,8 @@ const moment = require('moment');
 const config = require('config');
 const mkvDir = config.get('Path.mkvDir.Dir');
 const movieRips = config.get('Path.movieRips.Dir');
+const fileLog = config.get('Path.logToFiles.Enabled');
+const fileLog = config.get('Path.logToFiles.Dir');
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
 colors = require('colors/safe');
@@ -300,9 +302,13 @@ function ripDVD(commandDataItem, outputPath) {
                 console.error(colors.error(moment().format('LTS') + ' - ' + 'Critical Error Ripping ' + commandDataItem.title, stderr));
                 reject(stderr);
             } else {
-                //console.log(color.blue('OUTPUT', stdout)); //Outputs full log data to console after ripping (or attempting to rip) each DVD
+                //console.log(colors.blue('OUTPUT', stdout)); //Outputs full log data to console after ripping (or attempting to rip) each DVD
                 console.info(colors.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title));
                 resolve(commandDataItem.title);
+            }
+            
+            if (fileLog = 'True') {
+
             }
 
         });
