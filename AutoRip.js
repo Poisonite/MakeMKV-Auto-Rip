@@ -6,36 +6,47 @@ const mkvDir = config.get('Path.mkvDir.Dir');
 const movieRips = config.get('Path.movieRips.Dir');
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
+colors = require('colors/safe');
+
+//Color theme settings for colored text
+colors.setTheme({
+    info: 'green',
+    error: 'red',
+    line1: ['white', 'bgBlack'],
+    line2: ['black', 'bgWhite'],
+    warning: ['white', 'bgRed']
+});
 
 Opener();
 ripOrDip();
 
 //Opening boilerplate
 function Opener() {
-    console.log('MakeMKV Auto Rip Copyright (C) 2018 Zac Ingoglia');
-    console.log('This program comes with ABSOLUTELY NO WARRANTY');
-    console.log('This is free software, and you are welcome to redistribute it under certain conditions.');
-    console.log('The full licence file can be found in the root folder of this software as "LICENSE.md"');
-    console.log('Please fully read the README.md file found in the root folder before using this software.');
-    console.log('');
-    console.log('');
-    console.log('---Welcome to MakeMKV Auto Rip v0.4.1---');
-    console.log('---Running in Production Mode---');
-    console.log('');
-    console.log('---Devloped by Zac Ingoglia---');
-    console.log('---Copyright 2018 Zac Ingoglia---');
-    console.log('');
-    console.log('');
-    console.log('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING');
-    console.log('');
+    console.info(colors.line1('MakeMKV Auto Rip Copyright (C) 2018 Zac Ingoglia'));
+    console.info(colors.line2('This program comes with ABSOLUTELY NO WARRANTY'));
+    console.info(colors.line1('This is free software, and you are welcome to redistribute it under certain conditions.'));
+    console.info(colors.line2('The full licence file can be found in the root folder of this software as "LICENSE.md"'));
+    console.info(colors.line1('Please fully read the README.md file found in the root folder before using this software.'));
+    console.info('');
+    console.info('');
+    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.4.1---'));
+    console.info(colors.line1('---Running in Production Mode---'));
+    console.info('');
+    console.info(colors.line1('---Devloped by Zac Ingoglia---'));
+    console.info(colors.line1('---Copyright 2018 Zac Ingoglia---'));
+    console.info('');
+    console.info('');
+    console.info(colors.warning('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING'));
+    console.info('');
 }
 
 //Run program or exit
 function ripOrDip() {
-    console.log('Would you like to Auto Rip all inserted DVDs now?');
-    console.log('This includes both internal and USB DVD and Bluray drives.');
-    console.log('Press 1 to Rip.');
-    console.log('Press 2 to exit.');
+    console.info(colors.white.underline('Would you like to Auto Rip all inserted DVDs now?'));
+    console.info(colors.white.underline('This includes both internal and USB DVD and Bluray drives.'));
+    console.info('');
+    console.info('Press' + colors.info(' 1 ') + 'to Rip.');
+    console.info('Press' + colors.error(' 2 ') + 'to exit.');
 
     prompt("Rip or Dip? ")
         .then((TA) => {
@@ -43,11 +54,11 @@ function ripOrDip() {
 
             switch (TA) {
                 case '1':
-                    console.log(moment().format('LTS') + ' - ' + 'Beginning AutoRip... Please Wait.');
+                    console.info(colors.info(moment().format('LTS') + ' - ' + 'Beginning AutoRip... Please Wait.'));
                     ripDVDs(movieRips);
                     break;
                 case '2':
-                    console.log(moment().format('LTS') + ' - ' + 'Exiting...');
+                    console.info(colors.error(moment().format('LTS') + ' - ' + 'Exiting...'));
                     process.exit();
                     break;
                 default:
@@ -57,8 +68,8 @@ function ripOrDip() {
 
         })
         .catch((error) => {
-            console.log("Critical Error, Must Abort!");
-            console.log(error);
+            console.error(colors.error(moment().format('LTS') + ' - ' + "Critical Error, Must Abort!"));
+            console.error(error);
             process.exit();
         })
 
@@ -212,7 +223,7 @@ function getCommandData() {
 
     return new Promise((resolve, reject) => {
 
-        console.info(moment().format('LTS') + ' - ' + 'Getting info for all discs...');
+        console.info(colors.info(moment().format('LTS') + ' - ' + 'Getting info for all discs...'));
         //console.log('mkv command', makeMKV + ' -r info disc:index')
         exec(makeMKV + ' -r info disc:index', (err, stdout, stderr) => {
 
@@ -221,7 +232,7 @@ function getCommandData() {
             }
 
             //get the data for drives with discs.
-            console.info(moment().format('LTS') + ' - ' + 'Getting drive info...');
+            console.info(colors.info(moment().format('LTS') + ' - ' + 'Getting drive info...'));
             //console.log('Got Command Data Items', stdout);
             var driveInfo = getDriveInfo(stdout);
 
@@ -230,7 +241,7 @@ function getCommandData() {
 
                 return new Promise((resolve, reject) => {
 
-                    console.info(moment().format('LTS') + ' - ' + 'Getting file number for drive title ' + driveInfo.driveNumber + '-' + driveInfo.title + '.');
+                    console.info(colors.info(moment().format('LTS') + ' - ' + 'Getting file number for drive title ' + driveInfo.driveNumber + '-' + driveInfo.title + '.'));
                     exec(makeMKV + ' -r info disc:' + driveInfo.driveNumber, (err, stdout, stderr) => {
 
                         if (stderr) {
@@ -238,7 +249,7 @@ function getCommandData() {
                         }
 
                         var fileNumber = getFileNumber(stdout);
-                        console.info(moment().format('LTS') + ' - ' + 'Got file info for ' + driveInfo.driveNumber + '-' + driveInfo.title + '.');
+                        console.info(colors.info(moment().format('LTS') + ' - ' + 'Got file info for ' + driveInfo.driveNumber + '-' + driveInfo.title + '.'));
                         resolve({
                             driveNumber: driveInfo.driveNumber,
                             title: driveInfo.title,
@@ -281,16 +292,16 @@ function ripDVD(commandDataItem, outputPath) {
 
         var dir = createUniqueFolder(outputPath, commandDataItem.title);
 
-        console.info(moment().format('LTS') + ' - ' + 'Ripping Title ' + commandDataItem.title + ' to ' + dir + '...');
+        console.info(colors.info(moment().format('LTS') + ' - ' + 'Ripping Title ' + commandDataItem.title + ' to ' + dir + '...'));
 
         exec(makeMKV + ' -r mkv disc:' + commandDataItem.driveNumber + ' ' + commandDataItem.fileNumber + ' ' + '\"' + dir + '\"', (err, stdout, stderr) => {
 
             if (stderr) {
-                console.error(moment().format('LTS') + ' - ' + 'Critical Error Ripping ' + commandDataItem.title, stderr);
+                console.error(colors.error(moment().format('LTS') + ' - ' + 'Critical Error Ripping ' + commandDataItem.title, stderr));
                 reject(stderr);
             } else {
-                //console.log('OUTPUT', stdout)
-                console.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title);
+                //console.log(color.blue('OUTPUT', stdout)); //Outputs full log data to console after ripping (or attempting to rip) each DVD
+                console.info(colors.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title));
                 resolve(commandDataItem.title);
             }
 
@@ -308,18 +319,18 @@ function ripDVDs(outputPath) {
             //Rip the DVDs synchonously.
             processArray(commandDataItems, ripDVD, outputPath)
                 .then((result) => {
-                    console.info('The following DVD titles have been successfully ripped.', result);
+                    console.info(colors.info(moment().format('LTS') + ' - ' + 'The following DVD titles have been successfully ripped.', result));
                     process.exit();
                     // all done here
                     // array of data here in result
                 }, (reason) => {
-                    console.error('Error Ripping One or More DVDs.', reason)
+                    console.error(colors.error(moment().format('LTS') + ' - ' + 'Error Ripping One or More DVDs.', reason));
                     // rejection happened
                 });
 
         })
         .catch(err => {
-            console.error(moment().format('LTS') + ' - ' + err);
+            console.error(colors.info(moment().format('LTS') + ' - ' + err));
         });
 
 }

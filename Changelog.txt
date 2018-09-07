@@ -126,3 +126,22 @@ Install-Node-Packages.bat Changes
 		INFO: Created so that node modules may be installed without having to use GitHub or the command line.
 GitHub Changes
 	Node packages no longer download with the Repository
+
+Version 0.4.2 - Colors, Colors, Everywhere!
+Changelog.txt Changes
+	Version Update: 0.4.2 > 0.4.2
+ToDo.txt Changes
+	Completed items were marked as such
+README.md Changes
+	Version Update: 0.4.2 > 0.4.2
+package.json Changes
+	Version Update: 0.4.2 > 0.4.2
+AutoRip.js Changes
+	Version Update: 0.4.2 > 0.4.2
+	Added color to console messages with the "colors" module
+Default.json Changes
+	Changed default output path back to "C:\\"
+Node Package Changes
+	Version Update: 0.4.2 > 0.4.2
+	Published updated package version
+	added the npm module "colors"
