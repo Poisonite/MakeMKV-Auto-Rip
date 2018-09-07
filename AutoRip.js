@@ -1,24 +1,3 @@
-console.log('MakeMKV Auto Rip Copyright (C) 2018 Zac Ingoglia');
-console.log('This program comes with ABSOLUTELY NO WARRANTY');
-console.log('This is free software, and you are welcome to redistribute it under certain conditions.');
-console.log('The full licence file can be found in the root folder of this software as "LICENSE.md"');
-console.log('Please fully read the README.md file found in the root folder before using this software.');
-console.log('');
-console.log('');
-console.log('---Welcome to MakeMKV Auto Rip v0.4.0---');
-console.log('---Running in Production Mode---');
-console.log('');
-console.log('---Devloped by Zac Ingoglia---');
-console.log('---Copyright 2018 Zac Ingoglia---');
-console.log('');
-console.log('');
-console.log('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING');
-console.log('');
-console.log('Would you like to Auto Rip all inserted DVDs now?');
-console.log('This includes both internal and USB DVD and Bluray drives.');
-console.log('Press 1 to Rip.');
-console.log('Press 2 to exit.');
-
 //All of the constants required throughout the script
 const user = {};
 const moment = require('moment');
@@ -28,26 +7,24 @@ const movieRips = config.get('Path.movieRips.Dir');
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
 
-prompt("Rip or Dip? ")
-    .then((TA) => {
-        user.TA = TA;
-        var msg = 'Beginning AutoRip... Please Wait.';
-        const movieRips = config.get('Path.movieRips.Dir');
+Opener();
+ripOrDip();
 
-        switch (TA) {
-            case '1':
-                console.log(msg);
-                ripDVDs(movieRips);
-                break;
-            case '2':
-                var msg = 'Exiting...';
-                console.log(msg);
-                process.exit();
-                break;
-            default:
-                process.exit();
-                break;
-        }
+//Opening boilerplate
+function Opener() {
+    console.log('MakeMKV Auto Rip Copyright (C) 2018 Zac Ingoglia');
+    console.log('This program comes with ABSOLUTELY NO WARRANTY');
+    console.log('This is free software, and you are welcome to redistribute it under certain conditions.');
+    console.log('The full licence file can be found in the root folder of this software as "LICENSE.md"');
+    console.log('Please fully read the README.md file found in the root folder before using this software.');
+    console.log('');
+    console.log('');
+    console.log('---Welcome to MakeMKV Auto Rip v0.4.1---');
+    console.log('---Running in Production Mode---');
+    console.log('');
+    console.log('---Devloped by Zac Ingoglia---');
+    console.log('---Copyright 2018 Zac Ingoglia---');
+    console.log('');
     console.log('');
     console.log('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING');
     console.log('');
