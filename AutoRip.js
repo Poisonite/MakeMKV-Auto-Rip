@@ -37,7 +37,7 @@ function Opener() {
     console.info(colors.line1('Please fully read the README.md file found in the root folder before using this software.'));
     console.info('');
     console.info('');
-    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.0---'));
+    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.1---'));
     console.info(colors.line1('---Running in DEV Mode---'));
     console.info('');
     console.info(colors.line1('---Devloped by Zac Ingoglia---'));
@@ -337,6 +337,15 @@ function ripDVD(commandDataItem, outputPath) {
                             resolve(commandDataItem.title);
                             console.info('');
                         });
+                } else if (fileLog == 'True') {
+                    fs.writeFile(fileName + '.txt', stdout, 'utf8',
+                        function (err) {
+                            if (err) throw err;
+                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
+                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                            resolve(commandDataItem.title);
+                            console.info('');
+                        });
                 } else {
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
                     resolve(commandDataItem.title);
@@ -382,10 +391,14 @@ function ripDVDs(outputPath) {
 
 function ejectDVDs() {
     if (eject == 'true') {
-        winEject.eject();
-        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+        winEject.eject('', function () {
+            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+        });
+    } else if (eject == 'True') {
+        winEject.eject('', function () {
+            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+        });
     } else {
         return;
     }
-
 }

@@ -40,14 +40,18 @@ Add exception handling in sections that lack it
         MSG:3035 - Cellwalk algorithm failed trying calltrim algorithm
         MSG:3002 - Calculated BUP offset for VTS #X does not match one in IFO header (this may be the most accurate "fail" message code)
         MSG:5010 - Failed to open disc
+    Info MSG codes
+        MSG:3024 - Complex multiplex encountered (this is what makes some DVDs take a very long time to gather disc info)
+        MSG:1005 - This is the very first line in the log (this should be used to output the MakeMKV version to the user and warn if there is a version mismatch)
 Add feature to delete folders created for failed discs
 Fix issues with some bluray discs not ripping for some reason (may be an unfixable disc speific issue)
     Must run a bluray through the raw console to discover the error
 Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
-Fix last DVD to rip writting a blank log file instead of a proper one
-Fix auto eject only ejecting 1 disc
+--Done--Fix last DVD to rip writting a blank log file instead of a proper one (it looks like that may have been fixed accidently during the latest code reorder)
+--Done--Fix auto eject only ejecting 1 disc
 Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
 Test to make sure ejecting and logging can be disabled without crashing the program
+Add option for sounds to play when each DVD is completed
 
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)
