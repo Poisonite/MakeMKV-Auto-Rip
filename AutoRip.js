@@ -331,7 +331,7 @@ function ripDVD(commandDataItem, outputPath) {
     });
 }
 
-function createLogFile() {
+function createLogFile(commandDataItem) {
     var fileName = createUniqueFile(logDir, commandDataItem.title);
     if (fileLog == 'True') {
         fs.writeFile(fileName + '.txt', stdout, 'utf8',
