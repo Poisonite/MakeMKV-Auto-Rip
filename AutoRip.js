@@ -37,7 +37,7 @@ function Opener() {
     console.info(colors.line1('Please fully read the README.md file found in the root folder before using this software.'));
     console.info('');
     console.info('');
-    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.4.3---'));
+    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.0---'));
     console.info(colors.line1('---Running in DEV Mode---'));
     console.info('');
     console.info(colors.line1('---Devloped by Zac Ingoglia---'));

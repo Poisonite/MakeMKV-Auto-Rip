@@ -47,6 +47,7 @@ Add info in README file regarding best settings to set in the graphical MakeMKV 
 Fix last DVD to rip writting a blank log file instead of a proper one
 Fix auto eject only ejecting 1 disc
 Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
+Test to make sure ejecting and logging can be disabled without crashing the program
 
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)

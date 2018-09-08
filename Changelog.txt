@@ -1,7 +1,7 @@
 ---MakeMKV Auto Rip Changelog---
 Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
 Newest Versions are at the bottom
-Current version: v0.3.2
+Current version: v0.5.0
 
 Version 0.1.0 - Initial Upload
 This version is for testing purposes only and is not publicly usable. The coming versions will be made proper and useful to the public, but for now adapting it to your personal use case requires changing device unique info in the AutoRip.js file.
@@ -145,3 +145,32 @@ Node Package Changes
 	Version Update: 0.4.2 > 0.4.2
 	Published updated package version
 	added the npm module "colors"
+
+Version 0.5.0 - A log for you, and a log for you, and a log for everyone!
+Changelog.txt Changes
+	Version Update: 0.3.2 > 0.5.0
+ToDo.txt Changes
+	Completed items were marked as such
+	Added more items
+README.md Changes
+	Version Update: 0.4.2 > 0.5.0
+package.json Changes
+	Version Update: 0.4.3 > 0.5.0
+AutoRip.js Changes
+	Version Update: 0.4.3 > 0.5.0
+	Added optional Logging with configurable file paths
+		INFO: Currently logging the same DVD more than once will overwrite the log file for that DVD (future versions will fix this)
+	Added optional automatic disc ejecting
+		INFO: As of now this only ejects the first disc (future versions will fix this)
+	Added win-eject to help with ejecting discs
+Default.json Changes
+	Changed default output path back to "C:\\"
+	Added configuration settings for logging and auto ejecting
+Node Package Changes
+	Version Update: 0.4.3 > 0.5.0
+	Published updated package version
+	added the npm module "win-eject"
+Install-Node-Packages.bat Changes
+	Added some more info that displays when opening so that the user is more informed
+Logs (folder) Added
+	INFO: This was added as a default dir for log files (it currently isn't use however)
