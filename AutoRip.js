@@ -311,7 +311,6 @@ function ripDVD(commandDataItem, outputPath) {
     return new Promise((resolve, reject) => {
 
         var dir = createUniqueFolder(outputPath, commandDataItem.title);
-        var fileName = createUniqueFile(logDir, commandDataItem.title);
 
         console.info(colors.info(moment().format('LTS') + ' - ' + 'Ripping Title ' + commandDataItem.title + ' to ' + dir + '...'));
 
@@ -333,6 +332,7 @@ function ripDVD(commandDataItem, outputPath) {
 }
 
 function createLogFile() {
+    var fileName = createUniqueFile(logDir, commandDataItem.title);
     if (fileLog == 'True') {
         fs.writeFile(fileName + '.txt', stdout, 'utf8',
             function (err) {
