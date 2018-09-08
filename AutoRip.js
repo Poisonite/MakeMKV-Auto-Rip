@@ -322,18 +322,18 @@ function ripDVD(commandDataItem, outputPath) {
             } else {
                 //console.log(colors.blue('OUTPUT', stdout)); //Outputs full log data to console after ripping (or attempting to rip) each DVD
                 createLogFile();
-                function createLogFile(commandDataItem) {
-                    var fileName = createUniqueFile(logDir, commandDataItem.title);
-                    if (fileLog == 'True') {
-                        fs.writeFile(fileName + '.txt', stdout, 'utf8',
-                            function (err) {
-                                if (err) throw err;
-                                console.info(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for ' + commandDataItem.title + ' has been written to file'));
-                            });
-                    } else {
-                        console.info('');
-                    }
+                //function createLogFile(commandDataItem) {
+                var fileName = createUniqueFile(logDir, commandDataItem.title);
+                if (fileLog == 'True') {
+                    fs.writeFile(fileName + '.txt', stdout, 'utf8',
+                        function (err) {
+                            if (err) throw err;
+                            console.info(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for ' + commandDataItem.title + ' has been written to file'));
+                        });
+                } else {
+                    console.info('');
                 }
+                //}
                 console.info(colors.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title));
                 resolve(commandDataItem.title);
             }
@@ -371,7 +371,7 @@ function ripDVDs(outputPath) {
 
 }
 
-function ejectDVDs(winEject) {
+function ejectDVDs() {
     if (eject == 'True') {
         winEject.eject();
         console.info(colors.info(moment().format('LTS') + ' - ' + 'All DVDs have been ejected.'));
