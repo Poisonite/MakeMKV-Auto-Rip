@@ -225,7 +225,7 @@ function createUniqueFolder(outputPath, folderName) {
 function createUniqueFile(logDir, fileName) {
 
     var fs = require('fs');
-    var dir = logDir + '\\' + fileName;
+    var dir = logDir + '\\' + 'Log' + '-' + fileName;
     var fileCounter = 1;
     if (fs.existsSync(dir)) {
         while (fs.existsSync(dir + '-' + fileCounter)) {
@@ -233,7 +233,7 @@ function createUniqueFile(logDir, fileName) {
         }
         dir += '-' + fileCounter;
     }
-    fs.mkdirSync(dir);
+    //fs.mkdirSync(dir); //This line may not be needed
     return dir;
 }
 
@@ -324,11 +324,11 @@ function ripDVD(commandDataItem, outputPath) {
                 resolve(commandDataItem.title);
             }
 
-            if (fileLog = 'True') {
-                fs.writeFile(fileName + 'Log.txt', stdout, 'utf8',
+            if (fileLog == 'True') {
+                fs.writeFile(fileName + '.txt', stdout, 'utf8',
                     function (err) {
                         if (err) throw err;
-                        console.log(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for' + commandDataItem.title + 'Has been written to file'));
+                        console.log(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for ' + commandDataItem.title + ' Has been written to file'));
                     });
             }
 
