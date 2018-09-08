@@ -25,6 +25,10 @@
 --Done--Fix GitHub settings so that node packages are not tracked (i.e. they are manually downloaded by the end user) so that Git download package is smaller
 --Done--Add windows batch file so the user can install node packages without downloading them in the git package or typing the command manually
 --Done--Add color messages to make console more readable
+--Done--Improve the feel of color messages
+--Done--Add logging option to send all STDout messages to log files instead of keeping them hidden in variables
+--Done--Add ability for user to send logs to file and choose log path
+--Done--Add Option to auto eject all drives after ripping
 --On Hold--Fix config file so that single slashes can be used
 Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it
@@ -36,13 +40,13 @@ Add exception handling in sections that lack it
         MSG:3035 - Cellwalk algorithm failed trying calltrim algorithm
         MSG:3002 - Calculated BUP offset for VTS #X does not match one in IFO header (this may be the most accurate "fail" message code)
         MSG:5010 - Failed to open disc
-Add logging option to send all STDout messages to log files instead of keeping them hidden in variables
 Add feature to delete folders created for failed discs
 Fix issues with some bluray discs not ripping for some reason (may be an unfixable disc speific issue)
     Must run a bluray through the raw console to discover the error
 Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
---Done--Add ability for user to send logs to file and choose log path
---Done--Add Option to auto eject all drives after ripping
+Fix last DVD to rip writting a blank log file instead of a proper one
+Fix auto eject only ejecting 1 disc
+Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
 
 ---Section Two (Stream Transcoder)---
 Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)

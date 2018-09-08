@@ -7,11 +7,11 @@
             "Dir": "C:\\"
         },
         "logToFiles": {
-            "Enabled": "True",
+            "Enabled": "true",
             "Dir": "\\Logs"
         },
         "ejectDVDs": {
-            "Enabled": "True"
+            "Enabled": "true"
         }
     }
 }

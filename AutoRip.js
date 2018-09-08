@@ -19,6 +19,7 @@ colors.setTheme({
     error: 'red',
     time: 'yellow',
     dash: 'gray',
+    title: 'cyan',
     line1: ['white', 'bgBlack'],
     line2: ['black', 'bgWhite'],
     warning: ['white', 'bgRed']
@@ -55,16 +56,18 @@ function ripOrDip() {
     console.info('Press' + colors.info(' 1 ') + 'to Rip.');
     console.info('Press' + colors.error(' 2 ') + 'to exit.');
 
-    prompt("Rip or Dip? ")
+    prompt(colors.info("Rip") + " or " + colors.error("Dip") + "? ")
         .then((TA) => {
             user.TA = TA;
 
             switch (TA) {
                 case '1':
+                    console.info('');
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Beginning AutoRip... Please Wait.'));
                     ripDVDs(movieRips);
                     break;
                 case '2':
+                    console.info('');
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Exiting...'));
                     process.exit();
                     break;
@@ -263,7 +266,7 @@ function getCommandData() {
 
                 return new Promise((resolve, reject) => {
 
-                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Getting file number for drive title ' + driveInfo.driveNumber + '-' + driveInfo.title + '.'));
+                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Getting file number for drive title ') + colors.title(driveInfo.driveNumber) + colors.info('-') + colors.title(driveInfo.title) + colors.info('.'));
                     exec(makeMKV + ' -r info disc:' + driveInfo.driveNumber, (err, stdout, stderr) => {
 
                         if (stderr) {
@@ -271,7 +274,7 @@ function getCommandData() {
                         }
 
                         var fileNumber = getFileNumber(stdout);
-                        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Got file info for ' + driveInfo.driveNumber + '-' + driveInfo.title + '.'));
+                        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Got file info for ') + colors.title(driveInfo.driveNumber) + colors.info('-') + colors.title(driveInfo.title) + colors.info(('.')));
                         resolve({
                             driveNumber: driveInfo.driveNumber,
                             title: driveInfo.title,
@@ -314,30 +317,34 @@ function ripDVD(commandDataItem, outputPath) {
 
         var dir = createUniqueFolder(outputPath, commandDataItem.title);
 
-        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Ripping Title ' + commandDataItem.title + ' to ' + dir + '...'));
+        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Ripping Title ') + colors.title(commandDataItem.title) + colors.info((' to ' + dir + '...')));
 
         exec(makeMKV + ' -r mkv disc:' + commandDataItem.driveNumber + ' ' + commandDataItem.fileNumber + ' ' + '\"' + dir + '\"', (err, stdout, stderr) => {
 
             if (stderr) {
-                console.error(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Critical Error Ripping ' + commandDataItem.title, stderr));
+                console.error(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Critical Error Ripping ' + colors.title(commandDataItem.title), stderr));
                 reject(stderr);
             } else {
                 //console.log(colors.blue('OUTPUT', stdout)); //Outputs full log data to console after ripping (or attempting to rip) each DVD
-                //createLogFile();
-                //function createLogFile(commandDataItem) {
                 var fileName = createUniqueFile(logDir, commandDataItem.title);
-                if (fileLog == 'True') {
+
+                if (fileLog == 'true') {
                     fs.writeFile(fileName + '.txt', stdout, 'utf8',
                         function (err) {
                             if (err) throw err;
-                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ' + commandDataItem.title + ' has been written to file'));
+                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
+                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                            resolve(commandDataItem.title);
+                            console.info('');
                         });
                 } else {
+                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                    resolve(commandDataItem.title);
                     console.info('');
                 }
-                //}
-                console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + commandDataItem.title));
-                resolve(commandDataItem.title);
+                // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + commandDataItem.title));
+                // resolve(commandDataItem.title);
+                // console.info('');
             }
 
         });
@@ -356,7 +363,7 @@ function ripDVDs(outputPath) {
             //Rip the DVDs synchonously.
             processArray(commandDataItems, ripDVD, outputPath)
                 .then((result) => {
-                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.cyan(result));
+                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(result));
                     ejectDVDs();
                     process.exit();
                     // all done here
@@ -374,11 +381,11 @@ function ripDVDs(outputPath) {
 }
 
 function ejectDVDs() {
-    if (eject == 'True') {
+    if (eject == 'true') {
         winEject.eject();
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
     } else {
-        console.info('');
+        return;
     }
 
 }
