@@ -5,9 +5,10 @@ const config = require('config');
 const mkvDir = config.get('Path.mkvDir.Dir');
 const movieRips = config.get('Path.movieRips.Dir');
 const fileLog = config.get('Path.logToFiles.Enabled');
-const fileLog = config.get('Path.logToFiles.Dir');
+const logDir = config.get('Path.logToFiles.Dir');
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
+const fs = require('fs');
 colors = require('colors/safe');
 
 //Color theme settings for colored text
@@ -221,6 +222,21 @@ function createUniqueFolder(outputPath, folderName) {
     return dir;
 }
 
+function createUniqueFile(logDir, fileName) {
+
+    var fs = require('fs');
+    var dir = logDir + '\\' + fileName;
+    var fileCounter = 1;
+    if (fs.existsSync(dir)) {
+        while (fs.existsSync(dir + '-' + fileCounter)) {
+            fileCounter++;
+        }
+        dir += '-' + fileCounter;
+    }
+    fs.mkdirSync(dir);
+    return dir;
+}
+
 function getCommandData() {
 
     return new Promise((resolve, reject) => {
@@ -293,6 +309,7 @@ function ripDVD(commandDataItem, outputPath) {
     return new Promise((resolve, reject) => {
 
         var dir = createUniqueFolder(outputPath, commandDataItem.title);
+        var fileName = createUniqueFile(logDir, commandDataItem.title);
 
         console.info(colors.info(moment().format('LTS') + ' - ' + 'Ripping Title ' + commandDataItem.title + ' to ' + dir + '...'));
 
@@ -306,9 +323,13 @@ function ripDVD(commandDataItem, outputPath) {
                 console.info(colors.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title));
                 resolve(commandDataItem.title);
             }
-            
-            if (fileLog = 'True') {
 
+            if (fileLog = 'True') {
+                fs.writeFile(fileName + 'Log.txt', stdout, 'utf8',
+                    function (err) {
+                        if (err) throw err;
+                        console.log(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for' + commandDataItem.title + 'Has been written to file'));
+                    });
             }
 
         });
@@ -325,7 +346,7 @@ function ripDVDs(outputPath) {
             //Rip the DVDs synchonously.
             processArray(commandDataItems, ripDVD, outputPath)
                 .then((result) => {
-                    console.info(colors.info(moment().format('LTS') + ' - ' + 'The following DVD titles have been successfully ripped.', result));
+                    console.info(moment().format('LTS') + ' - ' + 'The following DVD titles have been successfully ripped.', result);
                     process.exit();
                     // all done here
                     // array of data here in result
