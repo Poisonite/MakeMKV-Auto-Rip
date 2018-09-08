@@ -8,7 +8,10 @@
         },
         "logToFiles": {
             "Enabled": "True",
-            "Dir": "C:\\"
+            "Dir": "\\Logs"
+        },
+        "ejectDVDs": {
+            "Enabled": "True"
         }
     }
 }

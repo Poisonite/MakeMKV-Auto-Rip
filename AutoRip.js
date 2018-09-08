@@ -6,9 +6,11 @@ const mkvDir = config.get('Path.mkvDir.Dir');
 const movieRips = config.get('Path.movieRips.Dir');
 const fileLog = config.get('Path.logToFiles.Enabled');
 const logDir = config.get('Path.logToFiles.Dir');
+const eject = config.get('Path.ejectDVDs.Enabled');
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
 const fs = require('fs');
+const winEject = require('win-eject');
 colors = require('colors/safe');
 
 //Color theme settings for colored text
@@ -32,8 +34,8 @@ function Opener() {
     console.info(colors.line1('Please fully read the README.md file found in the root folder before using this software.'));
     console.info('');
     console.info('');
-    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.4.1---'));
-    console.info(colors.line1('---Running in Production Mode---'));
+    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.4.3---'));
+    console.info(colors.line1('---Running in DEV Mode---'));
     console.info('');
     console.info(colors.line1('---Devloped by Zac Ingoglia---'));
     console.info(colors.line1('---Copyright 2018 Zac Ingoglia---'));
@@ -320,21 +322,26 @@ function ripDVD(commandDataItem, outputPath) {
                 reject(stderr);
             } else {
                 //console.log(colors.blue('OUTPUT', stdout)); //Outputs full log data to console after ripping (or attempting to rip) each DVD
+                createLogFile();
                 console.info(colors.info(moment().format('LTS') + ' - ' + 'Done Ripping ' + commandDataItem.title));
                 resolve(commandDataItem.title);
-            }
-
-            if (fileLog == 'True') {
-                fs.writeFile(fileName + '.txt', stdout, 'utf8',
-                    function (err) {
-                        if (err) throw err;
-                        console.log(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for ' + commandDataItem.title + ' Has been written to file'));
-                    });
             }
 
         });
 
     });
+}
+
+function createLogFile() {
+    if (fileLog == 'True') {
+        fs.writeFile(fileName + '.txt', stdout, 'utf8',
+            function (err) {
+                if (err) throw err;
+                console.info(colors.info(moment().format('LTS') + ' - ' + 'Full Log file for ' + commandDataItem.title + ' has been written to file'));
+            });
+    } else {
+        console.info('');
+    }
 }
 
 function ripDVDs(outputPath) {
@@ -346,7 +353,8 @@ function ripDVDs(outputPath) {
             //Rip the DVDs synchonously.
             processArray(commandDataItems, ripDVD, outputPath)
                 .then((result) => {
-                    console.info(moment().format('LTS') + ' - ' + 'The following DVD titles have been successfully ripped.', result);
+                    console.info(colors.info(moment().format('LTS') + ' - ' + 'The following DVD titles have been successfully ripped.'), colors.cyan(result));
+                    ejectDVDs();
                     process.exit();
                     // all done here
                     // array of data here in result
@@ -359,5 +367,15 @@ function ripDVDs(outputPath) {
         .catch(err => {
             console.error(colors.info(moment().format('LTS') + ' - ' + err));
         });
+
+}
+
+function ejectDVDs(winEject) {
+    if (eject == 'True') {
+        winEject.eject();
+        console.info(colors.info(moment().format('LTS') + ' - ' + 'All DVDs have been ejected.'));
+    } else {
+        console.info('');
+    }
 
 }
