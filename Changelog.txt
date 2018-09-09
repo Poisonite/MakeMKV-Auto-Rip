@@ -1,7 +1,7 @@
 ---MakeMKV Auto Rip Changelog---
 Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
 Newest Versions are at the bottom
-Current version: v0.5.1
+Current version: v0.5.2
 
 Version 0.1.0 - Initial Upload
 This version is for testing purposes only and is not publicly usable. The coming versions will be made proper and useful to the public, but for now adapting it to your personal use case requires changing device unique info in the AutoRip.js file.
@@ -191,3 +191,27 @@ AutoRip.js Changes
 Node Package Changes
 	Version Update: 0.5.0 > 0.5.1
 	Published updated package version
+
+Version 0.5.2 - More accurate completed messages
+Changelog.txt Changes
+	Version Update: 0.5.1 > 0.5.2
+ToDo.txt Changes
+	Completed items were marked as such
+	Added more items
+	Reorganized List
+README.md Changes
+	Version Update: 0.5.1 > 0.5.2
+package.json Changes
+	Version Update: 0.5.1 > 0.5.2
+AutoRip.js Changes
+	Version Update: 0.5.1 > 0.5.2
+	Changed message system so that only discs that actually ripped get a "done ripping <Title Name>" message (discs that dont pass will get an error message)
+Node Package Changes
+	Version Update: 0.5.1 > 0.5.2
+	Published updated package version
+Load.js Added
+	INFO: A standalone file to load all dvds connected to the system (as long as the drive has the physical ability to) This is used with the DriveLoader.bat file
+Eject.js Added
+	INFO: A standalone file to eject all dvds connected to the system (as long as the drive has the physical ability to) This is used with the DriveLoader.bat file
+DriveLoader.bat Added
+	INFO: This file can be run to either load or eject all discs (dependent on which option the user selects at startup)

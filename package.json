@@ -1,6 +1,6 @@
 {
   "name": "makemkv-auto-rip",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Automatically rips DVDs using the MakeMKV console and saves them to unique folders.",
   "main": "AutoRip.js",
   "scripts": {

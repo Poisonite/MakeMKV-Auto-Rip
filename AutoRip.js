@@ -37,7 +37,7 @@ function Opener() {
     console.info(colors.line1('Please fully read the README.md file found in the root folder before using this software.'));
     console.info('');
     console.info('');
-    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.1---'));
+    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.2---'));
     console.info(colors.line1('---Running in DEV Mode---'));
     console.info('');
     console.info(colors.line1('---Devloped by Zac Ingoglia---'));
@@ -97,6 +97,8 @@ function ripOrDip() {
 }
 
 function validateFileDate() {
+    //This is the section for checking the MakeMKV version when the title command is run
+
     // check data to make sure that you opened a valid file.
 
     //is the length of data greater than 0
@@ -111,6 +113,8 @@ function validateFileDate() {
 }
 
 function validateDriveFileDate() {
+    //This is the section for checking the MakeMKV version when the drive number command is run
+
     // check data to make sure that you opened a valid file.
 
     //is the length of data greater than 0
@@ -196,6 +200,44 @@ function getFileNumber(data) {
 
 }
 
+function getCopyCompleteMSG(data) {
+
+    // var myTitleSectionValue = null,
+    //     maxValue = 0;
+
+    var lines = data.split("\n");
+    var validLines = lines.filter(line => line.startsWith("MSG:5036"));
+
+    if (validLines = lines.filter(line => line.startsWith("MSG:5036"))) {
+        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(commandDataItem.title));
+    } else {
+        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(commandDataItem.title) + colors.info(' Try ripping with MakeMKV GUI.'));
+    }
+    // validLines.forEach(line => {
+
+    //     var videoTimeString = line
+    //         .split(",")[9]
+    //         .replace(/['"]+/g, '');
+
+    //     var videoTimeArray = videoTimeString.split(':');
+
+    //     var videoTimeSeconds = getTimeInSeconds(videoTimeArray);
+
+    //     //process the largest file.
+    //     if (videoTimeSeconds > maxValue) {
+    //         maxValue = videoTimeSeconds;
+    //         myTitleSectionValue = line
+    //             .split(",")[3] //split by comma and get the element with the title.
+    //             .split(" ")[1] //get the element with the file number.
+    //             .replace("#", '') - 1; //strip off the hashtag and subtract 1 from the file number.
+
+    //     }
+    // });
+
+    // return myTitleSectionValue;
+
+}
+
 function makeTitleValidFolderPath(title) {
     //escape out any chars that are not valid for file name.
     return title.replace("\\", '')
@@ -240,6 +282,7 @@ function createUniqueFile(logDir, fileName) {
         }
         dir += '-' + fileCounter;
     }
+    //fs.writeFileSync(dir + '.txt', "") //saving for future update, this may be the solution but may also bork everything
     return dir;
 }
 
@@ -332,7 +375,8 @@ function ripDVD(commandDataItem, outputPath) {
                         function (err) {
                             if (err) throw err;
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
-                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                            // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                            console.info(getCopyCompleteMSG());
                             resolve(commandDataItem.title);
                             console.info('');
                         });
@@ -341,7 +385,8 @@ function ripDVD(commandDataItem, outputPath) {
                         function (err) {
                             if (err) throw err;
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
-                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                            // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                            console.info(getCopyCompleteMSG());
                             resolve(commandDataItem.title);
                             console.info('');
                         });
@@ -350,9 +395,7 @@ function ripDVD(commandDataItem, outputPath) {
                     resolve(commandDataItem.title);
                     console.info('');
                 }
-                // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + commandDataItem.title));
-                // resolve(commandDataItem.title);
-                // console.info('');
+
             }
 
         });

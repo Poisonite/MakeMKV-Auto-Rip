@@ -37,7 +37,7 @@ Add MakeMKV file validation to ensure MakeMKV is installed and running an accept
 Add exception handling in sections that lack it
     True successfully saved MSG codes
         MSG:5005 - X titles saved
-        MSG:5036 - Copy complete X titles saved
+        --Done--MSG:5036 - Copy complete X titles saved
     True Failed to save MSG codes
         MSG:3042 - IFO file for VTS #X is corrupt, VOB file must be scanned... (this one may not always return fail)
         MSG:3035 - Cellwalk algorithm failed trying calltrim algorithm
