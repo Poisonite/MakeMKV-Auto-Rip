@@ -204,11 +204,6 @@ function getCopyCompleteMSG(data) {
 
     // var myTitleSectionValue = null,
     //     maxValue = 0;
-
-    var validationMessage = validateFileDate(data);
-    if (validationMessage) {
-        return validationMessage;
-    }
     
     var lines = data.split("\n");
     var validLines = lines.filter(line => line.startsWith("MSG:5036"));
@@ -381,7 +376,7 @@ function ripDVD(commandDataItem, outputPath) {
                             if (err) throw err;
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
                             // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
-                            console.info(getCopyCompleteMSG());
+                            console.info(getCopyCompleteMSG(stdout));
                             resolve(commandDataItem.title);
                             console.info('');
                         });
@@ -391,7 +386,7 @@ function ripDVD(commandDataItem, outputPath) {
                             if (err) throw err;
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
                             // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
-                            console.info(getCopyCompleteMSG());
+                            console.info(getCopyCompleteMSG(stdout));
                             resolve(commandDataItem.title);
                             console.info('');
                         });
