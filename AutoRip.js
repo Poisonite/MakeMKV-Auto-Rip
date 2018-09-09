@@ -38,10 +38,7 @@ function Opener() {
     console.info('');
     console.info('');
     console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.2---'));
-    console.info(colors.line1('---Running in DEV Mode---'));
-    console.info('');
-    console.info(colors.line1('---Devloped by Zac Ingoglia---'));
-    console.info(colors.line1('---Copyright 2018 Zac Ingoglia---'));
+    console.info(colors.line1('---Devloped by Zac Ingoglia (Poisonite101)---'));
     console.info('');
     console.info('');
     console.info(colors.warning('WARNING--Ensure that you have configured the Default.json file before ripping--WARNING'));
@@ -200,7 +197,7 @@ function getFileNumber(data) {
 
 }
 
-function getCopyCompleteMSG(data) {
+function getCopyCompleteMSG(data, commandDataItem) {
 
     // var myTitleSectionValue = null,
     //     maxValue = 0;
