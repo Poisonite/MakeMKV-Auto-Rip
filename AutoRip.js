@@ -240,7 +240,6 @@ function createUniqueFile(logDir, fileName) {
         }
         dir += '-' + fileCounter;
     }
-    //fs.mkdirSync(dir); //This line may not be needed
     return dir;
 }
 
@@ -374,7 +373,7 @@ function ripDVDs(outputPath) {
                 .then((result) => {
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(result));
                     ejectDVDs();
-                    process.exit();
+                    //process.exit();
                     // all done here
                     // array of data here in result
                 }, (reason) => {
@@ -393,12 +392,14 @@ function ejectDVDs() {
     if (eject == 'true') {
         winEject.eject('', function () {
             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+            process.exit();
         });
     } else if (eject == 'True') {
         winEject.eject('', function () {
             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+            process.exit();
         });
     } else {
-        return;
+        process.exit();
     }
 }
