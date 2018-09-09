@@ -204,11 +204,13 @@ function getCopyCompleteMSG(data, commandDataItem) {
     
     var lines = data.split("\n");
     var validLines = lines.filter(line => line.startsWith("MSG:5036"));
+    var titleName = commandDataItem.title
+    //var titleName = createUniqueFolder(outputPath, commandDataItem.title)
 
     if (validLines = lines.filter(line => line.startsWith("MSG:5036"))) {
-        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(commandDataItem.title));
+        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(titleName));
     } else {
-        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(commandDataItem.title) + colors.info(' Try ripping with MakeMKV GUI.'));
+        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(titleName) + colors.info(' Try ripping with MakeMKV GUI.'));
     }
     // validLines.forEach(line => {
 
