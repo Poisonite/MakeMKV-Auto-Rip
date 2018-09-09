@@ -14,7 +14,7 @@ colors.setTheme({
 loadDVDs();
 function loadDVDs() {
     winEject.close('', function () {
-        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+        console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been loaded.'));
         process.exit();
     });
 }

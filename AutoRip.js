@@ -205,6 +205,11 @@ function getCopyCompleteMSG(data) {
     // var myTitleSectionValue = null,
     //     maxValue = 0;
 
+    var validationMessage = validateFileDate(data);
+    if (validationMessage) {
+        return validationMessage;
+    }
+    
     var lines = data.split("\n");
     var validLines = lines.filter(line => line.startsWith("MSG:5036"));
 

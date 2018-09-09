@@ -58,29 +58,12 @@ echo.
 echo ---Loading All DVDs---
 ping 192.0.2.2 -n 1 -w 400 > nul
 node Load.js
-goto :ESQ-1
+pause
 
 ::Copy Movies (For Option 2)
-:CopyDel
+:EjectDVDs
 echo.
 echo ---Ejecting All DVDs---
 ping 192.0.2.2 -n 1 -w 400 > nul
 node Eject.js
-goto :ESQ-2
-
-::End Sequence for Option 1
-:ESQ-1
-echo.
-echo ---All DVDs Were Loaded---
-echo.
-goto :Endr
-
-::End Sequence for Option 2
-:ESQ-2
-echo.
-echo ---All DVDs Were Ejected---
-echo.
-goto :Endr
-
-:Endr
 pause

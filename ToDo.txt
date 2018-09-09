@@ -53,7 +53,7 @@ Add info in README file regarding best settings to set in the graphical MakeMKV 
 Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
 Test to make sure ejecting and logging can be disabled without crashing the program
 Add option for sounds to play when each DVD is completed
-
+--Done--Fix DriveLoader.bat not working
 Add documentation on ejecting and loading files
 
 ---Section Two (Stream Transcoder)---
