@@ -204,10 +204,10 @@ function getCopyCompleteMSG(data, commandDataItem) {
     //     maxValue = 0;
 
     var lines = data.split("\n");
-    //console.log(lines);
+    console.log(lines);
     var validLines = lines.filter(line => line.startsWith("MSG:5036"));
     //var validLines = 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"'
-    //console.log(validLines);
+    console.log(validLines);
     var titleName = commandDataItem.title
     //var titleName = createUniqueFolder(commandDataItem.title)
     //if (validLines == lines.filter(line => line.startsWith("MSG:5036"))) {

@@ -59,7 +59,7 @@ echo ---Loading All DVDs---
 ping 192.0.2.2 -n 1 -w 400 > nul
 node Load.js
 pause
-:eof
+goto eof
 
 ::Copy Movies (For Option 2)
 :EjectDVDs
@@ -68,6 +68,6 @@ echo ---Ejecting All DVDs---
 ping 192.0.2.2 -n 1 -w 400 > nul
 node Eject.js
 pause
-:eof
+goto eof
 
 :eof
