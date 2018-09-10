@@ -205,13 +205,13 @@ function getCopyCompleteMSG(data, commandDataItem) {
 
     var lines = data.split("\n");
     //console.log(lines);
-    //var validLines = lines.filter(line => line.startsWith("MSG:5036"));
+    var validLines = lines.filter(line => line.startsWith("MSG:5036"));
     //var validLines = 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"'
     //console.log(validLines);
     var titleName = commandDataItem.title
     //var titleName = createUniqueFolder(commandDataItem.title)
-    if (validLines == lines.filter(line => line.startsWith("MSG:5036"))) {
-        //if (validLines == 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"') {
+    //if (validLines == lines.filter(line => line.startsWith("MSG:5036"))) {
+    if (validLines == 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"') {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(titleName));
     } else {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(titleName) + colors.info(' Try ripping with MakeMKV GUI.'));
