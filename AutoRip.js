@@ -25,6 +25,7 @@ colors.setTheme({
     warning: ['white', 'bgRed']
 });
 
+// getCopyCompleteMSG();
 Opener();
 ripOrDip();
 
@@ -203,13 +204,14 @@ function getCopyCompleteMSG(data, commandDataItem) {
     //     maxValue = 0;
 
     var lines = data.split("\n");
-    console.log(lines);
-    var validLines = lines.filter(line => line.startsWith("MSG:5036"));
+    //console.log(lines);
+    //var validLines = lines.filter(line => line.startsWith("MSG:5036"));
+    var validLines = 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"'
     console.log(validLines);
     var titleName = commandDataItem.title
     //var titleName = createUniqueFolder(commandDataItem.title)
-
-    if (validLines = lines.filter(line => line.startsWith("MSG:5036"))) {
+    if (validLines == lines.filter(line => line.startsWith("MSG:5036"))) {
+        //if (validLines == 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"') {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(titleName));
     } else {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(titleName) + colors.info(' Try ripping with MakeMKV GUI.'));
@@ -387,12 +389,13 @@ function ripDVD(commandDataItem, outputPath) {
                             if (err) throw err;
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
                             // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
-                            console.info(getCopyCompleteMSG(stdout));
+                            console.info(getCopyCompleteMSG(stdout, commandDataItem));
                             resolve(commandDataItem.title);
                             console.info('');
                         });
                 } else {
-                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                    // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                    console.info(getCopyCompleteMSG(stdout, commandDataItem));
                     resolve(commandDataItem.title);
                     console.info('');
                 }
