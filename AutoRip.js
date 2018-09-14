@@ -4,9 +4,9 @@ const moment = require('moment');
 const config = require('config');
 const mkvDir = config.get('Path.mkvDir.Dir');
 const movieRips = config.get('Path.movieRips.Dir');
-const fileLog = config.get('Path.logToFiles.Enabled');
+const fileLog = config.get('Path.logToFiles.Enabled').toLowerCase();
 const logDir = config.get('Path.logToFiles.Dir');
-const eject = config.get('Path.ejectDVDs.Enabled');
+const eject = config.get('Path.ejectDVDs.Enabled').toLowerCase();
 const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
 const fs = require('fs');
@@ -211,10 +211,14 @@ function getCopyCompleteMSG(data, commandDataItem) {
     var titleName = commandDataItem.title
     //var titleName = createUniqueFolder(commandDataItem.title)
     //if (validLines == lines.filter(line => line.startsWith("MSG:5036"))) {
-    if (validLines == 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"\\r') {
+    var goodVideoArray = [];
+    var badVideoArray = [];
+    if (validLines == 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"') {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(titleName));
+        var addGoodItem = goodVideoArray.push(titleName);
     } else {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(titleName) + colors.info(' Try ripping with MakeMKV GUI.'));
+        var addBadItem = badVideoArray.push(titleName);
     }
     // validLines.forEach(line => {
 
@@ -383,16 +387,16 @@ function ripDVD(commandDataItem, outputPath) {
                             resolve(commandDataItem.title);
                             console.info('');
                         });
-                } else if (fileLog == 'True') {
-                    fs.writeFile(fileName + '.txt', stdout, 'utf8',
-                        function (err) {
-                            if (err) throw err;
-                            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
-                            // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
-                            console.info(getCopyCompleteMSG(stdout, commandDataItem));
-                            resolve(commandDataItem.title);
-                            console.info('');
-                        });
+                    // } else if (fileLog == 'True') {
+                    //     fs.writeFile(fileName + '.txt', stdout, 'utf8',
+                    //         function (err) {
+                    //             if (err) throw err;
+                    //             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
+                    //             // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
+                    //             console.info(getCopyCompleteMSG(stdout, commandDataItem));
+                    //             resolve(commandDataItem.title);
+                    //             console.info('');
+                    //         });
                 } else {
                     // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
                     console.info(getCopyCompleteMSG(stdout, commandDataItem));
@@ -411,14 +415,14 @@ function ripDVD(commandDataItem, outputPath) {
 
 function ripDVDs(outputPath) {
 
-    getCommandData()
+    getCommandData(goodVideoArray)
 
         .then(commandDataItems => {
 
             //Rip the DVDs synchonously.
             processArray(commandDataItems, ripDVD, outputPath)
                 .then((result) => {
-                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(result));
+                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(goodVideoAray));
                     ejectDVDs();
                     //process.exit();
                     // all done here
@@ -441,11 +445,11 @@ function ejectDVDs() {
             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
             process.exit();
         });
-    } else if (eject == 'True') {
-        winEject.eject('', function () {
-            console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
-            process.exit();
-        });
+        // } else if (eject == 'True') {
+        //     winEject.eject('', function () {
+        //         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
+        //         process.exit();
+        //     });
     } else {
         process.exit();
     }

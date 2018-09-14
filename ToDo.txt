@@ -32,6 +32,8 @@
 --Done--Fix last DVD to rip writting a blank log file instead of a proper one (it looks like that may have been fixed accidently during the latest code reorder)
 --Done--Fix auto eject only ejecting 1 disc
 --Done--Create seperate ejecting and loading files
+--Done--Fix config file so that "enabled" settings are no longer case sensitive
+--Done--Fix "Following items were ripped" to only show non failed items
 --On Hold--Fix config file so that single slashes can be used
 Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it
