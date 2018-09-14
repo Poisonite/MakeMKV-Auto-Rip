@@ -413,16 +413,16 @@ function ripDVD(commandDataItem, outputPath) {
 
 
 
-function ripDVDs(outputPath) {
+function ripDVDs(outputPath, goodVideoArray) {
 
     getCommandData(goodVideoArray)
 
         .then(commandDataItems => {
 
             //Rip the DVDs synchonously.
-            processArray(commandDataItems, ripDVD, outputPath)
+            processArray(commandDataItems, ripDVD, outputPath, goodVideoArray)
                 .then((result) => {
-                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(goodVideoAray));
+                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(goodVideoArray));
                     ejectDVDs();
                     //process.exit();
                     // all done here
