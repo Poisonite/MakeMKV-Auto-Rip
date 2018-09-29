@@ -34,6 +34,11 @@
 --Done--Create seperate ejecting and loading files
 --Done--Fix config file so that "enabled" settings are no longer case sensitive
 --Done--Fix "Following items were ripped" to only show non failed items
+--Done--Fix issues with some (all) bluray discs not ripping for some reason (may be an unfixable disc speific issue)
+    --Done--Must run a bluray through the raw console to discover the error
+--Done--Add "The Following DVDs filed to rip" message
+--Done--Fix DriveLoader.bat not working
+--Done--Test to make sure ejecting and logging can be disabled without crashing the program (all combos)
 --On Hold--Fix config file so that single slashes can be used
 Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it
@@ -49,16 +54,9 @@ Add exception handling in sections that lack it
         MSG:3024 - Complex multiplex encountered (this is what makes some DVDs take a very long time to gather disc info)
         MSG:1005 - This is the very first line in the log (this should be used to output the MakeMKV version to the user and warn if there is a version mismatch)
 Add feature to delete folders created for failed discs
-Fix issues with some bluray discs not ripping for some reason (may be an unfixable disc speific issue)
-    Must run a bluray through the raw console to discover the error
 Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
 Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
-Test to make sure ejecting and logging can be disabled without crashing the program
 Add option for sounds to play when each DVD is completed
---Done--Fix DriveLoader.bat not working
 Add documentation on ejecting and loading files
-
----Section Two (Stream Transcoder)---
-Setup cluster rendering for Handbrake (render same file on ZacAcePC and RHU1 at the same time using Handbrake)
-    This may be a part of a seperate github project or not published at all (still unsure at this time)
---More tasks to come--
+--Maybe--Add "Rip all titles" mode that rips all titles greater then the min title legnth set in the GUI preferences (Insted of the longest title greater then the min legnth)
+Fix "following DVD titles failed/successfully ripped" returning "undefined" instead of proper titles

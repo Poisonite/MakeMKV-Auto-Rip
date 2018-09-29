@@ -171,37 +171,41 @@ function getFileNumber(data) {
     }
 
     var lines = data.split("\n");
-    var validLines = lines.filter(line => line.startsWith("MSG:3028"));
+    var validLines = lines
+        .filter(line => {
+            var lineArray = line.split(",");
+
+            if ((lineArray[0].startsWith("TINFO:"))) {
+
+                //Ensure that the number in the second element is = 9. This is the "message code" that indicates title legnth
+                return (lineArray[1] == 9);
+            }
+        });
 
     validLines.forEach(line => {
 
+        //gets element of good lines that contains the title legnth and removes the quotes from it (leaving just the time in HH:MM:SS format)
         var videoTimeString = line
-            .split(",")[9]
+            .split(",")[3]
             .replace(/['"]+/g, '');
 
         var videoTimeArray = videoTimeString.split(':');
 
         var videoTimeSeconds = getTimeInSeconds(videoTimeArray);
 
-        //process the largest file.
+        //process the largest file. Then return title number for longest title.
         if (videoTimeSeconds > maxValue) {
             maxValue = videoTimeSeconds;
             myTitleSectionValue = line
-                .split(",")[3] //split by comma and get the element with the title.
-                .split(" ")[1] //get the element with the file number.
-                .replace("#", '') - 1; //strip off the hashtag and subtract 1 from the file number.
-
+                .split(",")[0] //split by comma and get the element with the title.
+                .replace("TINFO:", '') //Stip begnning info off element 0 to get only the title number.
         }
     });
 
     return myTitleSectionValue;
-
-}
+};
 
 function getCopyCompleteMSG(data, commandDataItem) {
-
-    // var myTitleSectionValue = null,
-    //     maxValue = 0;
 
     var lines = data.split("\n");
     console.log(lines);
@@ -220,29 +224,6 @@ function getCopyCompleteMSG(data, commandDataItem) {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(titleName) + colors.info(' Try ripping with MakeMKV GUI.'));
         var addBadItem = badVideoArray.push(titleName);
     }
-    // validLines.forEach(line => {
-
-    //     var videoTimeString = line
-    //         .split(",")[9]
-    //         .replace(/['"]+/g, '');
-
-    //     var videoTimeArray = videoTimeString.split(':');
-
-    //     var videoTimeSeconds = getTimeInSeconds(videoTimeArray);
-
-    //     //process the largest file.
-    //     if (videoTimeSeconds > maxValue) {
-    //         maxValue = videoTimeSeconds;
-    //         myTitleSectionValue = line
-    //             .split(",")[3] //split by comma and get the element with the title.
-    //             .split(" ")[1] //get the element with the file number.
-    //             .replace("#", '') - 1; //strip off the hashtag and subtract 1 from the file number.
-
-    //     }
-    // });
-
-    // return myTitleSectionValue;
-
 }
 
 function makeTitleValidFolderPath(title) {
@@ -380,7 +361,7 @@ function ripDVD(commandDataItem, outputPath) {
                 if (fileLog == 'true') {
                     fs.writeFile(fileName + '.txt', stdout, 'utf8',
                         function (err) {
-                            if (err) throw err;
+                            if (err) console.error(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Directory for logs does not exist. Please Create it.'));
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
                             // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
                             console.info(getCopyCompleteMSG(stdout, commandDataItem));
@@ -412,23 +393,23 @@ function ripDVD(commandDataItem, outputPath) {
 }
 
 
+function ripDVDs(outputPath, goodVideoArray, badVideoArray) {
 
-function ripDVDs(outputPath, goodVideoArray) {
-
-    getCommandData(goodVideoArray)
+    getCommandData(goodVideoArray, badVideoArray)
 
         .then(commandDataItems => {
 
             //Rip the DVDs synchonously.
-            processArray(commandDataItems, ripDVD, outputPath, goodVideoArray)
+            processArray(commandDataItems, ripDVD, outputPath, goodVideoArray, badVideoArray)
                 .then((result) => {
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(goodVideoArray));
+                    console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles failed to rip.'), colors.title(badVideoArray));
                     ejectDVDs();
                     //process.exit();
                     // all done here
                     // array of data here in result
                 }, (reason) => {
-                    console.error(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Error Ripping One or More DVDs.'), colors.blue(reason));
+                    console.error(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Uncorrectable Error Ripping One or More DVDs.'), colors.blue(reason));
                     // rejection happened
                 });
 
