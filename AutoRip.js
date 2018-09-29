@@ -12,6 +12,8 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 const winEject = require('win-eject');
 colors = require('colors/safe');
+var goodVideoArray = [];
+var badVideoArray = [];
 
 //Color theme settings for colored text
 colors.setTheme({
@@ -208,21 +210,21 @@ function getFileNumber(data) {
 function getCopyCompleteMSG(data, commandDataItem) {
 
     var lines = data.split("\n");
-    console.log(lines);
+    //console.log(lines);
     var validLines = lines.filter(line => line.startsWith("MSG:5036"));
     //var validLines = 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"'
-    console.log(validLines);
+    //console.log(validLines);
     var titleName = commandDataItem.title
     //var titleName = createUniqueFolder(commandDataItem.title)
     //if (validLines == lines.filter(line => line.startsWith("MSG:5036"))) {
-    var goodVideoArray = [];
-    var badVideoArray = [];
-    if (validLines == 'MSG:5036,260,1,"Copy complete. 1 titles saved.","Copy complete. %1 titles saved.","1"') {
+    
+    
+    if (validLines.length > 0) {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ') + colors.title(titleName));
-        var addGoodItem = goodVideoArray.push(titleName);
+        goodVideoArray.push(titleName);
     } else {
         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Unable to rip ') + colors.title(titleName) + colors.info(' Try ripping with MakeMKV GUI.'));
-        var addBadItem = badVideoArray.push(titleName);
+        badVideoArray.push(titleName);
     }
 }
 
@@ -368,16 +370,6 @@ function ripDVD(commandDataItem, outputPath) {
                             resolve(commandDataItem.title);
                             console.info('');
                         });
-                    // } else if (fileLog == 'True') {
-                    //     fs.writeFile(fileName + '.txt', stdout, 'utf8',
-                    //         function (err) {
-                    //             if (err) throw err;
-                    //             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
-                    //             // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
-                    //             console.info(getCopyCompleteMSG(stdout, commandDataItem));
-                    //             resolve(commandDataItem.title);
-                    //             console.info('');
-                    //         });
                 } else {
                     // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
                     console.info(getCopyCompleteMSG(stdout, commandDataItem));
@@ -393,14 +385,14 @@ function ripDVD(commandDataItem, outputPath) {
 }
 
 
-function ripDVDs(outputPath, goodVideoArray, badVideoArray) {
+function ripDVDs(outputPath) {
 
-    getCommandData(goodVideoArray, badVideoArray)
+    getCommandData()
 
         .then(commandDataItems => {
 
             //Rip the DVDs synchonously.
-            processArray(commandDataItems, ripDVD, outputPath, goodVideoArray, badVideoArray)
+            processArray(commandDataItems, ripDVD, outputPath)
                 .then((result) => {
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles have been successfully ripped.'), colors.title(goodVideoArray));
                     console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('The following DVD titles failed to rip.'), colors.title(badVideoArray));
@@ -426,11 +418,6 @@ function ejectDVDs() {
             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
             process.exit();
         });
-        // } else if (eject == 'True') {
-        //     winEject.eject('', function () {
-        //         console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('All DVDs have been ejected.'));
-        //         process.exit();
-        //     });
     } else {
         process.exit();
     }
