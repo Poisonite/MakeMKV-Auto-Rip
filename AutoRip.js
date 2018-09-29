@@ -266,14 +266,14 @@ function createUniqueFile(logDir, fileName) {
     var fs = require('fs');
     var dir = logDir + '\\' + 'Log' + '-' + fileName;
     var fileCounter = 1;
-    if (fs.existsSync(dir)) {
-        while (fs.existsSync(dir + '-' + fileCounter)) {
+    if (fs.existsSync(dir + '.txt')) {
+        while (fs.existsSync(dir + '-' + fileCounter + '.txt')) {
             fileCounter++;
         }
         dir += '-' + fileCounter;
     }
     //fs.writeFileSync(dir + '.txt', "") //saving for future update, this may be the solution but may also bork everything
-    return dir;
+    return dir + '.txt';
 }
 
 function getCommandData() {
@@ -361,7 +361,7 @@ function ripDVD(commandDataItem, outputPath) {
                 var fileName = createUniqueFile(logDir, commandDataItem.title);
 
                 if (fileLog == 'true') {
-                    fs.writeFile(fileName + '.txt', stdout, 'utf8',
+                    fs.writeFile(fileName, stdout, 'utf8',
                         function (err) {
                             if (err) console.error(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.error('Directory for logs does not exist. Please Create it.'));
                             console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Full Log file for ') + colors.title(commandDataItem.title) + colors.info(' has been written to file'));
