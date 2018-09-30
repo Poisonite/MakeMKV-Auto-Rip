@@ -1,7 +1,7 @@
 ---MakeMKV Auto Rip Changelog---
 Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
 Newest Versions are at the bottom
-Current version: v0.5.2
+Current version: v0.6.0
 
 Version 0.1.0 - Initial Upload
 This version is for testing purposes only and is not publicly usable. The coming versions will be made proper and useful to the public, but for now adapting it to your personal use case requires changing device unique info in the AutoRip.js file.
@@ -215,3 +215,31 @@ Eject.js Added
 	INFO: A standalone file to eject all dvds connected to the system (as long as the drive has the physical ability to) This is used with the DriveLoader.bat file
 DriveLoader.bat Added
 	INFO: This file can be run to either load or eject all discs (dependent on which option the user selects at startup)
+
+Version 0.6.0 - The Exterminator has Arrived
+Changelog.txt Changes
+	Version Update: 0.5.2 > 0.6.0
+ToDo.txt Changes
+	Completed items were marked as such
+	Added more items
+	Reorganized List
+README.md Changes
+	Version Update: 0.5.2 > 0.6.0
+	Expanded and updated with new instructions and a discription of what everything does
+package.json Changes
+	Version Update: 0.5.2 > 0.6.0
+AutoRip.js Changes
+	Version Update: 0.5.2 > 0.6.0
+	Updated redundent code where "enabled" settings from config file were called
+	Fixed "Following items were ripped" to only show non failed items
+	Added Section to show failed items at the bottom
+	Added support for Blu Ray Discs
+	Title selection code was rewriten and appears to work with a wider range of discs and disc types (including blurays and DVDs which previously had issues running)
+	Log generation now creates a new file with modified name when the desired name already exists (instead of overwriting it)
+Default.json Changes
+	"enabled" settings are no longer case sensitive
+Node Package Changes
+	Version Update: 0.5.2 > 0.6.0
+	Published updated package version
+DriveLoader.bat Changed
+	Fixed problems preventing the script from running correctly

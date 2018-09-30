@@ -11,9 +11,9 @@ const makeMKV = '\"' + mkvDir + '\\makemkvcon.exe' + '\"';
 const exec = require('child_process').exec;
 const fs = require('fs');
 const winEject = require('win-eject');
-colors = require('colors/safe');
 var goodVideoArray = [];
 var badVideoArray = [];
+colors = require('colors/safe');
 
 //Color theme settings for colored text
 colors.setTheme({
@@ -40,7 +40,7 @@ function Opener() {
     console.info(colors.line1('Please fully read the README.md file found in the root folder before using this software.'));
     console.info('');
     console.info('');
-    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.5.2---'));
+    console.info(colors.line1('---Welcome to MakeMKV Auto Rip v0.6.0---'));
     console.info(colors.line1('---Devloped by Zac Ingoglia (Poisonite101)---'));
     console.info('');
     console.info('');
@@ -50,7 +50,7 @@ function Opener() {
 
 //Run program or exit
 function ripOrDip() {
-    console.info(colors.white.underline('Would you like to Auto Rip all inserted DVDs now?'));
+    console.info(colors.white.underline('Would you like to Auto Rip all inserted discs now?'));
     console.info(colors.white.underline('This includes both internal and USB DVD and Bluray drives.'));
     console.info('');
     console.info('Press' + colors.info(' 1 ') + 'to Rip.');

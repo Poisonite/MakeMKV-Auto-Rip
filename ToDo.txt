@@ -1,4 +1,5 @@
 ---Section One (Ripper)---
+
 --Done--Create working settings.json file so that users can modify select information that may differ between computers
     --Done--Have the base location for rips be customizable through the settings.json file
         --Done--New folder will have to be generated before running console as the console won't do this for you
@@ -39,8 +40,11 @@
 --Done--Add "The Following DVDs filed to rip" message
 --Done--Fix DriveLoader.bat not working
 --Done--Test to make sure ejecting and logging can be disabled without crashing the program (all combos)
+--Done--Add documentation on ejecting and loading files
+--Done--Fix "following DVD titles failed/successfully ripped" returning "undefined" instead of proper titles
+--Done--Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
+--Done--Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
 --On Hold--Fix config file so that single slashes can be used
-Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add exception handling in sections that lack it
     True successfully saved MSG codes
         MSG:5005 - X titles saved
@@ -53,10 +57,5 @@ Add exception handling in sections that lack it
     Info MSG codes
         MSG:3024 - Complex multiplex encountered (this is what makes some DVDs take a very long time to gather disc info)
         MSG:1005 - This is the very first line in the log (this should be used to output the MakeMKV version to the user and warn if there is a version mismatch)
-Add feature to delete folders created for failed discs
-Add info in README file regarding best settings to set in the graphical MakeMKV app since the console pulls settings from it
-Fix log generator so that when a previously ripped DVD is ripped again a new log file will be generated instead of overwriting the old one
+Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
 Add option for sounds to play when each DVD is completed
-Add documentation on ejecting and loading files
---Maybe--Add "Rip all titles" mode that rips all titles greater then the min title legnth set in the GUI preferences (Insted of the longest title greater then the min legnth)
-Fix "following DVD titles failed/successfully ripped" returning "undefined" instead of proper titles
