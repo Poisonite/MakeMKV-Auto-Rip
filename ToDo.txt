@@ -57,5 +57,14 @@ Add exception handling in sections that lack it
     Info MSG codes
         MSG:3024 - Complex multiplex encountered (this is what makes some DVDs take a very long time to gather disc info)
         MSG:1005 - This is the very first line in the log (this should be used to output the MakeMKV version to the user and warn if there is a version mismatch)
-Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version
+        MSG:5075 - New Version of MakeMKV available
+        MSG:5021 - Current version of MakeMKV is too old (Must be updated)
+Add MakeMKV file validation to ensure MakeMKV is installed and running an acceptable version (Use the MSG codes)
 Add option for sounds to play when each DVD is completed
+Rebuild the independent DriveLoader.bat file in node so that standard windows command prompt is only needed to run a single .js file without any additional code
+    This is how AutoRip.Bat/.js is built
+Add config option to run MakeMKVAutoRip in repeat mode
+    This mode will prompt the user to load the next set of DVDs at the end of the rip session and (opon confirmation that the new set is in) close the DVD trays and begin to rip again
+    This will be useful if the user has a very large amount of discs and would like to streamline the process of starting a rip session
+    Note: AutoRip must wait ~10 to 15 seconds after the drives are loaded so that the user has a chance to manually load drives that lack the servo required to pull the tray in.
+        A warning telling the user to close any open drive trays should play during the 10-15 second waiting period

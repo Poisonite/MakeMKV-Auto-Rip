@@ -1,5 +1,5 @@
 # MakeMKV-Auto-Rip v0.6.0
-Automatically rips DVDs using the MakeMKV console and saves them to unique folders.
+Automatically rips DVDs and BluRay Discs using the MakeMKV console and saves them to unique folders.
 
 # Disclaimer
     This program is distributed in the hope that it will be useful,
