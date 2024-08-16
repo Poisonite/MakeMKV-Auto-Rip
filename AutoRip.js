@@ -7,6 +7,7 @@ const movieRips = config.get("Path.movieRips.Dir");
 const fileLog = config.get("Path.logToFiles.Enabled").toLowerCase();
 const logDir = config.get("Path.logToFiles.Dir");
 const eject = config.get("Path.ejectDVDs.Enabled").toLowerCase();
+const ripAll = config.get("Path.ripAll.Enabled").toLowerCase();
 const makeMKV = '"' + mkvDir + "\\makemkvcon.exe" + '"';
 const exec = require("child_process").exec;
 const fs = require("fs");
@@ -184,7 +185,7 @@ function getDriveInfo(data) {
       var driveInfo = {
         driveNumber: lineArray[0].substring(4),
         title: makeTitleValidFolderPath(lineArray[5]),
-        mediaType: mediaType // Include media type
+        mediaType: mediaType // Include media type. Not needed now. Leaving for possible later use
       };
       return driveInfo;
     });
@@ -343,7 +344,12 @@ function getCommandData() {
                 reject(stderr);
               }
 
-              var fileNumber = getFileNumber(stdout);
+              if (ripAll === 'true') {
+                var fileNumber = 'all';
+              } else {
+                var fileNumber = getFileNumber(stdout);
+              }
+
               console.info(
                 colors.time(moment().format("LTS")) +
                   colors.dash(" - ") +
@@ -353,6 +359,7 @@ function getCommandData() {
                   colors.title(driveInfo.title) +
                   colors.info(".")
               );
+
               resolve({
                 driveNumber: driveInfo.driveNumber,
                 title: driveInfo.title,
@@ -400,7 +407,6 @@ function processArray(array, fn, outputPath) {
 function ripDVD(commandDataItem, outputPath) {
   return new Promise((resolve, reject) => {
     var dir = createUniqueFolder(outputPath, commandDataItem.title);
-    var mediaType = commandDataItem.mediaType; // 'dvd' or 'blu-ray'
     var makeMKVCommand;
 
     console.info(
@@ -411,7 +417,6 @@ function ripDVD(commandDataItem, outputPath) {
         colors.info(" to " + dir + "...")
     );
 
-    if (mediaType === 'dvd') {
       makeMKVCommand =
         makeMKV +
         " -r mkv disc:" +
@@ -422,19 +427,6 @@ function ripDVD(commandDataItem, outputPath) {
         '"' +
         dir +
         '"';
-    } else if (mediaType === 'blu-ray') {
-      makeMKVCommand =
-        makeMKV +
-        " mkv disc:" +
-        commandDataItem.driveNumber +
-        " all " +
-        '"' +
-        dir +
-        '"';
-    } else {
-      reject(new Error("Unknown media type: " + mediaType));
-      return;
-    }
 
     exec(makeMKVCommand, (err, stdout, stderr) => {
       if (err || stderr) {
@@ -467,11 +459,13 @@ function ripDVD(commandDataItem, outputPath) {
                 colors.title(commandDataItem.title) +
                 colors.info(" has been written to file")
             );
+            // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
             console.info(getCopyCompleteMSG(stdout, commandDataItem));
             resolve(commandDataItem.title);
             console.info("");
           });
         } else {
+          // console.info(colors.time(moment().format('LTS')) + colors.dash(' - ') + colors.info('Done Ripping ' + colors.title(commandDataItem.title)));
           console.info(getCopyCompleteMSG(stdout, commandDataItem));
           resolve(commandDataItem.title);
           console.info("");

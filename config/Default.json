@@ -12,6 +12,9 @@
         },
         "ejectDVDs": {
             "Enabled": "true"
+        },
+        "ripAll": {
+            "Enabled": "false"
         }
     }
 }
