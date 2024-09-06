@@ -86,6 +86,10 @@ ejectDVDs
 This setting determines whether all disc drives connected to the system will be ejected after ALL discs have been ripped.
     The setting is not case sensitive, "true" will enable disc ejecting, "false" will disable disc ejecting
 
+ripAll
+This setting determines whether to rip all videos on each disk or only the longest one. By default this is 'false' (good for movies).
+    Setting this to true will rip all video files above the minimum title length set in MakeMKV GUI.
+
 # MakeMKV GUI Config
 In: View > Preferences > Video change "Minimum title length (seconds):" to any number below 1000
     You could set it above or below 1000 but if the number is too high the program will disregard all titles (since most movies are only 1.5 to 2 hours) and no file will be ripped\
