@@ -5,7 +5,7 @@ import { FileSystemUtils } from "../utils/filesystem.js";
 import { ValidationUtils } from "../utils/validation.js";
 import { DiscService } from "./disc.service.js";
 import { DriveService } from "./drive.service.js";
-import { safeExit, createDateEnvironment } from "../utils/process.js";
+import { safeExit, withSystemDate } from "../utils/process.js";
 import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
@@ -29,25 +29,30 @@ export class RipService {
         await DriveService.loadDrivesWithWait();
       }
 
-      Logger.info("Beginning AutoRip... Please Wait.");
-      const commandDataItems = await DiscService.getAvailableDiscs();
+      // Get fake date from config and execute entire ripping operation with temporary system date
+      const fakeDate = AppConfig.makeMKVFakeDate;
 
-      // Check if any discs were found
-      if (commandDataItems.length === 0) {
+      await withSystemDate(fakeDate, async () => {
+        Logger.info("Beginning AutoRip... Please Wait.");
+        const commandDataItems = await DiscService.getAvailableDiscs();
+
+        // Check if any discs were found
+        if (commandDataItems.length === 0) {
+          Logger.info(
+            "No discs found to rip. No ripping operations will be performed."
+          );
+          Logger.separator();
+          await this.handlePostRipActions();
+          return;
+        }
+
         Logger.info(
-          "No discs found to rip. No ripping operations will be performed."
+          `Found ${commandDataItems.length} disc(s) ready for ripping.`
         );
-        Logger.separator();
+        await this.processRippingQueue(commandDataItems);
+        this.displayResults();
         await this.handlePostRipActions();
-        return;
-      }
-
-      Logger.info(
-        `Found ${commandDataItems.length} disc(s) ready for ripping.`
-      );
-      await this.processRippingQueue(commandDataItems);
-      this.displayResults();
-      await this.handlePostRipActions();
+      });
     } catch (error) {
       Logger.error("Critical error during ripping process", error);
       await this.ejectDiscs();
@@ -124,11 +129,7 @@ export class RipService {
 
       const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
 
-      // Create environment with fake date if configured
-      const fakeDate = AppConfig.makeMKVFakeDate;
-      const env = { ...process.env, ...createDateEnvironment(fakeDate) };
-
-      exec(makeMKVCommand, { env }, async (err, stdout, stderr) => {
+      exec(makeMKVCommand, async (err, stdout, stderr) => {
         // Check for critical MakeMKV messages (not first call, so only check for errors)
         const shouldContinue = MakeMKVMessages.checkOutput(
           stdout + (stderr || ""),

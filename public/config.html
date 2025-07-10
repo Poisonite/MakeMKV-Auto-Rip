@@ -428,12 +428,15 @@
                     name="makemkv.fake_date"
                   />
                   <small class="help-text">
-                    Override system date for MakeMKV operations only. Leave
-                    blank to use real system date.
+                    Temporarily change system date for MakeMKV operations only.
+                    Leave blank to use real system date.
                     <br />
-                    <strong>Note:</strong> This feature only works on
-                    Linux/macOS systems. On Windows, you'll need to change your
-                    full system date manually, or use a third party utility.
+                    <strong>Note:</strong> Requires administrative privileges.
+                    System date is automatically restored after ripping
+                    operations complete.
+                    <br />
+                    <strong>Docker:</strong> Not supported in Docker containers
+                    - change host system date manually if needed.
                   </small>
                 </div>
               </section>

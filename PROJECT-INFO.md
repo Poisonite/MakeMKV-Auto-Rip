@@ -346,9 +346,9 @@ MakeMKV output follows a structured format that the application parses:
 - **Completion Status**: `MSG:5036` or "Copy complete" indicators
 - **Version Messages**: `MSG:1005`, `MSG:5021`, `MSG:5075` for version-related information
 
-### Fake Date System
+### System Date Management
 
-The application supports overriding system date for MakeMKV operations to bypass date-based restrictions.
+The application supports temporarily changing the system date for MakeMKV operations to bypass date-based restrictions.
 
 #### Implementation
 
@@ -363,20 +363,28 @@ makemkv:
 
 **Cross-Platform Support**:
 
-- **Linux/macOS**: Uses `libfaketime` environment variables:
+- **Windows**: Uses `date` and `time` commands with `w32tm /resync` for restoration
+- **macOS**: Uses `sudo date -u` with `sudo sntp -sS time.apple.com` for restoration
+- **Linux**: Uses `sudo date -s` with `sudo timedatectl set-ntp true` for restoration
 
-  ```javascript
-  env.FAKETIME = "2024-01-15 14:30:00";
-  env.LD_PRELOAD = "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1";
-  ```
+**Process Flow**:
 
-- **Windows**: Displays warning message directing users to manually change system date or use third-party tools
+1. **Pre-Ripping**: System date temporarily changed to configured fake_date
+2. **Ripping Operations**: All makemkvcon processes see the modified system date
+3. **Post-Ripping**: System date automatically restored to network time
 
-**Process Isolation**:
+**Administrative Requirements**:
 
-- Only affects `makemkvcon` processes, not other system operations
-- Environment variables set per-process execution
-- Real system date remains unchanged for logging and other operations
+- Requires administrative/root privileges to modify system date
+- Automatic restoration ensures system time returns to normal after operations
+- System-wide date change affects all processes temporarily
+- Graceful error handling with manual restoration guidance if needed
+
+**Docker Limitation**:
+
+- System date management is not supported in Docker containers
+- Feature automatically disabled when `DOCKER_CONTAINER=true` environment variable is detected
+- Users must change host system date manually if needed for containerized deployments
 
 #### Web UI Integration
 
@@ -388,9 +396,14 @@ makemkv:
 #### Implementation Details
 
 ```javascript
-// Process execution with fake date
-const env = { ...process.env, ...createDateEnvironment(fakeDate) };
-exec(makemkvCommand, { env }, callback);
+// System date management utilities
+import { systemDateManager } from "./system-date.js";
+
+// Execute operations with temporary system date
+await systemDateManager.withTemporaryDate(targetDate, async () => {
+  // All makemkvcon commands now see the modified system date
+  exec(makemkvCommand, callback);
+});
 
 // Date parsing and validation
 function parseFakeDate(fakeDateStr) {

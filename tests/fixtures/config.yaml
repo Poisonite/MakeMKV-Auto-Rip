@@ -24,4 +24,6 @@ interface:
   repeat_mode: true
 
 makemkv:
+  # Test fixture: Temporarily change system date for MakeMKV operations
+  # System date automatically restored after operations complete
   fake_date: "2023-12-25 10:00:00"

@@ -2,6 +2,9 @@
  * Process utilities for handling exit scenarios in test-safe way
  */
 
+import { Logger } from "./logger.js";
+import { systemDateManager } from "./system-date.js";
+
 /**
  * Check if the current environment is a test environment
  * @returns {boolean} True if running in test environment
@@ -69,39 +72,63 @@ export function parseFakeDate(fakeDateStr) {
 }
 
 /**
- * Create environment variables for setting fake date on different platforms
+ * Apply system date management for MakeMKV operations
  * @param {string|null} fakeDateStr - Fake date string or null to use real date
- * @returns {Object} Environment object to merge with process environment
+ * @returns {Promise<void>}
+ * @throws {Error} When system date cannot be changed
  */
-export function createDateEnvironment(fakeDateStr) {
+export async function applySystemDate(fakeDateStr) {
   if (!fakeDateStr) {
-    return {};
+    return;
   }
 
   const fakeDate = parseFakeDate(fakeDateStr);
   if (!fakeDate) {
-    console.warn(
+    Logger.warning(
       `Invalid fake date format: ${fakeDateStr}. Using real system date.`
     );
-    return {};
+    return;
   }
 
-  // For Windows: Show warning and don't fake the date
-  if (process.platform === "win32") {
-    console.warn(
-      `WARNING: Fake date feature is not supported on Windows systems. ` +
-        `The configured fake date '${fakeDateStr}' will be ignored. ` +
-        `To use a different date, please change your system date and try again.`
+  try {
+    await systemDateManager.setSystemDate(fakeDate);
+  } catch (error) {
+    Logger.error(`Failed to apply system date: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Restore system date to network time
+ * @returns {Promise<void>}
+ */
+export async function restoreSystemDate() {
+  try {
+    await systemDateManager.restoreSystemDate();
+  } catch (error) {
+    Logger.error(`Failed to restore system date: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Execute an operation with temporary system date
+ * @param {string|null} fakeDateStr - Fake date string or null to use real date
+ * @param {Function} operation - Async operation to execute
+ * @returns {Promise<any>} Result of the operation
+ */
+export async function withSystemDate(fakeDateStr, operation) {
+  if (!fakeDateStr) {
+    return await operation();
+  }
+
+  const fakeDate = parseFakeDate(fakeDateStr);
+  if (!fakeDate) {
+    Logger.warning(
+      `Invalid fake date format: ${fakeDateStr}. Executing operation with real system date.`
     );
-    return {};
+    return await operation();
   }
 
-  // For Linux/macOS: use faketime/libfaketime
-  const env = {};
-  const dateStr = fakeDate.toISOString().slice(0, 19).replace("T", " ");
-  env.FAKETIME = dateStr;
-  env.LD_PRELOAD =
-    "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1:/usr/lib/faketime/libfaketime.so.1";
-
-  return env;
+  return await systemDateManager.withTemporaryDate(fakeDate, operation);
 }

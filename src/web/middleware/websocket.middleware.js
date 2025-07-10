@@ -82,7 +82,7 @@ function handleWebSocketMessage(ws, message) {
       break;
 
     default:
-      Logger.warn("Unknown WebSocket message type", message.type);
+      Logger.warning("Unknown WebSocket message type", message.type);
       ws.send(
         JSON.stringify({
           type: "error",

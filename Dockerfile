@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     wget \
     udisks2 \
     eject \
-    faketime \
     udev \
     build-essential \
     pkg-config \

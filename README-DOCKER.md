@@ -4,6 +4,8 @@ Get MakeMKV Auto Rip running in Docker with just a few commands. Perfect for Lin
 
 **Note:** This Docker implementation compiles MakeMKV from official source code following the [official Linux installation instructions](https://forum.makemkv.com/forum/viewtopic.php?f=3&t=224) to ensure compatibility and proper licensing.
 
+⚠️ **Important**: The `fake_date` configuration feature is not supported in Docker containers. If you need to use a different system date with MakeMKV, manually change the host system date before starting the container. This is intentional to help keep the host system isolated from the container environment.
+
 ## 🚀 Quick Start
 
 ### Prerequisites

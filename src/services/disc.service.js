@@ -6,7 +6,6 @@ import { FileSystemUtils } from "../utils/filesystem.js";
 import { VALIDATION_CONSTANTS, MEDIA_TYPES } from "../constants/index.js";
 import { DriveService } from "./drive.service.js";
 import { MakeMKVMessages } from "../utils/makemkv-messages.js";
-import { createDateEnvironment } from "../utils/process.js";
 
 /**
  * Service for handling disc detection and information gathering
@@ -94,11 +93,7 @@ export class DiscService {
 
       const command = `${makeMKVExecutable} -r info disc:index`;
 
-      // Create environment with fake date if configured
-      const fakeDate = AppConfig.makeMKVFakeDate;
-      const env = { ...process.env, ...createDateEnvironment(fakeDate) };
-
-      exec(command, { env }, (err, stdout, stderr) => {
+      exec(command, (err, stdout, stderr) => {
         // Check for critical MakeMKV messages first
         const isFirstCall = DiscService.isFirstMakeMKVCall;
         const shouldContinue = MakeMKVMessages.checkOutput(
@@ -303,11 +298,7 @@ export class DiscService {
 
       const command = `${makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
 
-      // Create environment with fake date if configured
-      const fakeDate = AppConfig.makeMKVFakeDate;
-      const env = { ...process.env, ...createDateEnvironment(fakeDate) };
-
-      exec(command, { env }, (err, stdout, stderr) => {
+      exec(command, (err, stdout, stderr) => {
         // Check for critical MakeMKV messages (not first call, so only check for errors)
         const shouldContinue = MakeMKVMessages.checkOutput(
           stdout + (stderr || ""),

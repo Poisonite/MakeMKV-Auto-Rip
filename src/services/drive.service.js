@@ -2,7 +2,6 @@ import { OpticalDriveUtil } from "../utils/optical-drive.js";
 import { Logger } from "../utils/logger.js";
 import { VALIDATION_CONSTANTS } from "../constants/index.js";
 import { MakeMKVMessages } from "../utils/makemkv-messages.js";
-import { createDateEnvironment } from "../utils/process.js";
 
 /**
  * Service for handling drive operations (loading and ejecting)
@@ -114,11 +113,7 @@ export class DriveService {
       const command = `${makeMKVExecutable} -r info disc:index`;
 
       return new Promise((resolve) => {
-        // Create environment with fake date if configured
-        const fakeDate = AppConfig.makeMKVFakeDate;
-        const env = { ...process.env, ...createDateEnvironment(fakeDate) };
-
-        exec(command, { env }, (err, stdout, stderr) => {
+        exec(command, (err, stdout, stderr) => {
           // Check for critical MakeMKV messages (not first call, so only check for errors)
           const shouldContinue = MakeMKVMessages.checkOutput(
             stdout + (stderr || ""),
