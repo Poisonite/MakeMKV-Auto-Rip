@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Complete project refactor** with proper Node.js project structure
 - **Modular architecture** with clear separation of concerns into services, utilities, and CLI modules
-- **Drive management** - Automatic drive loading before ripping when `ejectDVDs` is enabled
+- **Advanced drive management** - Separate configuration options for loading and ejecting drives
+- **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal HDD performance
+- **Enhanced logging** - Configurable 12hr/24hr time format options for log timestamps
 - **Standalone drive commands** - `npm run load` and `npm run eject` for drive operations without ripping
 - **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @ThreeHats and @Adam8234)
 - **Enhanced error handling** - Comprehensive error handling throughout the application
@@ -21,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Configuration structure** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
+- **Ripping behavior** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
+- **Logging system** - Added `timeFormat` option for 12hr/24hr time display (defaults to 24hr)
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
 - **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work in theory, but are not officially supported)
@@ -35,6 +40,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - All `.bat` files (AutoRip.bat, DriveLoader.bat, Install-Node-Packages.bat)
 - Monolithic `AutoRip.js` file (replaced with modular structure)
+
+### Migration Notes
+
+**Configuration Updates Required:**
+- Replace `"ejectDVDs": {"Enabled": "true"}` with:
+  ```json
+  "loadDrives": {"Enabled": "true"},
+  "ejectDrives": {"Enabled": "true"}
+  ```
+- Add new optional settings:
+  ```json
+  "logToFiles": {
+    "timeFormat": "24hr"
+  },
+  "rippingMode": {
+    "Mode": "async"
+  }
+  ```
 
 ---
 

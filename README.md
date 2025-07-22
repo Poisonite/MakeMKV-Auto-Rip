@@ -14,9 +14,9 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 - **💿 Multi-format support** - DVDs and Blu-ray discs
 - **🔍 Smart title detection** - Automatically finds the main movie
 - **📁 Unique folders** - No file conflicts with automatic folder naming
-- **📊 Parallel processing** - Multiple discs rip simultaneously
-- **📝 Comprehensive logging** - Optional detailed operation logs
-- **⚡ Drive management** - Automatic loading and ejection
+- **📊 Flexible processing** - Choose between parallel (async) or sequential (sync) ripping
+- **📝 Comprehensive logging** - Optional detailed operation logs with 12hr/24hr time formats
+- **⚡ Advanced drive management** - Separate control for loading and ejecting drives
 - **🎛️ Flexible options** - Rip longest title or all titles (that are above MakeMKV min title length)
 
 ## 🚀 Quick Start
@@ -74,13 +74,20 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
     },
     "logToFiles": {
       "Enabled": "true",
-      "Dir": "C:\\Your\\Log\\Directory"
+      "Dir": "C:\\Your\\Log\\Directory",
+      "timeFormat": "24hr"
     },
-    "ejectDVDs": {
+    "loadDrives": {
+      "Enabled": "true"
+    },
+    "ejectDrives": {
       "Enabled": "true"
     },
     "ripAll": {
       "Enabled": "false"
+    },
+    "rippingMode": {
+      "Mode": "async"
     }
   }
 }
@@ -92,14 +99,19 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 - **`movieRips`** - Root directory for ripped movies (create a dedicated folder)
 - **`logToFiles.Enabled`** - Enable/disable detailed logging (`"true"` or `"false"`)
 - **`logToFiles.Dir`** - Directory for log files
-- **`ejectDVDs.Enabled`** - Auto-load drives before ripping and eject after completion
+- **`logToFiles.timeFormat`** - Time format for logs (`"12hr"` or `"24hr"`, defaults to 24hr)
+- **`loadDrives.Enabled`** - Auto-load/close drives before ripping (`"true"` or `"false"`)
+- **`ejectDrives.Enabled`** - Auto-eject drives after ripping completion (`"true"` or `"false"`)
 - **`ripAll.Enabled`** - Rip all titles that are above MakeMKV min length (`"true"`) or longest title only (`"false"`)
+- **`rippingMode.Mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing, defaults to async)
 
 **Important Notes:**
 
 - Use double backslashes (`\\`) in Windows paths
 - Create directories manually - the application cannot create missing folders
 - Recommended: Create dedicated folders for movie rips and logs
+- **New in V1.0.0**: Separate `loadDrives` and `ejectDrives` options replace the old `ejectDVDs` setting
+- **Performance tip**: Use `"sync"` ripping mode for HDDs where concurrent writes impact performance
 
 ### MakeMKV GUI Configuration
 

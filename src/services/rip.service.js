@@ -21,8 +21,8 @@ export class RipService {
    */
   async startRipping() {
     try {
-      // Load drives first if ejection is enabled
-      if (AppConfig.isEjectEnabled) {
+      // Load drives first if loading is enabled
+      if (AppConfig.isLoadDrivesEnabled) {
         Logger.info("Loading drives before ripping...");
         await DriveService.loadDrivesWithWait();
       }
@@ -46,23 +46,38 @@ export class RipService {
    * @returns {Promise<void>}
    */
   async processRippingQueue(commandDataItems) {
-    const promises = [];
-
-    for (const item of commandDataItems) {
-      const promise = this.ripSingleDisc(item, AppConfig.movieRipsDir)
-        .then((result) => result)
-        .catch((error) => {
+    if (AppConfig.rippingMode === "sync") {
+      // Process discs one at a time (synchronously)
+      Logger.info("Ripping discs synchronously (one at a time)...");
+      for (const item of commandDataItems) {
+        try {
+          await this.ripSingleDisc(item, AppConfig.movieRipsDir);
+        } catch (error) {
           Logger.error(`Error ripping ${item.title}`, error);
           this.badVideoArray.push(item.title);
-        });
-      promises.push(promise);
-    }
+        }
+      }
+    } else {
+      // Process discs in parallel (asynchronously) - default behavior
+      Logger.info("Ripping discs asynchronously (parallel processing)...");
+      const promises = [];
 
-    try {
-      await Promise.all(promises);
-    } catch (error) {
-      Logger.error("Uncorrectable Error Ripping One or More DVDs.", error);
-      throw error;
+      for (const item of commandDataItems) {
+        const promise = this.ripSingleDisc(item, AppConfig.movieRipsDir)
+          .then((result) => result)
+          .catch((error) => {
+            Logger.error(`Error ripping ${item.title}`, error);
+            this.badVideoArray.push(item.title);
+          });
+        promises.push(promise);
+      }
+
+      try {
+        await Promise.all(promises);
+      } catch (error) {
+        Logger.error("Uncorrectable Error Ripping One or More DVDs.", error);
+        throw error;
+      }
     }
   }
 
@@ -183,7 +198,7 @@ export class RipService {
    * @returns {Promise<void>}
    */
   async ejectDiscs() {
-    if (AppConfig.isEjectEnabled) {
+    if (AppConfig.isEjectDrivesEnabled) {
       await DriveService.ejectAllDrives();
     }
   }

@@ -20,12 +20,36 @@ export class AppConfig {
     return config.get("Path.logToFiles.Dir");
   }
 
+  static get logTimeFormat() {
+    const format = config.get("Path.logToFiles.timeFormat").toLowerCase();
+    return format === "12hr" ? "12hr" : "24hr"; // Default to 24hr if not 12hr
+  }
+
+  static get isLoadDrivesEnabled() {
+    return config.get("Path.loadDrives.Enabled").toLowerCase() === "true";
+  }
+
+  static get isEjectDrivesEnabled() {
+    return config.get("Path.ejectDrives.Enabled").toLowerCase() === "true";
+  }
+
+  // Legacy support for old ejectDVDs config - for backwards compatibility
   static get isEjectEnabled() {
-    return config.get("Path.ejectDVDs.Enabled").toLowerCase() === "true";
+    return this.isEjectDrivesEnabled;
+  }
+
+  // Legacy support for loading drives
+  static get isLoadEnabled() {
+    return this.isLoadDrivesEnabled;
   }
 
   static get isRipAllEnabled() {
     return config.get("Path.ripAll.Enabled").toLowerCase() === "true";
+  }
+
+  static get rippingMode() {
+    const mode = config.get("Path.rippingMode.Mode").toLowerCase();
+    return mode === "sync" ? "sync" : "async"; // Default to async if not sync
   }
 
   static get makeMKVExecutable() {

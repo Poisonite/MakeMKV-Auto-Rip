@@ -8,13 +8,20 @@
         },
         "logToFiles": {
             "Enabled": "true",
-            "Dir": ".\\logs"
+            "Dir": ".\\logs",
+            "timeFormat": "24hr"
         },
-        "ejectDVDs": {
+        "loadDrives": {
+            "Enabled": "true"
+        },
+        "ejectDrives": {
             "Enabled": "true"
         },
         "ripAll": {
             "Enabled": "false"
+        },
+        "rippingMode": {
+            "Mode": "async"
         }
     }
 }
