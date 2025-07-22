@@ -1,42 +1,51 @@
 {
-  "name": "makemkv-auto-rip",
-  "version": "0.6.0",
-  "description": "Automatically rips DVDs using the MakeMKV console and saves them to unique folders.",
-  "main": "AutoRip.js",
-  "type": "module",
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/poisonite101/MakeMKV-Auto-Rip.git"
-  },
-  "keywords": [
-    "Poisonite",
-    "Poisonite101",
-    "MakeMKV",
-    "Auto",
-    "Rip",
-    "AutoRip",
-    "DVD",
-    "Ripping",
-    "Automatic",
-    "Nodejs",
-    "Node"
-  ],
-  "author": "Zac Ingoglia",
-  "license": "GPL-3.0-or-later",
-  "bugs": {
-    "url": "https://github.com/poisonite101/MakeMKV-Auto-Rip/issues"
-  },
-  "homepage": "https://github.com/poisonite101/MakeMKV-Auto-Rip#readme",
-  "dependencies": {
-    "chalk": "^5.4.1",
-    "config": "^4.0.1",
-    "date-fns": "^4.1.0",
-    "win-eject": "^1.0.2"
-  }
+    "name": "makemkv-auto-rip",
+    "version": "1.0.0",
+    "description": "Automatically rips DVDs & Blu-rays using the MakeMKV console, then saves them to unique folders.",
+    "main": "index.js",
+    "type": "module",
+    "engines": {
+        "node": ">=22.0.0"
+    },
+    "scripts": {
+        "start": "node index.js",
+        "rip": "node index.js",
+        "load": "node src/cli/commands.js load",
+        "eject": "node src/cli/commands.js eject",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/poisonite/MakeMKV-Auto-Rip.git"
+    },
+    "keywords": [
+        "Poisonite",
+        "Poisonite101",
+        "MakeMKV",
+        "Auto",
+        "Rip",
+        "AutoRip",
+        "DVD",
+        "Ripping",
+        "Automatic",
+        "Blu-ray",
+        "Video",
+        "Movie",
+        "TV",
+        "TV Show",
+        "Series",
+        "Disc"
+    ],
+    "author": "Zac Ingoglia",
+    "license": "GPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/poisonite/MakeMKV-Auto-Rip/issues"
+    },
+    "homepage": "https://github.com/poisonite/MakeMKV-Auto-Rip#readme",
+    "dependencies": {
+        "chalk": "^5.4.1",
+        "config": "^4.0.1",
+        "date-fns": "^4.1.0",
+        "win-eject": "^1.0.2"
+    }
 }

@@ -4,11 +4,11 @@
             "Dir": "C:\\Program Files (x86)\\MakeMKV"
         },
         "movieRips": {
-            "Dir": "C:\\"
+            "Dir": ".\\media"
         },
         "logToFiles": {
             "Enabled": "true",
-            "Dir": "C:\\"
+            "Dir": ".\\logs"
         },
         "ejectDVDs": {
             "Enabled": "true"

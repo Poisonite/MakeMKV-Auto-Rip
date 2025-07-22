@@ -1,1 +1,0 @@
-This folder exists so that you have an easy (and default) location for storing log file should you choose to keep them
