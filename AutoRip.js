@@ -1,7 +1,12 @@
-//All of the constants required throughout the script
+// All of the constants required throughout the script
+import chalk from "chalk";
+import { format } from "date-fns";
+import config from "config";
+import { exec } from "child_process";
+import fs from "fs";
+import winEject from "win-eject";
+
 const user = {};
-const moment = require("moment");
-const config = require("config");
 const mkvDir = config.get("Path.mkvDir.Dir");
 const movieRips = config.get("Path.movieRips.Dir");
 const fileLog = config.get("Path.logToFiles.Enabled").toLowerCase();
@@ -9,24 +14,24 @@ const logDir = config.get("Path.logToFiles.Dir");
 const eject = config.get("Path.ejectDVDs.Enabled").toLowerCase();
 const ripAll = config.get("Path.ripAll.Enabled").toLowerCase();
 const makeMKV = '"' + mkvDir + "\\makemkvcon.exe" + '"';
-const exec = require("child_process").exec;
-const fs = require("fs");
-const winEject = require("win-eject");
 var goodVideoArray = [];
 var badVideoArray = [];
-colors = require("colors/safe");
 
-//Color theme settings for colored text
-colors.setTheme({
-  info: "green",
-  error: "red",
-  time: "yellow",
-  dash: "gray",
-  title: "cyan",
-  line1: ["white", "bgBlack"],
-  line2: ["black", "bgWhite"],
-  warning: ["white", "bgRed"],
-});
+// Define color styling functions using chalk
+const colors = {
+  info: chalk.green,
+  error: chalk.red,
+  time: chalk.yellow,
+  dash: chalk.gray,
+  title: chalk.cyan,
+  line1: chalk.white.bgBlack,
+  line2: chalk.black.bgWhite,
+  warning: chalk.white.bgRed,
+  white: {
+    underline: chalk.white.underline
+  },
+  blue: chalk.blue
+};
 
 // getCopyCompleteMSG();
 Opener();
@@ -89,7 +94,7 @@ function ripOrDip() {
         case "1":
           console.info("");
           console.info(
-            colors.time(moment().format("LTS")) +
+            colors.time(format(new Date(), "HH:mm:ss")) +
               colors.dash(" - ") +
               colors.info("Beginning AutoRip... Please Wait.")
           );
@@ -98,7 +103,7 @@ function ripOrDip() {
         case "2":
           console.info("");
           console.info(
-            colors.time(moment().format("LTS")) +
+            colors.time(format(new Date(), "HH:mm:ss")) +
               colors.dash(" - ") +
               colors.error("Exiting...")
           );
@@ -111,7 +116,7 @@ function ripOrDip() {
     })
     .catch((error) => {
       console.error(
-        colors.time(moment().format("LTS")) +
+        colors.time(format(new Date(), "HH:mm:ss")) +
           colors.dash(" - ") +
           colors.error("Critical Error, Must Abort!")
       );
@@ -238,7 +243,7 @@ function getCopyCompleteMSG(data, commandDataItem) {
   var titleName = commandDataItem.title;
   if (validLines.length > 0) {
     console.info(
-      colors.time(moment().format("LTS")) +
+      colors.time(format(new Date(), "HH:mm:ss")) +
         colors.dash(" - ") +
         colors.info("Done Ripping ") +
         colors.title(titleName)
@@ -246,7 +251,7 @@ function getCopyCompleteMSG(data, commandDataItem) {
     goodVideoArray.push(titleName);
   } else {
     console.info(
-      colors.time(moment().format("LTS")) +
+      colors.time(format(new Date(), "HH:mm:ss")) +
         colors.dash(" - ") +
         colors.info("Unable to rip ") +
         colors.title(titleName) +
@@ -275,7 +280,6 @@ function getTimeInSeconds(timeArray) {
 }
 
 function createUniqueFolder(outputPath, folderName) {
-  var fs = require("fs");
   //console.log(outputPath, folderName)
   var dir = outputPath + "\\" + folderName;
   var folderCounter = 1;
@@ -290,7 +294,6 @@ function createUniqueFolder(outputPath, folderName) {
 }
 
 function createUniqueFile(logDir, fileName) {
-  var fs = require("fs");
   var dir = logDir + "\\" + "Log" + "-" + fileName;
   var fileCounter = 1;
   if (fs.existsSync(dir + ".txt")) {
@@ -306,7 +309,7 @@ function createUniqueFile(logDir, fileName) {
 function getCommandData() {
   return new Promise((resolve, reject) => {
     console.info(
-      colors.time(moment().format("LTS")) +
+      colors.time(format(new Date(), "HH:mm:ss")) +
         colors.dash(" - ") +
         colors.info("Getting info for all discs...")
     );
@@ -318,7 +321,7 @@ function getCommandData() {
 
       //get the data for drives with discs.
       console.info(
-        colors.time(moment().format("LTS")) +
+        colors.time(format(new Date(), "HH:mm:ss")) +
           colors.dash(" - ") +
           colors.info("Getting drive info...")
       );
@@ -329,7 +332,7 @@ function getCommandData() {
       var drivePromises = driveInfo.map((driveInfo) => {
         return new Promise((resolve, reject) => {
           console.info(
-            colors.time(moment().format("LTS")) +
+            colors.time(format(new Date(), "HH:mm:ss")) +
               colors.dash(" - ") +
               colors.info("Getting file number for drive title ") +
               colors.title(driveInfo.driveNumber) +
@@ -351,7 +354,7 @@ function getCommandData() {
               }
 
               console.info(
-                colors.time(moment().format("LTS")) +
+                colors.time(format(new Date(), "HH:mm:ss")) +
                   colors.dash(" - ") +
                   colors.info("Got file info for ") +
                   colors.title(driveInfo.driveNumber) +
@@ -384,7 +387,7 @@ function getCommandData() {
 
 function processArray(array, fn, outputPath) {
   var promises = [];
-  for (item of array) {
+  for (const item of array) {
     var results = [];
     var promise = fn(item, outputPath).then((data) => {
       results.push(data);
@@ -410,7 +413,7 @@ function ripDVD(commandDataItem, outputPath) {
     var makeMKVCommand;
 
     console.info(
-      colors.time(moment().format("LTS")) +
+      colors.time(format(new Date(), "HH:mm:ss")) +
         colors.dash(" - ") +
         colors.info("Ripping Title ") +
         colors.title(commandDataItem.title) +
@@ -431,7 +434,7 @@ function ripDVD(commandDataItem, outputPath) {
     exec(makeMKVCommand, (err, stdout, stderr) => {
       if (err || stderr) {
         console.error(
-          colors.time(moment().format("LTS")) +
+          colors.time(format(new Date(), "HH:mm:ss")) +
             colors.dash(" - ") +
             colors.error(
               "Critical Error Ripping " + colors.title(commandDataItem.title),
@@ -446,14 +449,14 @@ function ripDVD(commandDataItem, outputPath) {
           fs.writeFile(fileName, stdout, "utf8", function (err) {
             if (err)
               console.error(
-                colors.time(moment().format("LTS")) +
+                colors.time(format(new Date(), "HH:mm:ss")) +
                   colors.dash(" - ") +
                   colors.error(
                     "Directory for logs does not exist. Please create it."
                   )
               );
             console.info(
-              colors.time(moment().format("LTS")) +
+              colors.time(format(new Date(), "HH:mm:ss")) +
                 colors.dash(" - ") +
                 colors.info("Full log file for ") +
                 colors.title(commandDataItem.title) +
@@ -482,7 +485,7 @@ function ripDVDs(outputPath) {
       processArray(commandDataItems, ripDVD, outputPath).then(
         (result) => {
           console.info(
-            colors.time(moment().format("LTS")) +
+            colors.time(format(new Date(), "HH:mm:ss")) +
               colors.dash(" - ") +
               colors.info(
                 "The following DVD titles have been successfully ripped."
@@ -490,7 +493,7 @@ function ripDVDs(outputPath) {
             colors.title(goodVideoArray)
           );
           console.info(
-            colors.time(moment().format("LTS")) +
+            colors.time(format(new Date(), "HH:mm:ss")) +
               colors.dash(" - ") +
               colors.info("The following DVD titles failed to rip."),
             colors.title(badVideoArray)
@@ -504,7 +507,7 @@ function ripDVDs(outputPath) {
         },
         (reason) => {
           console.error(
-            colors.time(moment().format("LTS")) +
+            colors.time(format(new Date(), "HH:mm:ss")) +
               colors.dash(" - ") +
               colors.error("Uncorrectable Error Ripping One or More DVDs."),
             colors.blue(reason)
@@ -517,7 +520,7 @@ function ripDVDs(outputPath) {
     })
     .catch((err) => {
       console.error(
-        colors.time(moment().format("LTS")) +
+        colors.time(format(new Date(), "HH:mm:ss")) +
           colors.dash(" - ") +
           colors.error(err)
       );
@@ -528,7 +531,7 @@ function ejectDVDs() {
   if (eject == "true") {
     winEject.eject("", function () {
       console.info(
-        colors.time(moment().format("LTS")) +
+        colors.time(format(new Date(), "HH:mm:ss")) +
           colors.dash(" - ") +
           colors.info("All DVDs have been ejected.")
       );
