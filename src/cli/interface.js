@@ -77,6 +77,11 @@ export class CLIInterface {
     return new Promise((resolve, reject) => {
       const { stdin, stdout } = process;
 
+      if (!stdin || !stdout) {
+        reject(new Error('Standard input/output streams are not available'));
+        return;
+      }
+
       stdin.resume();
       stdout.write(question);
 
@@ -84,6 +89,10 @@ export class CLIInterface {
         stdin.off("data", onData);
         stdin.off("error", onError);
         stdin.pause();
+        if (data === null || data === undefined) {
+          reject(new Error('Received null or undefined data'));
+          return;
+        }
         resolve(data.toString().trim());
       };
 

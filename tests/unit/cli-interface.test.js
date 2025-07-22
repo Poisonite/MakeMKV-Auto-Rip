@@ -8,7 +8,9 @@ import { CLIInterface } from '../../src/cli/interface.js';
 // Mock dependencies
 vi.mock('../../src/services/rip.service.js', () => ({
   RipService: vi.fn().mockImplementation(() => ({
-    startRipping: vi.fn().mockResolvedValue(undefined)
+    startRipping: vi.fn().mockResolvedValue(undefined),
+    goodVideoArray: [],
+    badVideoArray: []
   }))
 }));
 
@@ -45,6 +47,11 @@ describe('CLIInterface', () => {
     vi.spyOn(process, 'stdout', 'get').mockReturnValue(mockStdout);
 
     cliInterface = new CLIInterface();
+    
+    // Ensure the ripService has the startRipping method properly mocked
+    if (!cliInterface.ripService.startRipping) {
+      cliInterface.ripService.startRipping = vi.fn().mockResolvedValue(undefined);
+    }
   });
 
   afterEach(() => {
@@ -370,13 +377,13 @@ describe('CLIInterface', () => {
     it('should handle stdin unavailable', async () => {
       vi.spyOn(process, 'stdin', 'get').mockReturnValue(null);
 
-      expect(() => cliInterface.getPromptInput('Test: ')).toThrow();
+      await expect(cliInterface.getPromptInput('Test: ')).rejects.toThrow('Standard input/output streams are not available');
     });
 
     it('should handle stdout unavailable', async () => {
       vi.spyOn(process, 'stdout', 'get').mockReturnValue(null);
 
-      expect(() => cliInterface.getPromptInput('Test: ')).toThrow();
+      await expect(cliInterface.getPromptInput('Test: ')).rejects.toThrow('Standard input/output streams are not available');
     });
 
     it('should handle malformed input data', async () => {

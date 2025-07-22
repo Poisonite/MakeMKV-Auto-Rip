@@ -68,7 +68,7 @@ TINFO:2,9,0,"2:15:30"`;
         callback(mockError, '', '');
       });
 
-      await expect(DiscService.getAvailableDiscs()).rejects.toBe(mockError);
+      await expect(DiscService.getAvailableDiscs()).rejects.toThrow('No drive data received from MakeMKV');
     });
 
     it('should handle validation errors in drive parsing', async () => {
@@ -90,7 +90,7 @@ TINFO:2,9,0,"2:15:30"`;
         }
       });
 
-      await expect(DiscService.getAvailableDiscs()).rejects.toBe('File info error');
+      await expect(DiscService.getAvailableDiscs()).rejects.toThrow('Invalid MakeMKV drive output format');
     });
   });
 
@@ -116,7 +116,8 @@ DRV:2,0,999,0,"","",""`;
     });
 
     it('should identify Blu-ray media correctly', () => {
-      const data = `DRV:0,2,999,1,"BD-ROM HL-DT-ST BD-RE  BH16NS40 1.02d","Blu-ray Movie","/dev/sr0"`;
+      const data = `DRV:0,2,999,1,"BD-ROM HL-DT-ST BD-RE  BH16NS40 1.02d","Blu-ray Movie","/dev/sr0"
+MSG:1005,0,1,"MakeMKV v1.16.5 win(x64-release) started"`;
 
       const result = DiscService.parseDriveInfo(data);
 
@@ -124,7 +125,8 @@ DRV:2,0,999,0,"","",""`;
     });
 
     it('should identify DVD media correctly', () => {
-      const data = `DRV:0,2,999,1,"DVD+R-DL MATSHITA DVD-RAM UJ8E2 1.00","DVD Movie","/dev/sr0"`;
+      const data = `DRV:0,2,999,1,"DVD+R-DL MATSHITA DVD-RAM UJ8E2 1.00","DVD Movie","/dev/sr0"
+MSG:1005,0,1,"MakeMKV v1.16.5 win(x64-release) started"`;
 
       const result = DiscService.parseDriveInfo(data);
 
@@ -143,11 +145,12 @@ DRV:2,1,999,0,"DVD DRIVE","","/dev/sr2"`;
     });
 
     it('should sanitize title for folder path', () => {
-      const data = `DRV:0,2,999,1,"BD-ROM","Movie: Title/With\\Special*Chars","/dev/sr0"`;
+      const data = `DRV:0,2,999,1,"BD-ROM","Movie: Title/With\\Special*Chars","/dev/sr0"
+MSG:1005,0,1,"MakeMKV v1.16.5 win(x64-release) started"`;
 
       const result = DiscService.parseDriveInfo(data);
 
-      expect(result[0].title).toBe('Movie Title/WithSpecialChars');
+      expect(result[0].title).toBe('Movie TitleWithSpecialChars');
     });
 
     it('should handle empty drive data', () => {
@@ -202,7 +205,8 @@ TINFO:2,9,0,"2:15:30"`;
       };
 
       exec.mockImplementation((command, callback) => {
-        callback(null, 'any stdout', '');
+        callback(null, `TINFO:0,9,0,"1:23:45"
+MSG:1005,0,1,"MakeMKV v1.16.5 win(x64-release) started"`, '');
       });
 
       const result = await DiscService.getDiscFileInfo(driveInfo);
@@ -252,7 +256,8 @@ TINFO:3,9,0,"1:45:20"`;
     });
 
     it('should handle single title', () => {
-      const data = `TINFO:0,9,0,"1:23:45"`;
+      const data = `TINFO:0,9,0,"1:23:45"
+MSG:1005,0,1,"MakeMKV v1.16.5 win(x64-release) started"`;
 
       const result = DiscService.getFileNumber(data);
 

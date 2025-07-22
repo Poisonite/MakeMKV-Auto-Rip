@@ -14,7 +14,7 @@ export class ValidationUtils {
       return "No data received from MakeMKV";
     }
 
-    const lines = data.split("\n");
+    const lines = data.split("\n").filter(line => line.trim().length > 0);
     if (lines.length <= 1) {
       return "Invalid MakeMKV output format";
     }
@@ -48,6 +48,9 @@ export class ValidationUtils {
    * @returns {number} - Total time in seconds
    */
   static getTimeInSeconds(timeArray) {
+    if (!timeArray || !Array.isArray(timeArray) || timeArray.length < 3) {
+      return 0;
+    }
     return +timeArray[0] * 60 * 60 + +timeArray[1] * 60 + +timeArray[2];
   }
 
@@ -57,6 +60,9 @@ export class ValidationUtils {
    * @returns {boolean} - True if copy completed successfully
    */
   static isCopyComplete(data) {
+    if (!data || typeof data !== 'string') {
+      return false;
+    }
     const lines = data.split("\n");
     return lines.some(
       (line) =>

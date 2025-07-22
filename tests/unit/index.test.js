@@ -31,7 +31,7 @@ describe('Main Application (index.js)', () => {
   let mockAppConfig;
   let mockLogger;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     
     // Spy on process methods

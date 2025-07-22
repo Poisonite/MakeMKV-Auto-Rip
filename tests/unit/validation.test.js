@@ -212,7 +212,7 @@ All done`;
 
     it('should handle empty time array', () => {
       const result = ValidationUtils.getTimeInSeconds([]);
-      expect(result).toBeNaN();
+      expect(result).toBe(0);
     });
   });
 });

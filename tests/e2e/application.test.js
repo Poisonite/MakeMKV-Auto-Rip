@@ -73,8 +73,13 @@ describe('Application End-to-End Tests', () => {
     });
 
     it('should handle missing configuration gracefully', async () => {
-      // Remove test config
-      fs.rmSync(testConfigDir, { recursive: true, force: true });
+      // Mock the config module to return empty values
+      vi.doMock('config', () => ({
+        get: vi.fn().mockReturnValue(''),
+        default: {
+          get: vi.fn().mockReturnValue('')
+        }
+      }));
       
       // Reset module cache
       vi.resetModules();

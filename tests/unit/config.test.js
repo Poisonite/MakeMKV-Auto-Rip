@@ -354,7 +354,7 @@ describe('AppConfig', () => {
 
     it('should have all methods as static', () => {
       expect(typeof AppConfig.validate).toBe('function');
-      expect(AppConfig.prototype).toBeUndefined();
+      expect(Object.getOwnPropertyNames(AppConfig.prototype)).toEqual(['constructor']);
     });
   });
 });

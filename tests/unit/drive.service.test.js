@@ -228,7 +228,7 @@ describe('DriveService', () => {
       expect(typeof DriveService.ejectAllDrives).toBe('function');
       expect(typeof DriveService.loadDrivesWithWait).toBe('function');
       expect(typeof DriveService.wait).toBe('function');
-      expect(DriveService.prototype).toBeUndefined();
+      expect(Object.getOwnPropertyNames(DriveService.prototype)).toEqual(['constructor']);
     });
   });
 
@@ -296,20 +296,20 @@ describe('DriveService', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle winEject.close errors', () => {
+    it('should handle winEject.close errors', async () => {
       winEject.close.mockImplementation((drive, callback) => {
         throw new Error('Close operation failed');
       });
 
-      expect(() => DriveService.loadAllDrives()).toThrow('Close operation failed');
+      await expect(DriveService.loadAllDrives()).rejects.toThrow('Close operation failed');
     });
 
-    it('should handle winEject.eject errors', () => {
+    it('should handle winEject.eject errors', async () => {
       winEject.eject.mockImplementation((drive, callback) => {
         throw new Error('Eject operation failed');
       });
 
-      expect(() => DriveService.ejectAllDrives()).toThrow('Eject operation failed');
+      await expect(DriveService.ejectAllDrives()).rejects.toThrow('Eject operation failed');
     });
 
     it('should handle callback never being called', async () => {

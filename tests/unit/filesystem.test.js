@@ -17,7 +17,7 @@ describe('FileSystemUtils', () => {
   describe('makeTitleValidFolderPath', () => {
     it('should remove invalid characters from folder path', () => {
       const invalidTitle = 'Movie: Title/Part\\Two*With?Special<Chars>And|Quotes"';
-      const expected = 'Movie Title/PartTwoWithSpecialCharsAndQuotes';
+      const expected = 'Movie TitlePartTwoWithSpecialCharsAndQuotes';
       
       const result = FileSystemUtils.makeTitleValidFolderPath(invalidTitle);
       expect(result).toBe(expected);

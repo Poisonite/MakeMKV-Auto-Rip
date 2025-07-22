@@ -4,6 +4,10 @@ import config from "config";
  * Configuration management utility
  */
 export class AppConfig {
+  constructor() {
+    throw new Error('AppConfig is a static class and cannot be instantiated');
+  }
+
   static get mkvDir() {
     return config.get("Path.mkvDir.Dir");
   }
@@ -13,7 +17,8 @@ export class AppConfig {
   }
 
   static get isFileLogEnabled() {
-    return config.get("Path.logToFiles.Enabled").toLowerCase() === "true";
+    const value = config.get("Path.logToFiles.Enabled");
+    return value ? value.toLowerCase() === "true" : false;
   }
 
   static get logDir() {
@@ -21,11 +26,13 @@ export class AppConfig {
   }
 
   static get isEjectEnabled() {
-    return config.get("Path.ejectDVDs.Enabled").toLowerCase() === "true";
+    const value = config.get("Path.ejectDVDs.Enabled");
+    return value ? value.toLowerCase() === "true" : false;
   }
 
   static get isRipAllEnabled() {
-    return config.get("Path.ripAll.Enabled").toLowerCase() === "true";
+    const value = config.get("Path.ripAll.Enabled");
+    return value ? value.toLowerCase() === "true" : false;
   }
 
   static get makeMKVExecutable() {
