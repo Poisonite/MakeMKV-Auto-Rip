@@ -6,10 +6,10 @@
         "movieRips": {
             "Dir": ".\\media"
         },
-        "logToFiles": {
-            "Enabled": "true",
+        "logging": {
+            "toFiles": "true",
             "Dir": ".\\logs",
-            "timeFormat": "24hr"
+            "timeFormat": "12hr"
         },
         "loadDrives": {
             "Enabled": "true"

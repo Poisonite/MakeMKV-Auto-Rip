@@ -15,7 +15,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 - **🔍 Smart title detection** - Automatically finds the main movie
 - **📁 Unique folders** - No file conflicts with automatic folder naming
 - **📊 Flexible processing** - Choose between parallel (async) or sequential (sync) ripping
-- **📝 Comprehensive logging** - Optional detailed operation logs with 12hr/24hr time formats
+- **📝 Comprehensive logging** - Optional detailed operation logs with configurable 12hr/24hr console timestamps
 - **⚡ Advanced drive management** - Separate control for loading and ejecting drives
 - **🎛️ Flexible options** - Rip longest title or all titles (that are above MakeMKV min title length)
 
@@ -72,10 +72,10 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
     "movieRips": {
       "Dir": "C:\\Your\\Movie\\Rips"
     },
-    "logToFiles": {
-      "Enabled": "true",
+    "logging": {
+      "toFiles": "true",
       "Dir": "C:\\Your\\Log\\Directory",
-      "timeFormat": "24hr"
+      "timeFormat": "12hr"
     },
     "loadDrives": {
       "Enabled": "true"
@@ -97,9 +97,9 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 - **`mkvDir`** - MakeMKV installation directory (usually default location)
 - **`movieRips`** - Root directory for ripped movies (create a dedicated folder)
-- **`logToFiles.Enabled`** - Enable/disable detailed logging (`"true"` or `"false"`)
-- **`logToFiles.Dir`** - Directory for log files
-- **`logToFiles.timeFormat`** - Time format for logs (`"12hr"` or `"24hr"`, defaults to 24hr)
+- **`logging.toFiles`** - Enable/disable writing MakeMKV output to log files (`"true"` or `"false"`)
+- **`logging.Dir`** - Directory for log files
+- **`logging.timeFormat`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`, defaults to 12hr)
 - **`loadDrives.Enabled`** - Auto-load/close drives before ripping (`"true"` or `"false"`)
 - **`ejectDrives.Enabled`** - Auto-eject drives after ripping completion (`"true"` or `"false"`)
 - **`ripAll.Enabled`** - Rip all titles that are above MakeMKV min length (`"true"`) or longest title only (`"false"`)

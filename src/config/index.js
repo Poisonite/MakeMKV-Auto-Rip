@@ -13,16 +13,16 @@ export class AppConfig {
   }
 
   static get isFileLogEnabled() {
-    return config.get("Path.logToFiles.Enabled").toLowerCase() === "true";
+    return config.get("Path.logging.toFiles").toLowerCase() === "true";
   }
 
   static get logDir() {
-    return config.get("Path.logToFiles.Dir");
+    return config.get("Path.logging.Dir");
   }
 
   static get logTimeFormat() {
-    const format = config.get("Path.logToFiles.timeFormat").toLowerCase();
-    return format === "12hr" ? "12hr" : "24hr"; // Default to 24hr if not 12hr
+    const format = config.get("Path.logging.timeFormat").toLowerCase();
+    return format === "24hr" ? "24hr" : "12hr"; // Default to 12hr if not 24hr
   }
 
   static get isLoadDrivesEnabled() {
