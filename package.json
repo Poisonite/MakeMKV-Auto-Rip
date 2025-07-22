@@ -12,7 +12,11 @@
         "rip": "node index.js",
         "load": "node src/cli/commands.js load",
         "eject": "node src/cli/commands.js eject",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "vitest",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "test:watch": "vitest --watch",
+        "test:ui": "vitest --ui"
     },
     "repository": {
         "type": "git",
@@ -47,5 +51,10 @@
         "config": "^4.0.1",
         "date-fns": "^4.1.0",
         "win-eject": "^1.0.2"
+    },
+    "devDependencies": {
+        "vitest": "^3.2.4",
+        "@vitest/coverage-v8": "^3.2.4",
+        "@vitest/ui": "^3.2.4"
     }
 }

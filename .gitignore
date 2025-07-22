@@ -4,3 +4,33 @@ logs/*
 !logs/.gitkeep
 media/*
 !media/.gitkeep
+
+# Test coverage reports
+coverage/
+.nyc_output/
+
+# Test results
+test-results/
+
+# Vitest temporary files
+.vitest/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary folders
+tmp/
+temp/

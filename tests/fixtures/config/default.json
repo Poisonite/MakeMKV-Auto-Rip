@@ -1,0 +1,20 @@
+{
+    "Path": {
+        "mkvDir": {
+            "Dir": "./test-temp/makemkv"
+        },
+        "movieRips": {
+            "Dir": "./test-media"
+        },
+        "logToFiles": {
+            "Enabled": "true",
+            "Dir": "./test-logs"
+        },
+        "ejectDVDs": {
+            "Enabled": "true"
+        },
+        "ripAll": {
+            "Enabled": "false"
+        }
+    }
+}
