@@ -7,6 +7,7 @@
 import { DriveService } from "../services/drive.service.js";
 import { AppConfig } from "../config/index.js";
 import { Logger } from "../utils/logger.js";
+import { safeExit } from "../utils/process.js";
 import { APP_INFO } from "../constants/index.js";
 
 /**
@@ -28,10 +29,10 @@ export async function loadDrives() {
     Logger.info("Loading all drives...");
     await DriveService.loadDrivesWithWait();
     Logger.info("Load operation completed.");
-    process.exit(0);
+    safeExit(0, "Load operation completed");
   } catch (error) {
     Logger.error("Failed to load drives", error.message);
-    process.exit(1);
+    safeExit(1, "Failed to load drives");
   }
 }
 
@@ -46,10 +47,10 @@ export async function ejectDrives() {
     Logger.info("Ejecting all drives...");
     await DriveService.ejectAllDrives();
     Logger.info("Eject operation completed.");
-    process.exit(0);
+    safeExit(0, "Eject operation completed");
   } catch (error) {
     Logger.error("Failed to eject drives", error.message);
-    process.exit(1);
+    safeExit(1, "Failed to eject drives");
   }
 }
 
@@ -65,5 +66,5 @@ switch (command) {
     break;
   default:
     Logger.error("Invalid command. Use 'load' or 'eject'");
-    process.exit(1);
+    safeExit(1, "Invalid command");
 }

@@ -5,16 +5,26 @@ import { Logger } from "../utils/logger.js";
  * Service for handling drive operations (loading and ejecting)
  */
 export class DriveService {
+  constructor() {
+    throw new Error(
+      "DriveService is a static class and cannot be instantiated"
+    );
+  }
+
   /**
    * Load/close all DVD/Blu-ray drives
    * @returns {Promise<void>}
    */
   static async loadAllDrives() {
-    return new Promise((resolve) => {
-      winEject.close("", () => {
-        Logger.info("All drives have been loaded/closed.");
-        resolve();
-      });
+    return new Promise((resolve, reject) => {
+      try {
+        winEject.close("", () => {
+          Logger.info("All drives have been loaded/closed.");
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -23,11 +33,15 @@ export class DriveService {
    * @returns {Promise<void>}
    */
   static async ejectAllDrives() {
-    return new Promise((resolve) => {
-      winEject.eject("", () => {
-        Logger.info("All drives have been ejected.");
-        resolve();
-      });
+    return new Promise((resolve, reject) => {
+      try {
+        winEject.eject("", () => {
+          Logger.info("All drives have been ejected.");
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 

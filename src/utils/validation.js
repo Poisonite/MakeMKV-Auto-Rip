@@ -14,12 +14,17 @@ export class ValidationUtils {
       return "No data received from MakeMKV";
     }
 
-    const lines = data.split("\n");
-    if (lines.length <= 1) {
+    const lines = data.split("\n").filter((line) => line.trim().length > 0);
+    if (lines.length === 0) {
       return "Invalid MakeMKV output format";
     }
 
-    // Additional validation can be added here as needed
+    // Check if at least one line contains valid TINFO data
+    const hasTInfoLine = lines.some((line) => line.startsWith("TINFO:"));
+    if (!hasTInfoLine) {
+      return "Invalid MakeMKV output format";
+    }
+
     return null;
   }
 
@@ -33,12 +38,19 @@ export class ValidationUtils {
       return "No drive data received from MakeMKV";
     }
 
-    const lines = data.split("\n");
-    if (lines.length <= 1) {
+    const lines = data.split("\n").filter((line) => line.trim().length > 0);
+    if (lines.length === 0) {
       return "Invalid MakeMKV drive output format";
     }
 
-    // TODO: Additional validation can be added here as needed
+    // Check if at least one line contains valid DRV data
+    const hasDrvLine = lines.some((line) =>
+      line.startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER)
+    );
+    if (!hasDrvLine) {
+      return "Invalid MakeMKV drive output format";
+    }
+
     return null;
   }
 
@@ -48,6 +60,9 @@ export class ValidationUtils {
    * @returns {number} - Total time in seconds
    */
   static getTimeInSeconds(timeArray) {
+    if (!timeArray || !Array.isArray(timeArray) || timeArray.length < 3) {
+      return 0;
+    }
     return +timeArray[0] * 60 * 60 + +timeArray[1] * 60 + +timeArray[2];
   }
 
@@ -57,6 +72,9 @@ export class ValidationUtils {
    * @returns {boolean} - True if copy completed successfully
    */
   static isCopyComplete(data) {
+    if (!data || typeof data !== "string") {
+      return false;
+    }
     const lines = data.split("\n");
     return lines.some(
       (line) =>
