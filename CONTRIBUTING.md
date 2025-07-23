@@ -20,7 +20,7 @@ We welcome contributions of all kinds:
 - **Node.js** >= 22.0.0
 - **Git** for version control
 - **MakeMKV** installed for testing
-- **Windows** (for now - cross-platform support welcome!)
+- **Windows, Linux, or Docker** - Cross-platform support now available!
 
 ### Development Setup
 
@@ -125,8 +125,10 @@ git commit -m "Update stuff"
 
    ```bash
    npm start  # Test main functionality
-   npm run load  # Test drive loading
-   npm run eject  # Test drive ejection
+   npm run load  # Test drive loading (Windows only)
+   npm run eject  # Test drive ejection (Windows only)
+   npm run docker:build  # Test Docker build
+   npm run docker:run  # Test Docker deployment
    ```
 
 3. **Create a pull request** with:
@@ -156,11 +158,29 @@ We're planning to add:
 
 ## 🌍 Cross-Platform Support
 
-Currently Windows-only, but we welcome contributions for:
+Full cross-platform support now available!
 
-- **Linux support** - Adapt drive operations and paths (we're considering [`eject-media`](https://www.npmjs.com/package/eject-media) as one option)
-- **macOS support** - Similar adaptations
-- **Docker containers** - For consistent environments
+- **Windows** - Full native support with drive loading/ejecting
+- **Linux** - Dockerized support with all ripping functionality
+- **macOS** - Planned support (contributions welcome!)
+- **Docker containers** - Complete containerization with volume management
+
+### Docker Development
+
+Test your changes with Docker:
+
+```bash
+npm run docker:build    # Build the Docker image
+npm run docker:run      # Start container with docker-compose
+npm run docker:logs     # View container logs
+npm run docker:stop     # Stop the container
+```
+
+### Platform-Specific Features
+
+- **Drive operations** are automatically disabled in Docker/Linux environments
+- **MakeMKV paths** adapt automatically to the target platform
+- **Dependencies** are conditionally loaded based on the environment
 
 ## 📚 Documentation
 

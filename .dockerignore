@@ -1,0 +1,63 @@
+# Development files
+tests/
+*.test.js
+test-*
+coverage/
+.nyc_output/
+
+# Development dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+PROJECT-INFO.md
+ToDo.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs (these should be mounted as volumes)
+logs/
+*.log
+
+# Lock files (package-lock.json is copied explicitly)
+yarn.lock
+pnpm-lock.yaml
+
+# Vitest config
+vitest.config.js
+
+# Test results
+test-results/

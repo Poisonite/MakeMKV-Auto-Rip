@@ -16,7 +16,12 @@
         "test:run": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --watch",
-        "test:ui": "vitest --ui"
+        "test:ui": "vitest --ui",
+        "docker:build": "docker build -t makemkv-auto-rip .",
+        "docker:run": "docker-compose up -d",
+        "docker:stop": "docker-compose down",
+        "docker:logs": "docker-compose logs -f",
+        "prepublishOnly": "npm run test:run"
     },
     "repository": {
         "type": "git",
@@ -41,8 +46,17 @@
         "Disc",
         "UHD",
         "4K",
-        "BD 100"
+        "BD 100",
+        "Docker",
+        "Container",
+        "CLI",
+        "Console",
+        "Cross-platform"
     ],
+    "bin": {
+        "makemkv-auto-rip": "./index.js"
+    },
+    "preferGlobal": true,
     "author": "Zac Ingoglia",
     "license": "GPL-3.0-or-later",
     "bugs": {
@@ -55,6 +69,17 @@
         "date-fns": "^4.1.0",
         "win-eject": "^1.0.2"
     },
+    "optionalDependencies": {
+        "win-eject": "^1.0.2"
+    },
+    "files": [
+        "src/",
+        "config/",
+        "index.js",
+        "README.md",
+        "LICENSE.md",
+        "CHANGELOG.md"
+    ],
     "devDependencies": {
         "vitest": "^3.2.4",
         "@vitest/coverage-v8": "^3.2.4",

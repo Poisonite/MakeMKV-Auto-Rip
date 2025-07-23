@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  makemkv-auto-rip:
+    build: .
+    container_name: makemkv-auto-rip
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+    volumes:
+      # Mount your DVD/Blu-ray drives (adjust device paths as needed)
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+      # Mount media output directory
+      - ./media:/app/media
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Mount custom config if needed
+      - ./config/default.json:/app/config/default.json:ro
+    devices:
+      # Grant access to optical drives
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+    privileged: true  # Required for device access
+    stdin_open: true  # Keep STDIN open for interactive CLI
+    tty: true         # Allocate a pseudo-TTY for colored output
+
+  # Alternative service for users who prefer using the npm registry image
+  makemkv-auto-rip-npm:
+    image: makemkv-auto-rip:latest
+    container_name: makemkv-auto-rip-npm
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+    volumes:
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+      - ./media:/app/media
+      - ./logs:/app/logs
+      - ./config/default.json:/app/config/default.json:ro
+    devices:
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+    privileged: true
+    stdin_open: true
+    tty: true
+    profiles:
+      - npm  # Only run this service when 'npm' profile is specified

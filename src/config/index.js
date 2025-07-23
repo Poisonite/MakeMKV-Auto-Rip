@@ -32,11 +32,19 @@ export class AppConfig {
   }
 
   static get isLoadDrivesEnabled() {
+    // Disable drive loading in Docker environments since it's Windows-specific
+    if (this.isDockerEnvironment) {
+      return false;
+    }
     const value = config.get("Path.loadDrives.Enabled");
     return value ? value.toLowerCase() === "true" : false;
   }
 
   static get isEjectDrivesEnabled() {
+    // Disable drive ejection in Docker environments since it's Windows-specific
+    if (this.isDockerEnvironment) {
+      return false;
+    }
     const value = config.get("Path.ejectDrives.Enabled");
     return value ? value.toLowerCase() === "true" : false;
   }
@@ -53,7 +61,20 @@ export class AppConfig {
   }
 
   static get makeMKVExecutable() {
+    // Use different executable path for Docker/Linux vs Windows
+    if (this.isDockerEnvironment) {
+      return "makemkvcon";
+    }
     return `"${this.mkvDir}\\makemkvcon.exe"`;
+  }
+
+  /**
+   * Check if running in Docker environment
+   * @returns {boolean}
+   */
+  static get isDockerEnvironment() {
+    return process.env.DOCKER_CONTAINER === "true" || 
+           (process.env.NODE_ENV === "production" && process.env.DOCKER_CONTAINER !== "false");
   }
 
   /**

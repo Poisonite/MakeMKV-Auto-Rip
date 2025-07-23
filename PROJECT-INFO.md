@@ -27,6 +27,10 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │       └── index.js              # Shared constants and enums
 ├── config/                       # Configuration files
 │   └── default.json              # Application settings
+├── docker/                       # Docker deployment files
+│   ├── Dockerfile                # Multi-stage Docker build
+│   ├── docker-compose.yml        # Container orchestration
+│   └── .dockerignore             # Docker build exclusions
 ├── .github/                      # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/           # Issue templates
 │   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
@@ -117,7 +121,21 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **chalk** - Terminal styling and colors
 - **date-fns** - Modern date/time formatting (replaced moment.js)
 - **config** - Configuration file management
-- **win-eject** - Windows optical drive control
+- **win-eject** - Windows optical drive control (optional dependency)
+
+### Container Technology
+
+- **Docker** - Application containerization with Alpine Linux base
+- **Docker Compose** - Multi-container application orchestration
+- **Health Checks** - Container monitoring and recovery
+- **Volume Mounting** - Persistent data and media storage
+
+### Cross-Platform Support
+
+- **Environment Detection** - Automatic platform-specific behavior
+- **Conditional Imports** - Dynamic loading of platform-specific modules
+- **Path Adaptation** - Cross-platform file system handling
+- **Executable Resolution** - Platform-appropriate binary paths
 
 ### Development Principles
 
@@ -125,6 +143,7 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **Async/Await** - Promise-based asynchronous operations
 - **Functional Programming** - Pure functions where possible
 - **Immutable Patterns** - Avoiding side effects in utilities
+- **Platform Agnostic** - Cross-platform compatibility by design
 
 ## 📊 Performance Considerations
 
@@ -161,8 +180,19 @@ for (const disc of discs) {
 
 ### Command Interface
 
-The application interfaces with MakeMKV through its command-line tool (`makemkvcon.exe`):
+The application interfaces with MakeMKV through its command-line tool:
 
+**Windows:**
+```javascript
+"C:\Program Files (x86)\MakeMKV\makemkvcon.exe"
+```
+
+**Docker/Linux:**
+```javascript
+makemkvcon  // Available in PATH within container
+```
+
+**Common Commands:**
 ```javascript
 // Drive detection
 makemkvcon -r info disc:index
@@ -206,19 +236,119 @@ MakeMKV output follows a structured format that the application parses:
 - **Reliability**: Better error handling and recovery
 - **Performance**: Parallel processing and optimized resource usage
 
+## 🐳 Docker Architecture
+
+### Container Design
+
+The Docker implementation follows best practices for Node.js containerization:
+
+```dockerfile
+# Multi-stage build with Alpine Linux base
+FROM node:22-alpine
+
+# Security: Non-root user execution
+USER makemkv (uid: 1001)
+
+# Volumes: Separate data from application
+VOLUME ["/app/media", "/app/logs"]
+
+# Health checks: Container monitoring
+HEALTHCHECK --interval=30s --timeout=10s
+```
+
+### Container Features
+
+- **MakeMKV Integration** - Pre-installed MakeMKV console tools
+- **Volume Management** - Persistent media and log storage
+- **Device Access** - Optical drive mounting with proper permissions
+- **Environment Variables** - Configuration through Docker environment
+- **Health Monitoring** - Built-in container health checks
+
+### Docker Compose Configuration
+
+```yaml
+services:
+  makemkv-auto-rip:
+    build: .
+    volumes:
+      - /dev/sr0:/dev/sr0:ro  # Optical drive access
+      - ./media:/app/media    # Media output
+      - ./logs:/app/logs      # Log storage
+    privileged: true          # Required for hardware access
+```
+
+### Platform Detection
+
+The application automatically detects containerized environments:
+
+```javascript
+static get isDockerEnvironment() {
+  return process.env.DOCKER_CONTAINER === "true" || 
+         (process.env.NODE_ENV === "production" && 
+          process.env.DOCKER_CONTAINER !== "false");
+}
+```
+
+## 🌐 Cross-Platform Compatibility
+
+### Environment-Specific Behavior
+
+| Feature | Windows | Docker/Linux | Notes |
+|---------|---------|--------------|-------|
+| Drive Loading | ✅ Full | ❌ Disabled | Windows-specific win-eject dependency |
+| Drive Ejection | ✅ Full | ❌ Disabled | Hardware control not available |
+| MakeMKV Path | Registry/Config | System PATH | Automatic detection |
+| File Paths | Backslashes | Forward slashes | Platform-appropriate separators |
+
+### Conditional Module Loading
+
+```javascript
+// Dynamic import based on environment
+let winEject;
+if (!AppConfig.isDockerEnvironment) {
+  try {
+    winEject = (await import("win-eject")).default;
+  } catch (error) {
+    Logger.warning("win-eject module not available");
+  }
+}
+```
+
+### NPM Package Distribution
+
+The package is configured for cross-platform distribution:
+
+```json
+{
+  "bin": {
+    "makemkv-auto-rip": "./index.js"
+  },
+  "optionalDependencies": {
+    "win-eject": "^1.0.2"
+  },
+  "files": [
+    "src/", "config/", "index.js"
+  ]
+}
+```
+
 ## 🔮 Future Considerations
 
 ### Potential Future Enhancements
 
-1. **Cross-Platform Support** - Linux and macOS compatibility
+1. **macOS Native Support** - Native drive operations for macOS
 2. **Metadata Integration** - Automatic movie information lookup (renaming to match Plex conventions)
+3. **Web Interface** - Browser-based management console
+4. **Kubernetes Support** - Scalable container orchestration
+5. **ARM Architecture** - Support for ARM-based containers
    ... TBD
 
 ### Technical Debt
 
-1. **Testing Coverage** - Unit and integration tests needed
-2. **Documentation** - JSDoc coverage for all modules
+1. **Testing Coverage** - Docker-specific integration tests needed
+2. **Documentation** - Container deployment guides
 3. **Configuration Schema** - JSON schema validation
+4. **Security Hardening** - Container security best practices
 
 ## 📝 Code Style and Standards
 

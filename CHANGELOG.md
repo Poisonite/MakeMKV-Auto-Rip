@@ -11,10 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Complete project refactor** with proper Node.js project structure
 - **Modular architecture** with clear separation of concerns into services, utilities, and CLI modules
+- **Docker support** - Full Docker containerization with multi-platform compatibility
+  - Dockerfile with optimized Node.js Alpine base image
+  - Docker Compose configuration for easy deployment
+  - Automatic drive operation disabling in containerized environments
+  - Health checks and proper volume management
+- **NPM package publishing** - Ready for npm registry distribution
+  - Binary executable support (`makemkv-auto-rip` command)
+  - Proper package.json configuration for global installation
+  - Development files excluded from published package
+  - Optional dependencies for cross-platform compatibility
+- **Cross-platform compatibility** - Windows-specific features gracefully disabled on other platforms
+  - Docker environment detection
+  - Conditional import of Windows-only dependencies
+  - Linux-compatible MakeMKV executable paths
 - **Advanced drive management** - Separate configuration options for loading and ejecting drives
 - **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal SSD or HDD performance
 - **Enhanced logging** - Configurable 12hr/24hr time format options for console timestamps (defaults to 12hr)
 - **Standalone drive commands** - `npm run load` and `npm run eject` for drive operations without ripping
+- **Docker management commands** - `npm run docker:build`, `docker:run`, `docker:stop`, and `docker:logs`
 - **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @ThreeHats and @Adam8234)
 - **Enhanced error handling** - Comprehensive error handling throughout the application
 - **Improved logging** - Structured logging with consistent formatting and colors
@@ -26,6 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration structure** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
 - **Ripping behavior** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
 - **Logging system** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
+- **Cross-platform executable paths** - MakeMKV executable path now adapts to Windows vs Docker/Linux environments
+- **Dependency management** - `win-eject` moved to optional dependencies for non-Windows compatibility
+- **Drive operations** - Automatically disabled in Docker environments with informative logging
+- **Package distribution** - Files list updated to exclude development and test files from npm package
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
 - **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work in theory, but are not officially supported)

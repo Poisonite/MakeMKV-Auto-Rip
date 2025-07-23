@@ -1,5 +1,15 @@
-import winEject from "win-eject";
 import { Logger } from "../utils/logger.js";
+import { AppConfig } from "../config/index.js";
+
+// Conditionally import win-eject only if not in Docker
+let winEject;
+if (!AppConfig.isDockerEnvironment) {
+  try {
+    winEject = (await import("win-eject")).default;
+  } catch (error) {
+    Logger.warning("win-eject module not available (likely non-Windows environment)");
+  }
+}
 
 /**
  * Service for handling drive operations (loading and ejecting)
@@ -16,6 +26,16 @@ export class DriveService {
    * @returns {Promise<void>}
    */
   static async loadAllDrives() {
+    if (AppConfig.isDockerEnvironment) {
+      Logger.info("Drive loading skipped in Docker environment (Windows-only feature)");
+      return Promise.resolve();
+    }
+
+    if (!winEject) {
+      Logger.warning("Drive loading not available (win-eject module not loaded)");
+      return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
       try {
         winEject.close("", () => {
@@ -33,6 +53,16 @@ export class DriveService {
    * @returns {Promise<void>}
    */
   static async ejectAllDrives() {
+    if (AppConfig.isDockerEnvironment) {
+      Logger.info("Drive ejection skipped in Docker environment (Windows-only feature)");
+      return Promise.resolve();
+    }
+
+    if (!winEject) {
+      Logger.warning("Drive ejection not available (win-eject module not loaded)");
+      return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
       try {
         winEject.eject("", () => {
