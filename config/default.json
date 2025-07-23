@@ -6,15 +6,22 @@
         "movieRips": {
             "Dir": ".\\media"
         },
-        "logToFiles": {
-            "Enabled": "true",
-            "Dir": ".\\logs"
+        "logging": {
+            "toFiles": "true",
+            "Dir": ".\\logs",
+            "timeFormat": "12hr"
         },
-        "ejectDVDs": {
+        "loadDrives": {
+            "Enabled": "true"
+        },
+        "ejectDrives": {
             "Enabled": "true"
         },
         "ripAll": {
             "Enabled": "false"
+        },
+        "rippingMode": {
+            "Mode": "async"
         }
     }
 }

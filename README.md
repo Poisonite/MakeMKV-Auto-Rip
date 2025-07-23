@@ -14,9 +14,9 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 - **💿 Multi-format support** - DVDs and Blu-ray discs
 - **🔍 Smart title detection** - Automatically finds the main movie
 - **📁 Unique folders** - No file conflicts with automatic folder naming
-- **📊 Parallel processing** - Multiple discs rip simultaneously
-- **📝 Comprehensive logging** - Optional detailed operation logs
-- **⚡ Drive management** - Automatic loading and ejection
+- **📊 Flexible processing** - Choose between parallel (async) or sequential (sync) ripping
+- **📝 Comprehensive logging** - Optional detailed operation logs with configurable 12hr/24hr console timestamps
+- **⚡ Advanced drive management** - Separate control for loading and ejecting drive preferences
 - **🎛️ Flexible options** - Rip longest title or all titles (that are above MakeMKV min title length)
 
 ## 🚀 Quick Start
@@ -72,15 +72,22 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
     "movieRips": {
       "Dir": "C:\\Your\\Movie\\Rips"
     },
-    "logToFiles": {
-      "Enabled": "true",
-      "Dir": "C:\\Your\\Log\\Directory"
+    "logging": {
+      "toFiles": "true",
+      "Dir": "C:\\Your\\Log\\Directory",
+      "timeFormat": "12hr"
     },
-    "ejectDVDs": {
+    "loadDrives": {
+      "Enabled": "true"
+    },
+    "ejectDrives": {
       "Enabled": "true"
     },
     "ripAll": {
       "Enabled": "false"
+    },
+    "rippingMode": {
+      "Mode": "async"
     }
   }
 }
@@ -90,16 +97,20 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 - **`mkvDir`** - MakeMKV installation directory (usually default location)
 - **`movieRips`** - Root directory for ripped movies (create a dedicated folder)
-- **`logToFiles.Enabled`** - Enable/disable detailed logging (`"true"` or `"false"`)
-- **`logToFiles.Dir`** - Directory for log files
-- **`ejectDVDs.Enabled`** - Auto-load drives before ripping and eject after completion
+- **`logging.toFiles`** - Enable/disable writing MakeMKV output to log files (`"true"` or `"false"`)
+- **`logging.Dir`** - Directory for log files
+- **`logging.timeFormat`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
+- **`loadDrives.Enabled`** - Auto-load/close drives before ripping (`"true"` or `"false"`)
+- **`ejectDrives.Enabled`** - Auto-eject drives after ripping completion (`"true"` or `"false"`)
 - **`ripAll.Enabled`** - Rip all titles that are above MakeMKV min length (`"true"`) or longest title only (`"false"`)
+- **`rippingMode.Mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing
 
 **Important Notes:**
 
 - Use double backslashes (`\\`) in Windows paths
 - Create directories manually - the application cannot create missing folders
 - Recommended: Create dedicated folders for movie rips and logs
+- **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance... for SSDs, `"async"` will yield much better overall performance
 
 ### MakeMKV GUI Configuration
 
