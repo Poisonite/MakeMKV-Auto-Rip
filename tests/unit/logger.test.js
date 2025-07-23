@@ -314,4 +314,68 @@ describe("Logger and Colors", () => {
       expect(consoleSpy.error).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe("Time Format Functionality", () => {
+    let mockAppConfig;
+
+    beforeEach(async () => {
+      // Dynamically import AppConfig for mocking
+      const { AppConfig } = await import("../../src/config/index.js");
+      mockAppConfig = AppConfig;
+    });
+
+    describe("12hr time format", () => {
+      it("should use 12hr format when configured", () => {
+        // Mock AppConfig to return 12hr format
+        vi.spyOn(mockAppConfig, "logTimeFormat", "get").mockReturnValue("12hr");
+
+        Logger.info("Test message");
+
+        expect(consoleSpy.info).toHaveBeenCalledTimes(1);
+        const call = consoleSpy.info.mock.calls[0][0];
+        // Should contain AM/PM indicator for 12hr format
+        expect(call).toMatch(/\d+:\d+:\d+\s(AM|PM)/i);
+      });
+    });
+
+    describe("24hr time format", () => {
+      it("should use 24hr format when configured", () => {
+        // Mock AppConfig to return 24hr format
+        vi.spyOn(mockAppConfig, "logTimeFormat", "get").mockReturnValue("24hr");
+
+        Logger.info("Test message");
+
+        expect(consoleSpy.info).toHaveBeenCalledTimes(1);
+        const call = consoleSpy.info.mock.calls[0][0];
+        // Should not contain AM/PM for 24hr format, just HH:MM:SS
+        expect(call).toMatch(/\d{2}:\d{2}:\d{2}/);
+        expect(call).not.toMatch(/AM|PM/i);
+      });
+    });
+
+    describe("Time format consistency", () => {
+      it("should apply same time format to both info and error messages", () => {
+        Logger.info("Info message");
+        Logger.error("Error message");
+
+        const infoCall = consoleSpy.info.mock.calls[0][0];
+        const errorCall = consoleSpy.error.mock.calls[0][0];
+
+        // Both should have the same timestamp format pattern
+        const timePattern = /\d+:\d+:\d+(\s(AM|PM))?/i;
+        expect(infoCall).toMatch(timePattern);
+        expect(errorCall).toMatch(timePattern);
+      });
+
+      it("should handle invalid time format gracefully", () => {
+        // Mock AppConfig to return invalid format
+        vi.spyOn(mockAppConfig, "logTimeFormat", "get").mockReturnValue(
+          "invalid"
+        );
+
+        expect(() => Logger.info("Test message")).not.toThrow();
+        expect(consoleSpy.info).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
 });

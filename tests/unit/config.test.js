@@ -208,6 +208,135 @@ describe("AppConfig", () => {
         );
       });
     });
+
+    describe("logTimeFormat", () => {
+      it("should return '12hr' when timeFormat is '12hr'", () => {
+        config.get.mockReturnValueOnce("12hr");
+
+        const result = AppConfig.logTimeFormat;
+
+        expect(config.get).toHaveBeenCalledWith("Path.logging.timeFormat");
+        expect(result).toBe("12hr");
+      });
+
+      it("should return '24hr' when timeFormat is '24hr'", () => {
+        config.get.mockReturnValueOnce("24hr");
+
+        const result = AppConfig.logTimeFormat;
+
+        expect(result).toBe("24hr");
+      });
+
+      it("should be case insensitive", () => {
+        config.get.mockReturnValueOnce("24HR");
+
+        const result = AppConfig.logTimeFormat;
+
+        expect(result).toBe("24hr");
+      });
+
+      it("should default to '12hr' when undefined", () => {
+        config.get.mockReturnValueOnce(undefined);
+
+        const result = AppConfig.logTimeFormat;
+
+        expect(result).toBe("12hr");
+      });
+
+      it("should default to '12hr' for invalid values", () => {
+        config.get.mockReturnValueOnce("invalid");
+
+        const result = AppConfig.logTimeFormat;
+
+        expect(result).toBe("12hr");
+      });
+    });
+
+    describe("isLoadDrivesEnabled", () => {
+      it("should return true when loadDrives is enabled", () => {
+        config.get.mockReturnValueOnce("true");
+
+        const result = AppConfig.isLoadDrivesEnabled;
+
+        expect(config.get).toHaveBeenCalledWith("Path.loadDrives.Enabled");
+        expect(result).toBe(true);
+      });
+
+      it("should return false when loadDrives is disabled", () => {
+        config.get.mockReturnValueOnce("false");
+
+        const result = AppConfig.isLoadDrivesEnabled;
+
+        expect(result).toBe(false);
+      });
+
+      it("should be case insensitive", () => {
+        config.get.mockReturnValueOnce("TRUE");
+
+        const result = AppConfig.isLoadDrivesEnabled;
+
+        expect(result).toBe(true);
+      });
+
+      it("should return false when value is undefined", () => {
+        config.get.mockReturnValueOnce(undefined);
+
+        const result = AppConfig.isLoadDrivesEnabled;
+
+        expect(result).toBe(false);
+      });
+
+      it("should return false when value is null", () => {
+        config.get.mockReturnValueOnce(null);
+
+        const result = AppConfig.isLoadDrivesEnabled;
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("rippingMode", () => {
+      it("should return 'async' when mode is 'async'", () => {
+        config.get.mockReturnValueOnce("async");
+
+        const result = AppConfig.rippingMode;
+
+        expect(config.get).toHaveBeenCalledWith("Path.rippingMode.Mode");
+        expect(result).toBe("async");
+      });
+
+      it("should return 'sync' when mode is 'sync'", () => {
+        config.get.mockReturnValueOnce("sync");
+
+        const result = AppConfig.rippingMode;
+
+        expect(result).toBe("sync");
+      });
+
+      it("should be case insensitive", () => {
+        config.get.mockReturnValueOnce("SYNC");
+
+        const result = AppConfig.rippingMode;
+
+        expect(result).toBe("sync");
+      });
+
+      it("should default to 'async' when undefined", () => {
+        config.get.mockReturnValueOnce(undefined);
+
+        const result = AppConfig.rippingMode;
+
+        expect(result).toBe("async");
+      });
+
+      it("should default to 'async' for invalid values", () => {
+        config.get.mockReturnValueOnce("invalid");
+
+        const result = AppConfig.rippingMode;
+
+        expect(result).toBe("async");
+      });
+    });
   });
 
   describe("validate method", () => {
