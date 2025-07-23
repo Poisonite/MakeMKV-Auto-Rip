@@ -9,6 +9,9 @@ const execAsync = promisify(exec);
 /**
  * Cross-platform optical drive utility for ejecting and loading CD/DVD/Blu-ray drives
  * Supports Windows, macOS, and Linux
+ * 
+ * Windows Support: Windows 8/Server 2012 and later (including Windows 10, 11, Server 2016+)
+ * Uses MCI (Media Control Interface) which is available across all supported Windows versions
  */
 export class OpticalDriveUtil {
   static #platform = os.platform();
@@ -36,14 +39,8 @@ export class OpticalDriveUtil {
    */
   static async ejectAllDrives() {
     const drives = await this.getOpticalDrives();
-    if (drives.length === 0) {
-      Logger.warning("No optical drives found to eject");
-      return;
-    }
-
     const ejectPromises = drives.map((drive) => this.ejectDrive(drive));
     await Promise.allSettled(ejectPromises);
-    Logger.info(`Ejected ${drives.length} optical drive(s)`);
   }
 
   /**
@@ -52,19 +49,13 @@ export class OpticalDriveUtil {
    */
   static async loadAllDrives() {
     const drives = await this.getOpticalDrives();
-    if (drives.length === 0) {
-      Logger.warning("No optical drives found to load");
-      return;
-    }
-
     const loadPromises = drives.map((drive) => this.loadDrive(drive));
     await Promise.allSettled(loadPromises);
-    Logger.info(`Loaded/closed ${drives.length} optical drive(s)`);
   }
 
   /**
    * Eject a specific optical drive
-   * @param {Object} drive - Drive object with platform-specific properties
+   * @param {Object} drive - Drive object from getOpticalDrives()
    * @returns {Promise<void>}
    */
   static async ejectDrive(drive) {
@@ -79,18 +70,16 @@ export class OpticalDriveUtil {
         case "linux":
           await this.#linuxEjectDrive(drive);
           break;
-        default:
-          throw new Error(`Unsupported platform: ${this.#platform}`);
       }
+      Logger.info(`Ejected drive: ${drive.description}`);
     } catch (error) {
-      Logger.error(`Failed to eject drive ${drive.id}: ${error.message}`);
-      throw error;
+      Logger.warning(`Failed to eject drive ${drive.description}: ${error.message}`);
     }
   }
 
   /**
    * Load/close a specific optical drive
-   * @param {Object} drive - Drive object with platform-specific properties
+   * @param {Object} drive - Drive object from getOpticalDrives()
    * @returns {Promise<void>}
    */
   static async loadDrive(drive) {
@@ -105,37 +94,36 @@ export class OpticalDriveUtil {
         case "linux":
           await this.#linuxLoadDrive(drive);
           break;
-        default:
-          throw new Error(`Unsupported platform: ${this.#platform}`);
       }
+      Logger.info(`Loaded drive: ${drive.description}`);
     } catch (error) {
-      Logger.error(`Failed to load drive ${drive.id}: ${error.message}`);
-      throw error;
+      Logger.warning(`Failed to load drive ${drive.description}: ${error.message}`);
     }
   }
 
-  // Windows implementation
+  // Windows implementation - Compatible with Windows 8/Server 2012 and later
   static async #getWindowsOpticalDrives() {
     try {
-      // Use PowerShell to get optical drives
+      // Use WMI to get optical drives - works on all Windows versions we support
       const { stdout } = await execAsync(
-        'powershell -Command "Get-WmiObject -Class Win32_CDROMDrive | Select-Object Drive, MediaType, Description | ConvertTo-Json"'
+        'powershell -Command "Get-WmiObject -Class Win32_CDROMDrive | ConvertTo-Json"'
       );
 
-      let drives = JSON.parse(stdout || "[]");
-      if (!Array.isArray(drives)) {
-        drives = [drives];
-      }
+      let drives = [];
+      if (stdout.trim()) {
+        const wmiData = JSON.parse(stdout);
+        const driveArray = Array.isArray(wmiData) ? wmiData : [wmiData];
 
-      return drives
-        .filter((drive) => drive && drive.Drive)
-        .map((drive) => ({
+        drives = driveArray.map((drive) => ({
           id: drive.Drive,
           path: drive.Drive,
-          description: drive.Description || "Optical Drive",
-          mediaType: drive.MediaType || "Unknown",
+          description: drive.Caption || drive.Name || "Optical Drive",
+          mediaType: drive.MediaType || "Optical",
           platform: "win32",
         }));
+      }
+
+      return drives;
     } catch (error) {
       Logger.error(`Windows optical drive detection failed: ${error.message}`);
       return [];
@@ -143,21 +131,21 @@ export class OpticalDriveUtil {
   }
 
   static async #windowsEjectDrive(drive) {
-    // Use PowerShell to eject the drive
-    const command = `powershell -Command "(New-Object -comObject Shell.Application).Namespace(17).ParseName('${drive.path}').InvokeVerb('Eject')"`;
+    // Use MCI (Media Control Interface) - available on all supported Windows versions
+    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\") public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door open', $null, 0, [IntPtr]::Zero)"`;
     await execAsync(command);
   }
 
   static async #windowsLoadDrive(drive) {
-    // Use PowerShell MCI command to close the drive
-    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
+    // Use MCI command to close the drive
+    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\") public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
     await execAsync(command);
   }
 
-  // macOS implementation
+  // macOS implementation - Proper optical drive detection
   static async #getMacOpticalDrives() {
     try {
-      // Use system_profiler to get optical drives
+      // Use system_profiler to get disc burning devices (optical drives)
       const { stdout } = await execAsync(
         "system_profiler SPDiscBurningDataType -json"
       );
@@ -165,12 +153,12 @@ export class OpticalDriveUtil {
       const data = JSON.parse(stdout);
       const drives = [];
 
-      if (data.SPDiscBurningDataType) {
+      if (data.SPDiscBurningDataType && data.SPDiscBurningDataType.length > 0) {
         data.SPDiscBurningDataType.forEach((drive, index) => {
           if (drive && drive._name) {
             drives.push({
-              id: `drive${index}`,
-              path: `/dev/disk${index}`,
+              id: `optical${index}`,
+              path: `/dev/rdisk${index + 1}`, // Use raw disk device
               description: drive._name,
               mediaType: "Optical",
               platform: "darwin",
@@ -179,29 +167,51 @@ export class OpticalDriveUtil {
         });
       }
 
+      // If no drives found through system_profiler, try diskutil
+      if (drives.length === 0) {
+        try {
+          const { stdout: diskutilOut } = await execAsync("diskutil list");
+          const lines = diskutilOut.split('\n');
+          
+          for (const line of lines) {
+            // Look for optical disk entries
+            if (line.includes('(optical)') || line.includes('CD_ROM') || line.includes('DVD')) {
+              const diskMatch = line.match(/\/dev\/(disk\d+)/);
+              if (diskMatch) {
+                drives.push({
+                  id: diskMatch[1],
+                  path: `/dev/r${diskMatch[1]}`,
+                  description: "Optical Drive",
+                  mediaType: "Optical", 
+                  platform: "darwin",
+                });
+              }
+            }
+          }
+        } catch (diskutilError) {
+          Logger.warning("Could not detect optical drives via diskutil");
+        }
+      }
+
       return drives;
     } catch (error) {
-      // Fallback: just assume there's at least one optical drive
-      Logger.warning("Could not detect specific optical drives, using default");
-      return [
-        {
-          id: "default",
-          path: "/dev/disk1",
-          description: "Default Optical Drive",
-          mediaType: "Optical",
-          platform: "darwin",
-        },
-      ];
+      Logger.error(`macOS optical drive detection failed: ${error.message}`);
+      return [];
     }
   }
 
   static async #macEjectDrive(drive) {
-    // Try drutil first, fallback to diskutil
+    // Try drutil first (works for most optical drives)
     try {
       await execAsync("drutil tray open");
     } catch (error) {
-      // Fallback to diskutil eject
-      await execAsync("drutil eject");
+      // Fallback to diskutil eject for the specific drive
+      try {
+        await execAsync(`diskutil eject ${drive.path}`);
+      } catch (fallbackError) {
+        // Final fallback - try drutil eject
+        await execAsync("drutil eject");
+      }
     }
   }
 
@@ -209,45 +219,121 @@ export class OpticalDriveUtil {
     try {
       await execAsync("drutil tray close");
     } catch (error) {
-      // Some drives don't support tray close
       Logger.warning("Drive may not support automatic closing");
     }
   }
 
-  // Linux implementation
+  // Linux implementation - Proper optical drive detection using /proc and sysfs
   static async #getLinuxOpticalDrives() {
     try {
       const drives = [];
 
-      // Check for common optical drive device files
-      const devicePaths = [
-        "/dev/cdrom",
-        "/dev/dvd",
-        "/dev/sr0",
-        "/dev/sr1",
-        "/dev/sr2",
-        "/dev/sr3",
-      ];
+      // Method 1: Check /proc/sys/dev/cdrom/info for optical drives
+      try {
+        const cdromInfo = await fs.readFile("/proc/sys/dev/cdrom/info", "utf8");
+        const lines = cdromInfo.split('\n');
+        const driveNameLine = lines.find(line => line.startsWith('drive name:'));
+        
+        if (driveNameLine) {
+          const driveNames = driveNameLine.split(':')[1].trim().split(/\s+/);
+          
+          for (const driveName of driveNames) {
+            if (driveName && driveName.startsWith('sr')) {
+              const devicePath = `/dev/${driveName}`;
+              
+              try {
+                // Verify the device exists and get additional info
+                await fs.access(devicePath);
+                
+                let description = "Optical Drive";
+                try {
+                  const { stdout } = await execAsync(
+                    `udevadm info --query=property --name=${devicePath} 2>/dev/null`
+                  );
+                  const modelMatch = stdout.match(/ID_MODEL=(.+)/);
+                  if (modelMatch) {
+                    description = modelMatch[1].replace(/_/g, " ");
+                  }
+                } catch {
+                  // If udevadm fails, keep default description
+                }
 
-      for (const devicePath of devicePaths) {
+                drives.push({
+                  id: driveName,
+                  path: devicePath,
+                  description: description,
+                  mediaType: "Optical",
+                  platform: "linux",
+                });
+              } catch {
+                // Device doesn't exist or isn't accessible
+                continue;
+              }
+            }
+          }
+        }
+      } catch (procError) {
+        Logger.warning("Could not read /proc/sys/dev/cdrom/info");
+      }
+
+      // Method 2: If no drives found, scan /sys/block for optical devices
+      if (drives.length === 0) {
         try {
-          await fs.access(devicePath);
-          // Get additional info about the drive
-          const { stdout } = await execAsync(
-            `udevadm info --query=property --name=${devicePath} 2>/dev/null || echo "ID_MODEL=Unknown"`
-          );
+          const blockDevices = await fs.readdir("/sys/block");
+          
+          for (const device of blockDevices) {
+            // Check if it's a CD/DVD drive by examining the device type
+            try {
+              const devicePath = `/sys/block/${device}`;
+              const removableFile = `${devicePath}/removable`;
+              const capabilityFile = `${devicePath}/capability`;
+              
+              // Check if device is removable
+              const removable = await fs.readFile(removableFile, "utf8");
+              if (removable.trim() !== "1") continue;
+              
+              // Check capabilities for optical drive indicators
+              const capability = await fs.readFile(capabilityFile, "utf8");
+              const capNum = parseInt(capability.trim(), 16);
+              
+              // Check for optical drive capabilities (bits for CD-ROM, etc.)
+              // Bit 3 (0x8) = CD-ROM, Bit 4 (0x10) = DVD
+              if ((capNum & 0x8) || (capNum & 0x10)) {
+                const deviceFile = `/dev/${device}`;
+                
+                try {
+                  await fs.access(deviceFile);
+                  
+                  let description = "Optical Drive";
+                  try {
+                    const { stdout } = await execAsync(
+                      `udevadm info --query=property --name=${deviceFile} 2>/dev/null`
+                    );
+                    const modelMatch = stdout.match(/ID_MODEL=(.+)/);
+                    if (modelMatch) {
+                      description = modelMatch[1].replace(/_/g, " ");
+                    }
+                  } catch {
+                    // Keep default description
+                  }
 
-          const model = stdout.match(/ID_MODEL=(.+)/)?.[1] || "Optical Drive";
-
-          drives.push({
-            id: devicePath.split("/").pop(),
-            path: devicePath,
-            description: model.replace(/_/g, " "),
-            mediaType: "Optical",
-            platform: "linux",
-          });
-        } catch {
-          // Device doesn't exist, skip
+                  drives.push({
+                    id: device,
+                    path: deviceFile,
+                    description: description,
+                    mediaType: "Optical",
+                    platform: "linux",
+                  });
+                } catch {
+                  continue;
+                }
+              }
+            } catch {
+              continue;
+            }
+          }
+        } catch (sysError) {
+          Logger.warning("Could not scan /sys/block for optical drives");
         }
       }
 
@@ -266,7 +352,6 @@ export class OpticalDriveUtil {
     try {
       await execAsync(`eject -t ${drive.path}`);
     } catch (error) {
-      // Some drives don't support loading/closing
       Logger.warning(`Drive ${drive.path} may not support automatic loading`);
     }
   }
