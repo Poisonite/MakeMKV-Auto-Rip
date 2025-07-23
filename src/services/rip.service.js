@@ -154,14 +154,14 @@ export class RipService {
   displayResults() {
     if (this.goodVideoArray.length > 0) {
       Logger.info(
-        "The following DVD titles have been successfully ripped: ",
+        "The following DVD/Blu-ray titles have been successfully ripped: ",
         this.goodVideoArray.join(", ")
       );
     }
 
     if (this.badVideoArray.length > 0) {
       Logger.info(
-        "The following DVD titles failed to rip: ",
+        "The following DVD/Blu-ray titles failed to rip: ",
         this.badVideoArray.join(", ")
       );
     }

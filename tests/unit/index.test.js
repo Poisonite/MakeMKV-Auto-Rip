@@ -175,7 +175,7 @@ describe("Main Application (src/app.js)", () => {
         // Catch the rejection to prevent unhandled promise rejection
       });
 
-      // In test environment, the handler should throw an error instead of calling process.exit
+      // In test environment, the handler should throw an error instead of calling process.exit (to prevent issues with vitest)
       expect(() =>
         unhandledRejectionHandler(testReason, testPromise)
       ).toThrow();
@@ -211,7 +211,7 @@ describe("Main Application (src/app.js)", () => {
       // Test the handler
       const testError = new Error("Uncaught exception");
 
-      // In test environment, the handler should throw an error instead of calling process.exit
+      // In test environment, the handler should throw an error instead of calling process.exit (to prevent issues with vitest)
       expect(() => uncaughtExceptionHandler(testError)).toThrow();
 
       try {

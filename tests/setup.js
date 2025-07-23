@@ -5,7 +5,6 @@
 
 import { vi } from "vitest";
 import fs from "fs";
-import path from "path";
 
 // Mock external dependencies that require system resources
 vi.mock("win-eject", () => ({
@@ -53,7 +52,7 @@ TINFO:2,9,0,"2:15:30"`;
 // Mock fs operations for test isolation
 const originalFs = { ...fs };
 
-// Create test directories if they don't exist
+// Create test directories if they don't exist (not change tracked by git)
 const testDirs = [
   "./test-temp",
   "./test-temp/makemkv",

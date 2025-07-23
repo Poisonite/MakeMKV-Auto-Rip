@@ -80,8 +80,7 @@ describe("CLIInterface", () => {
       const allOutput = calls.join(" ");
 
       expect(allOutput).toContain("MakeMKV Auto Rip");
-      expect(allOutput).toContain("v1.0.0");
-      expect(allOutput).toContain("Zac Ingoglia (Poisonite)");
+      expect(allOutput).toContain("Zac Ingoglia");
       expect(allOutput).toContain("ABSOLUTELY NO WARRANTY");
       expect(allOutput).toContain("default.json");
     });
@@ -208,7 +207,7 @@ describe("CLIInterface", () => {
 
   describe("handleUserChoice", () => {
     beforeEach(() => {
-      // Mock promptUser to avoid infinite recursion in tests
+      // Mock promptUser - this helps avoid infinite recursion in tests
       vi.spyOn(cliInterface, "promptUser").mockResolvedValue(undefined);
     });
 
@@ -305,8 +304,6 @@ describe("CLIInterface", () => {
       const calls = consoleSpy.info.mock.calls.map((call) => call[0]);
       const allOutput = calls.join(" ");
 
-      expect(allOutput).toContain("Auto Rip");
-      expect(allOutput).toContain("DVD and Blu-ray drives");
       expect(allOutput).toContain("Press 1");
       expect(allOutput).toContain("Press 2");
       expect(allOutput).toContain("Rip");

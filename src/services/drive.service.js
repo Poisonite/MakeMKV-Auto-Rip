@@ -6,7 +6,9 @@ import { Logger } from "../utils/logger.js";
  */
 export class DriveService {
   constructor() {
-    throw new Error('DriveService is a static class and cannot be instantiated');
+    throw new Error(
+      "DriveService is a static class and cannot be instantiated"
+    );
   }
 
   /**

@@ -4,7 +4,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { RipService } from "../../src/services/rip.service.js";
-import { DiscService } from "../../src/services/disc.service.js";
 import { DriveService } from "../../src/services/drive.service.js";
 import { exec } from "child_process";
 import { isProcessExitError } from "../../src/utils/process.js";
@@ -46,11 +45,10 @@ describe("Complete Ripping Workflow Integration", () => {
   describe("Successful ripping workflow", () => {
     it("should complete full ripping process with multiple discs", async () => {
       // Restore DriveService mocks for this test since it needs to verify drive operations
-      // But keep the wait method mocked to avoid 5-second delays
+      // But keep the wait method mocked to avoid drive loading waiting (i.e. 5-second delays)
       vi.mocked(DriveService.loadDrivesWithWait).mockRestore();
       vi.mocked(DriveService.loadAllDrives).mockRestore();
       vi.mocked(DriveService.ejectAllDrives).mockRestore();
-      // Keep wait mocked: vi.mocked(DriveService.wait).mockRestore();
 
       // Mock drive detection
       const mockDriveData = `DRV:0,2,999,1,"BD-ROM HL-DT-ST BD-RE  BH16NS40 1.02d","Test Blu-ray Movie","/dev/sr0"
@@ -435,7 +433,6 @@ DRV:2,2,999,1,"BD-ROM","Movie 3","/dev/sr2"`;
           setImmediate(() => callback(null, mockFileData, ""));
         } else if (command.includes("mkv disc:")) {
           ripCount++;
-          // Use setImmediate for fast, consistent execution
           setImmediate(() => callback(null, mockRipOutput, ""));
         } else {
           setImmediate(() => callback(null, "", ""));
@@ -458,7 +455,7 @@ DRV:2,2,999,1,"BD-ROM","Movie 3","/dev/sr2"`;
       expect(ripCount).toBe(3);
 
       // Should complete in reasonable time for mocked operations (concurrent processing)
-      // Note: Integration tests with multiple service calls can take longer than unit tests
+      // Dev Note: Integration tests with multiple service calls can take longer than unit tests
       expect(endTime - startTime).toBeLessThan(10000); // 10 seconds is more realistic for integration tests with service interactions
     });
 

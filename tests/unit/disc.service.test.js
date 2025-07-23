@@ -2,7 +2,7 @@
  * Unit tests for disc service
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { exec } from "child_process";
 import { DiscService } from "../../src/services/disc.service.js";
 
@@ -413,10 +413,10 @@ DRV:1,2,999,1,"DVD+R-DL MATSHITA","DVD Movie","/dev/sr1"`;
         // Simulate timeout by not calling callback
       });
 
-      // This would hang in real scenario, but mocked for testing
+      // This would hang in real scenario, but it's mocked for testing
       const promise = DiscService.getAvailableDiscs();
 
-      // We don't await this as it would hang, just ensure it returns a promise
+      // Don't await this as it would hang, just ensure it returns a promise
       expect(promise).toBeInstanceOf(Promise);
     });
 

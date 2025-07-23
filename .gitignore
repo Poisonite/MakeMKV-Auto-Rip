@@ -1,5 +1,6 @@
 node_modules
 
+# Default directories used by the application at runtime
 logs/*
 !logs/.gitkeep
 media/*

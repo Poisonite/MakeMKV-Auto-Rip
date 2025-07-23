@@ -52,7 +52,7 @@ export class CLIInterface {
   async promptUser() {
     Logger.underline("Would you like to Auto Rip all inserted discs now?");
     Logger.underline(
-      "This includes both internal and USB DVD and Blu-ray drives."
+      "This includes both (internal IDE/SATA and USB) Blu-ray and DVD drives."
     );
     Logger.separator();
     Logger.plain("Press" + colors.info(" 1 ") + "to Rip.");

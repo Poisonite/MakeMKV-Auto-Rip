@@ -5,7 +5,7 @@ import config from "config";
  */
 export class AppConfig {
   constructor() {
-    throw new Error('AppConfig is a static class and cannot be instantiated');
+    throw new Error("AppConfig is a static class and cannot be instantiated");
   }
 
   static get mkvDir() {

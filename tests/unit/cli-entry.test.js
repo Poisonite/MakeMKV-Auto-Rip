@@ -70,7 +70,7 @@ describe("CLI Entry Point (index.js)", () => {
       const indexPath = path.resolve("./index.js");
       const content = fs.readFileSync(indexPath, "utf8");
 
-      // Should be a short file that just imports and calls app functions
+      // Enforce this being a short file that just imports and calls app functions, to mandate separation of concerns
       const lines = content.split("\n").filter((line) => line.trim() !== "");
       expect(lines.length).toBeLessThan(15); // Should be a minimal wrapper
     });

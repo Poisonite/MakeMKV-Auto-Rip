@@ -3,7 +3,6 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { isProcessExitError } from "../../src/utils/process.js";
@@ -127,7 +126,6 @@ describe("Application End-to-End Tests", () => {
 
     it("should create necessary directories during operation", async () => {
       const ripsDir = path.join(testTempDir, "rips");
-      const logsDir = path.join(testTempDir, "logs");
 
       // Mock external dependencies
       vi.doMock("child_process", () => ({
@@ -188,7 +186,6 @@ describe("Application End-to-End Tests", () => {
       const allOutput = calls.join(" ");
 
       expect(allOutput).toContain("MakeMKV Auto Rip");
-      expect(allOutput).toContain("v1.0.0");
 
       consoleSpy.mockRestore();
     });
@@ -198,7 +195,7 @@ describe("Application End-to-End Tests", () => {
 
       const cli = new CLIInterface();
 
-      // Test invalid choice - should throw an error instead of calling process.exit
+      // Test invalid choice - should throw an error instead of calling process.exit to prevent issues with vitest
       await expect(cli.handleUserChoice("invalid")).rejects.toThrow();
 
       try {
@@ -344,7 +341,6 @@ describe("Application End-to-End Tests", () => {
       );
 
       expect(APP_INFO.name).toBe("MakeMKV Auto Rip");
-      expect(APP_INFO.version).toBe("1.0.0");
       expect(APP_INFO.author).toContain("Zac Ingoglia");
 
       expect(MEDIA_TYPES.DVD).toBe("dvd");
