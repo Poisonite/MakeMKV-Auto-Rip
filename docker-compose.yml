@@ -5,7 +5,7 @@ services:
     build: 
       context: .
       args:
-        MAKEMKV_VERSION: 1.17.5  # Update this when new MakeMKV versions are released
+        MAKEMKV_VERSION: 1.18.1  # Note: Update this when new MakeMKV versions are released
     container_name: makemkv-auto-rip
     restart: unless-stopped
     environment:
