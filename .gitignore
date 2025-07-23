@@ -12,6 +12,9 @@ coverage/
 # Test results
 test-results/
 
+# Test log files
+test-logs-*
+
 # Vitest temporary files
 .vitest/
 
