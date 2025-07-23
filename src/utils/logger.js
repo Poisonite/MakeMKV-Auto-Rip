@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { format } from "date-fns";
+import { AppConfig } from "../config/index.js";
 
 /**
  * Color styling functions using chalk
@@ -24,7 +25,9 @@ export const colors = {
  */
 export class Logger {
   static info(message, title = null) {
-    const timestamp = colors.time(format(new Date(), "h:mm:ss a"));
+    const timeFormat =
+      AppConfig.logTimeFormat === "12hr" ? "h:mm:ss a" : "HH:mm:ss";
+    const timestamp = colors.time(format(new Date(), timeFormat));
     const dash = colors.dash(" - ");
     const infoText = colors.info(message);
 
@@ -36,7 +39,9 @@ export class Logger {
   }
 
   static error(message, details = null) {
-    const timestamp = colors.time(format(new Date(), "h:mm:ss a"));
+    const timeFormat =
+      AppConfig.logTimeFormat === "12hr" ? "h:mm:ss a" : "HH:mm:ss";
+    const timestamp = colors.time(format(new Date(), timeFormat));
     const dash = colors.dash(" - ");
     const errorText = colors.error(message);
 

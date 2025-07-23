@@ -63,10 +63,11 @@ The application follows strict separation of concerns:
 
 - **Responsibility**: Orchestrates the ripping process
 - **Key Features**:
-  - Parallel processing of multiple discs
+  - Configurable parallel or sequential processing of multiple discs
   - Progress tracking and result aggregation
   - Error handling and recovery
   - Integration with logging and drive management
+  - Support for async/sync ripping modes for optimal SSD/HDD performance
 
 #### DriveService
 
@@ -75,6 +76,9 @@ The application follows strict separation of concerns:
   - `loadAllDrives()` - Closes/loads all optical drives
   - `ejectAllDrives()` - Ejects all optical drives
   - `loadDrivesWithWait()` - Loads drives with user guidance
+- **Configuration Integration**:
+  - Separate control for loading and ejecting operations
+  - Independent enable/disable options for each drive operation
 
 ### Error Handling Strategy
 
@@ -92,9 +96,9 @@ The application implements a multi-layered error handling approach:
 ```
 1. User Input (CLI) → 2. Configuration Validation → 3. Drive Loading (if enabled)
                                     ↓
-8. Results Display ← 7. Drive Ejection ← 6. Parallel Ripping ← 5. Disc Detection
-                                    ↓
-                            4. Title Analysis
+8. Results Display ← 7. Drive Ejection (if enabled) ← 6. Configurable Ripping ← 5. Disc Detection
+                                    ↓                        (Async/Sync)              ↓
+                                                                            4. Title Analysis
 ```
 
 ### Command Processing
@@ -124,16 +128,28 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 
 ## 📊 Performance Considerations
 
-### Parallel Processing
+### Configurable Processing Modes
 
-Thanks to contributions of @ThreeHats and @Adam8234, we support parallel processing for multiple disc operations:
+We support both parallel and sequential processing for multiple disc operations:
+(Thanks to the contributions of @ThreeHats and @Adam8234 for the original parallel processing logic)
+
+**Async Mode (Parallel - Default):**
 
 ```javascript
 const promises = discs.map((disc) => ripDisc(disc));
 await Promise.all(promises);
 ```
 
-This change can reduce total ripping time significantly when multiple drives are available.
+**Sync Mode (Sequential):**
+
+```javascript
+for (const disc of discs) {
+  await ripDisc(disc);
+}
+```
+
+- **Async mode** reduces total ripping time when writing to solid state storage (like a SSD)
+- **Sync mode** is ideal for HDDs where concurrent write streams significantly impact performance
 
 ### Memory Management
 
@@ -192,7 +208,7 @@ MakeMKV output follows a structured format that the application parses:
 
 ## 🔮 Future Considerations
 
-### Potential Enhancements
+### Potential Future Enhancements
 
 1. **Cross-Platform Support** - Linux and macOS compatibility
 2. **Metadata Integration** - Automatic movie information lookup (renaming to match Plex conventions)

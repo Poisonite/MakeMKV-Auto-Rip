@@ -13,19 +13,33 @@ export class AppConfig {
   }
 
   static get isFileLogEnabled() {
-    return config.get("Path.logToFiles.Enabled").toLowerCase() === "true";
+    return config.get("Path.logging.toFiles").toLowerCase() === "true";
   }
 
   static get logDir() {
-    return config.get("Path.logToFiles.Dir");
+    return config.get("Path.logging.Dir");
   }
 
-  static get isEjectEnabled() {
-    return config.get("Path.ejectDVDs.Enabled").toLowerCase() === "true";
+  static get logTimeFormat() {
+    const format = config.get("Path.logging.timeFormat").toLowerCase();
+    return format === "24hr" ? "24hr" : "12hr";
+  }
+
+  static get isLoadDrivesEnabled() {
+    return config.get("Path.loadDrives.Enabled").toLowerCase() === "true";
+  }
+
+  static get isEjectDrivesEnabled() {
+    return config.get("Path.ejectDrives.Enabled").toLowerCase() === "true";
   }
 
   static get isRipAllEnabled() {
     return config.get("Path.ripAll.Enabled").toLowerCase() === "true";
+  }
+
+  static get rippingMode() {
+    const mode = config.get("Path.rippingMode.Mode").toLowerCase();
+    return mode === "sync" ? "sync" : "async";
   }
 
   static get makeMKVExecutable() {
