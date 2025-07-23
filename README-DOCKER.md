@@ -2,6 +2,8 @@
 
 Get MakeMKV Auto Rip running in Docker with just a few commands. Perfect for Linux servers, NAS systems, or anyone wanting a containerized solution.
 
+**Note:** This Docker implementation compiles MakeMKV from official source code following the [official Linux installation instructions](https://forum.makemkv.com/forum/viewtopic.php?f=3&t=224) to ensure compatibility and proper licensing.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -67,7 +69,7 @@ cp config/default.json my-config.json
 
 ## 🔑 MakeMKV License
 
-**Free Trial:** Works for 30 days without a license.
+**Free Trial:** Works for 30 days without a license (standard MakeMKV evaluation period).
 
 **For Continued Use:**
 1. Buy a license from [makemkv.com](https://makemkv.com/buy/)

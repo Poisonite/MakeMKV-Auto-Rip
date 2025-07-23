@@ -2,27 +2,27 @@ version: '3.8'
 
 services:
   makemkv-auto-rip:
-    build: .
+    build: 
+      context: .
+      args:
+        MAKEMKV_VERSION: 1.17.5  # Update this when new MakeMKV versions are released
     container_name: makemkv-auto-rip
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - DOCKER_CONTAINER=true
     volumes:
-      # Mount your DVD/Blu-ray drives (adjust device paths as needed)
-      - /dev/sr0:/dev/sr0:ro
-      - /dev/sr1:/dev/sr1:ro
       # Mount media output directory
       - ./media:/app/media
-      # Mount logs directory
+      # Mount logs directory  
       - ./logs:/app/logs
-      # Mount custom config if needed
-      - ./config/default.json:/app/config/default.json:ro
+      # Mount custom config if needed (optional)
+      - ./config/production.json:/app/config/production.json:ro
     devices:
-      # Grant access to optical drives
+      # Grant access to optical drives (adjust device paths as needed)
       - /dev/sr0:/dev/sr0:ro
       - /dev/sr1:/dev/sr1:ro
-    privileged: true  # Required for device access
+    privileged: true  # Required for optical drive access
     stdin_open: true  # Keep STDIN open for interactive CLI
     tty: true         # Allocate a pseudo-TTY for colored output
 
