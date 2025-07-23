@@ -52,8 +52,7 @@
     "dependencies": {
         "chalk": "^5.4.1",
         "config": "^4.0.1",
-        "date-fns": "^4.1.0",
-        "win-eject": "^1.0.2"
+        "date-fns": "^4.1.0"
     },
     "devDependencies": {
         "vitest": "^3.2.4",
