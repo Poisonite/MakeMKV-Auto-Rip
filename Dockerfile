@@ -1,11 +1,15 @@
 # MakeMKV Auto Rip Docker Image
 FROM node:22-alpine
 
-# Install MakeMKV dependencies
+# Install MakeMKV and configure it properly
 RUN apk add --no-cache \
     makemkv \
     makemkv-con \
-    && mkdir -p /app/media /app/logs
+    && mkdir -p /app/media /app/logs \
+    && mkdir -p /home/makemkv/.MakeMKV \
+    && echo 'app_Key = ""' > /home/makemkv/.MakeMKV/settings.conf \
+    && echo '# Add your MakeMKV registration key above if you have one' >> /home/makemkv/.MakeMKV/settings.conf \
+    && echo '# For evaluation purposes, MakeMKV will work for 30 days without a key' >> /home/makemkv/.MakeMKV/settings.conf
 
 # Set working directory
 WORKDIR /app

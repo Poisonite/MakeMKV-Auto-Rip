@@ -204,6 +204,18 @@ makemkvcon -r info disc:{driveNumber}
 makemkvcon -r mkv disc:{driveNumber} {fileNumber} "{outputPath}"
 ```
 
+### Cross-Platform Adaptation
+
+The application automatically adapts to different environments:
+
+| Feature | Windows | Docker/Linux |
+|---------|---------|--------------|
+| MakeMKV Path | `"C:\Program Files (x86)\MakeMKV\makemkvcon.exe"` | `makemkvcon` |
+| Drive Loading | Enabled (win-eject) | Disabled (not applicable) |
+| Drive Ejection | Enabled (win-eject) | Disabled (not applicable) |
+| File Paths | Windows-style (`\`) | Unix-style (`/`) |
+| Time Format | 12hr (default) | 24hr (production) |
+
 ### Output Parsing
 
 MakeMKV output follows a structured format that the application parses:

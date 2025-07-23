@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Optional dependencies for cross-platform compatibility
 - **Cross-platform compatibility** - Windows-specific features gracefully disabled on other platforms
   - Docker environment detection
+  - Comprehensive test coverage for Docker functionality and cross-platform behavior
   - Conditional import of Windows-only dependencies
   - Linux-compatible MakeMKV executable paths
 - **Advanced drive management** - Separate configuration options for loading and ejecting drives

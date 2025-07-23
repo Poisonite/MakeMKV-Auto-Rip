@@ -73,8 +73,7 @@ export class AppConfig {
    * @returns {boolean}
    */
   static get isDockerEnvironment() {
-    return process.env.DOCKER_CONTAINER === "true" || 
-           (process.env.NODE_ENV === "production" && process.env.DOCKER_CONTAINER !== "false");
+    return process.env.DOCKER_CONTAINER === "true";
   }
 
   /**

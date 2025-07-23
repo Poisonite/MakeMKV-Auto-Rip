@@ -1,359 +1,193 @@
-# MakeMKV Auto Rip - Docker Guide
+# MakeMKV Auto Rip - Docker Setup Guide
 
-This guide covers how to use MakeMKV Auto Rip with Docker for cross-platform deployment.
+Get MakeMKV Auto Rip running in Docker with just a few commands. Perfect for Linux servers, NAS systems, or anyone wanting a containerized solution.
 
-## 🐳 Quick Start with Docker
+## 🚀 Quick Start
 
 ### Prerequisites
-
 - Docker and Docker Compose installed
-- Optical drives accessible to the host system
-- MakeMKV registration key (for commercial use)
+- DVD/Blu-ray drives connected to your system
+- Basic familiarity with command line
 
-### Using Docker Compose (Recommended)
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/poisonite/MakeMKV-Auto-Rip.git
-   cd MakeMKV-Auto-Rip
-   ```
-
-2. **Start the container:**
-   ```bash
-   npm run docker:run
-   # or directly: docker-compose up -d
-   ```
-
-3. **View logs:**
-   ```bash
-   npm run docker:logs
-   # or directly: docker-compose logs -f
-   ```
-
-4. **Stop the container:**
-   ```bash
-   npm run docker:stop
-   # or directly: docker-compose down
-   ```
-
-### Manual Docker Commands
-
-1. **Build the image:**
-   ```bash
-   npm run docker:build
-   # or directly: docker build -t makemkv-auto-rip .
-   ```
-
-2. **Run the container:**
-   ```bash
-   docker run -it --rm \
-     --privileged \
-     --device=/dev/sr0:/dev/sr0:ro \
-     --device=/dev/sr1:/dev/sr1:ro \
-     -v ./media:/app/media \
-     -v ./logs:/app/logs \
-     -v ./config/default.json:/app/config/default.json:ro \
-     makemkv-auto-rip
-   ```
-
-## 📁 Volume Configuration
-
-### Required Volumes
-
-| Volume | Purpose | Example |
-|--------|---------|---------|
-| `/app/media` | Output directory for ripped files | `-v ./media:/app/media` |
-| `/app/logs` | Log file storage | `-v ./logs:/app/logs` |
-
-### Optional Volumes
-
-| Volume | Purpose | Example |
-|--------|---------|---------|
-| `/app/config/default.json` | Custom configuration | `-v ./config/default.json:/app/config/default.json:ro` |
-
-### Device Access
-
-Optical drives must be mounted as devices:
-
+### 1. Get the Code
 ```bash
-# For first optical drive
---device=/dev/sr0:/dev/sr0:ro
+git clone https://github.com/poisonite/MakeMKV-Auto-Rip.git
+cd MakeMKV-Auto-Rip
+```
 
-# For second optical drive  
---device=/dev/sr1:/dev/sr1:ro
+### 2. Start Ripping
+```bash
+# Create output directories
+mkdir -p media logs
 
-# For DVD/CD drives (alternative naming)
---device=/dev/dvd:/dev/dvd:ro
---device=/dev/cdrom:/dev/cdrom:ro
+# Start the container
+docker-compose up -d
+
+# Watch it work
+docker-compose logs -f
+```
+
+That's it! Insert a disc and the container will automatically detect and start ripping.
+
+## 📁 File Organization
+
+After running, you'll have:
+```
+MakeMKV-Auto-Rip/
+├── media/          # Your ripped movies appear here
+├── logs/           # Application logs
+└── docker-compose.yml
 ```
 
 ## ⚙️ Configuration
 
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DOCKER_CONTAINER` | `true` | Automatically set in container |
-| `NODE_ENV` | `production` | Runtime environment |
-
-### Docker-Specific Behavior
-
-When running in Docker, the application automatically:
-
-- **Disables drive loading/ejecting** (Windows-only features)
-- **Uses system MakeMKV executable** (instead of Windows path)
-- **Adapts file paths** for Linux filesystem
-- **Logs informative messages** about disabled features
-
-### Custom Configuration
-
-Create a custom `config/default.json`:
-
-```json
-{
-    "Path": {
-        "mkvDir": {
-            "Dir": "/usr/bin"
-        },
-        "movieRips": {
-            "Dir": "/app/media"
-        },
-        "logging": {
-            "toFiles": "true",
-            "Dir": "/app/logs",
-            "timeFormat": "24hr"
-        },
-        "loadDrives": {
-            "Enabled": "false"
-        },
-        "ejectDrives": {
-            "Enabled": "false"
-        },
-        "ripAll": {
-            "Enabled": "false"
-        },
-        "rippingMode": {
-            "Mode": "async"
-        }
-    }
-}
+### Find Your Drives
+First, identify your optical drives:
+```bash
+ls -la /dev/sr*
+# Example output: /dev/sr0, /dev/sr1
 ```
 
-## 🔍 Troubleshooting
+### Multiple Drives
+Edit `docker-compose.yml` to add more drives:
+```yaml
+devices:
+  - /dev/sr0:/dev/sr0:ro
+  - /dev/sr1:/dev/sr1:ro
+  - /dev/sr2:/dev/sr2:ro  # Add more as needed
+```
 
-### Common Issues
+### Custom Settings
+Want to change ripping behavior? Copy and modify the config:
+```bash
+cp config/default.json my-config.json
+# Edit my-config.json with your preferences
+# Mount it: -v $(pwd)/my-config.json:/app/config/default.json:ro
+```
 
-#### Drive Not Detected
+## 🔑 MakeMKV License
+
+**Free Trial:** Works for 30 days without a license.
+
+**For Continued Use:**
+1. Buy a license from [makemkv.com](https://makemkv.com/buy/)
+2. Add it to your setup:
 
 ```bash
-# Check if drives are visible to the host
-lsblk
+# Method 1: Environment variable
+echo "MAKEMKV_KEY=your-license-key" >> .env
+
+# Method 2: Settings file
+echo 'app_Key = "your-license-key"' > makemkv-settings.conf
+# Then mount it in docker-compose.yml
+```
+
+## 📊 Monitoring Your Rips
+
+### Watch Progress
+```bash
+# Live logs
+docker-compose logs -f
+
+# Just the latest
+docker logs makemkv-auto-rip --tail 50
+```
+
+### Check Status
+```bash
+# Is it running?
+docker ps | grep makemkv
+
+# How much space is it using?
+du -sh media/
+
+# Resource usage
+docker stats makemkv-auto-rip
+```
+
+## 🔧 Common Issues
+
+### "No drives detected"
+```bash
+# Check drives are accessible
 ls -la /dev/sr*
 
-# Verify container has access
-docker exec -it makemkv-auto-rip ls -la /dev/sr*
+# Make sure docker-compose.yml includes your drives
+# Restart if you added drives: docker-compose restart
 ```
 
-#### Permission Denied
-
+### "Permission denied"
 ```bash
-# Add your user to the cdrom group
-sudo usermod -a -G cdrom $USER
-
-# Or run with --privileged flag
-docker run --privileged ...
+# Fix directory permissions
+sudo chown -R $USER:$USER media logs
+chmod 755 media logs
 ```
 
-#### MakeMKV Not Found
-
+### "Container keeps restarting"
 ```bash
-# Check if MakeMKV is installed in container
-docker exec -it makemkv-auto-rip which makemkvcon
+# Check what's wrong
+docker-compose logs
 
-# Verify MakeMKV installation
-docker exec -it makemkv-auto-rip makemkvcon --version
+# Common cause: missing drives in docker-compose.yml
 ```
 
-### Debug Mode
+## 🎯 Pro Tips
 
-Run with interactive terminal for debugging:
+### Performance
+- **Use SSD storage** for the `media` folder if possible
+- **Don't run on the same drive** as your OS if you can avoid it
+- **One disc at a time** usually works best
 
+### Organization
 ```bash
-docker run -it --rm \
-  --privileged \
-  --device=/dev/sr0:/dev/sr0:ro \
-  -v ./media:/app/media \
-  -v ./logs:/app/logs \
-  makemkv-auto-rip bash
+# Organize by date
+mkdir -p media/$(date +%Y-%m-%d)
+
+# Or by disc type
+mkdir -p media/{movies,tv-shows,documentaries}
 ```
 
-### Log Analysis
-
+### Automation
 ```bash
-# View container logs
-docker-compose logs -f makemkv-auto-rip
+# Auto-start on boot
+docker-compose up -d --restart unless-stopped
 
-# Check application logs
-tail -f ./logs/*.log
-
-# View system logs
-journalctl -u docker
+# Auto-cleanup logs
+docker system prune -f --volumes
 ```
 
-## 🏗️ Advanced Usage
+## 🔄 Maintenance
 
-### Custom Dockerfile
-
-Extend the base image for custom requirements:
-
-```dockerfile
-FROM makemkv-auto-rip:latest
-
-# Install additional tools
-RUN apk add --no-cache \
-    mediainfo \
-    ffmpeg
-
-# Add custom scripts
-COPY custom-scripts/ /app/scripts/
-
-# Override entrypoint
-ENTRYPOINT ["/app/scripts/custom-entrypoint.sh"]
-```
-
-### Kubernetes Deployment
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: makemkv-auto-rip
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: makemkv-auto-rip
-  template:
-    metadata:
-      labels:
-        app: makemkv-auto-rip
-    spec:
-      containers:
-      - name: makemkv-auto-rip
-        image: makemkv-auto-rip:latest
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - name: media-storage
-          mountPath: /app/media
-        - name: logs-storage
-          mountPath: /app/logs
-        - name: optical-drive
-          mountPath: /dev/sr0
-      volumes:
-      - name: media-storage
-        persistentVolumeClaim:
-          claimName: media-pvc
-      - name: logs-storage
-        persistentVolumeClaim:
-          claimName: logs-pvc
-      - name: optical-drive
-        hostPath:
-          path: /dev/sr0
-```
-
-### Docker Swarm
-
-```yaml
-version: '3.8'
-
-services:
-  makemkv-auto-rip:
-    image: makemkv-auto-rip:latest
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.optical-drives == true
-    volumes:
-      - media:/app/media
-      - logs:/app/logs
-    devices:
-      - /dev/sr0:/dev/sr0:ro
-    privileged: true
-
-volumes:
-  media:
-    driver: local
-  logs:
-    driver: local
-```
-
-## 🔒 Security Considerations
-
-### Privileged Mode
-
-The container runs in privileged mode for hardware access:
-
-- **Required for**: Optical drive access
-- **Risk**: Full system access
-- **Mitigation**: Use specific device mounts when possible
-
-### User Permissions
-
-```dockerfile
-# Container runs as non-root user
-USER makemkv (uid: 1001)
-
-# File permissions
-RUN chown -R makemkv:makemkv /app
-```
-
-### Volume Security
-
+### Updates
 ```bash
-# Restrict volume permissions
-chmod 755 ./media ./logs
-chown 1001:1001 ./media ./logs
+# Get latest version
+git pull
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
-## 📊 Performance Optimization
-
-### Resource Limits
-
-```yaml
-services:
-  makemkv-auto-rip:
-    image: makemkv-auto-rip:latest
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-```
-
-### Storage Optimization
-
+### Cleanup
 ```bash
-# Use SSD for media output (faster parallel ripping)
-docker run -v /fast-ssd/media:/app/media ...
+# Remove old containers
+docker system prune
 
-# Use HDD for logs (lower priority)
-docker run -v /slow-hdd/logs:/app/logs ...
+# Check disk usage
+docker system df
 ```
 
-## 🆘 Support
+### Backup
+```bash
+# Save your setup
+tar -czf makemkv-backup.tar.gz docker-compose.yml config/ media/
+```
 
-If you encounter issues with Docker deployment:
+## 🆘 Need Help?
 
-1. Check the [main README](README.md) for general troubleshooting
-2. Review Docker logs: `docker-compose logs -f`
-3. Verify system requirements and permissions
-4. Open an issue on GitHub with:
-   - Docker version (`docker --version`)
-   - System information (`uname -a`)
-   - Container logs
-   - Steps to reproduce the issue
+1. **Check the logs first:** `docker-compose logs -f`
+2. **Verify your drives:** `ls -la /dev/sr*`
+3. **Test MakeMKV directly:** `docker exec -it makemkv-auto-rip makemkvcon info`
+4. **Still stuck?** Open an issue on GitHub with your logs
+
+---
+
+**Want technical details?** Check [PROJECT-INFO.md](PROJECT-INFO.md) for architecture information.
