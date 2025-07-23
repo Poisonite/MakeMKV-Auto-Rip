@@ -338,9 +338,7 @@ The package is configured for cross-platform distribution:
 
 1. **macOS Native Support** - Native drive operations for macOS
 2. **Metadata Integration** - Automatic movie information lookup (renaming to match Plex conventions)
-3. **Web Interface** - Browser-based management console
-4. **Kubernetes Support** - Scalable container orchestration
-5. **ARM Architecture** - Support for ARM-based containers
+3. **Kubernetes Support** - Scalable container orchestration
    ... TBD
 
 ### Technical Debt

@@ -158,7 +158,7 @@ We're planning to add:
 
 ## 🌍 Cross-Platform Support
 
-Full cross-platform support now available!
+Cross-platform support now available!
 
 - **Windows** - Full native support with drive loading/ejecting
 - **Linux** - Dockerized support with all ripping functionality
