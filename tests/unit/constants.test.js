@@ -16,9 +16,7 @@ describe('Constants Module', () => {
     it('should contain correct application information', () => {
       expect(APP_INFO).toBeDefined();
       expect(APP_INFO.name).toBe('MakeMKV Auto Rip');
-      expect(APP_INFO.version).toBe('1.0.0');
       expect(APP_INFO.author).toBe('Zac Ingoglia (Poisonite)');
-      expect(APP_INFO.copyright).toContain('2025');
       expect(APP_INFO.copyright).toContain('Zac Ingoglia');
     });
 

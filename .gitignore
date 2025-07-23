@@ -11,6 +11,9 @@ coverage/
 
 # Test results
 test-results/
+test-media/
+test-temp/
+test-logs/
 
 # Test log files
 test-logs*

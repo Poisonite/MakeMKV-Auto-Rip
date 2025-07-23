@@ -38,7 +38,10 @@
         "TV",
         "TV Show",
         "Series",
-        "Disc"
+        "Disc",
+        "UHD",
+        "4K",
+        "BD 100"
     ],
     "author": "Zac Ingoglia",
     "license": "GPL-3.0-or-later",

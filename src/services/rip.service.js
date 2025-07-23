@@ -5,6 +5,7 @@ import { FileSystemUtils } from "../utils/filesystem.js";
 import { ValidationUtils } from "../utils/validation.js";
 import { DiscService } from "./disc.service.js";
 import { DriveService } from "./drive.service.js";
+import { safeExit } from "../utils/process.js";
 
 /**
  * Service for handling DVD/Blu-ray ripping operations
@@ -36,7 +37,7 @@ export class RipService {
     } catch (error) {
       Logger.error("Critical error during ripping process", error);
       await this.ejectDiscs();
-      process.exit(1);
+      safeExit(1, "Critical error during ripping process");
     }
   }
 

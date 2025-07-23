@@ -6,7 +6,7 @@ export const APP_INFO = Object.freeze({
   name: "MakeMKV Auto Rip",
   version: "1.0.0",
   author: "Zac Ingoglia (Poisonite)",
-  copyright: "Copyright (C) 2025 Zac Ingoglia (Poisonite)",
+  copyright: "- Created By: Zac Ingoglia (Poisonite)",
 });
 
 export const MEDIA_TYPES = Object.freeze({

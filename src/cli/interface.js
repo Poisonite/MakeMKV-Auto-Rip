@@ -1,6 +1,7 @@
 import { Logger, colors } from "../utils/logger.js";
 import { RipService } from "../services/rip.service.js";
 import { APP_INFO, MENU_OPTIONS } from "../constants/index.js";
+import { safeExit, isTestEnvironment } from "../utils/process.js";
 
 /**
  * Command-line interface for user interaction
@@ -64,7 +65,13 @@ export class CLIInterface {
       await this.handleUserChoice(answer);
     } catch (error) {
       Logger.error("Critical Error, Must Abort!", error);
-      process.exit(1);
+
+      // In test environments, re-throw the error for proper testing
+      if (isTestEnvironment()) {
+        throw error;
+      }
+
+      safeExit(1, "Critical Error, Must Abort!");
     }
   }
 
@@ -78,7 +85,7 @@ export class CLIInterface {
       const { stdin, stdout } = process;
 
       if (!stdin || !stdout) {
-        reject(new Error('Standard input/output streams are not available'));
+        reject(new Error("Standard input/output streams are not available"));
         return;
       }
 
@@ -90,7 +97,7 @@ export class CLIInterface {
         stdin.off("error", onError);
         stdin.pause();
         if (data === null || data === undefined) {
-          reject(new Error('Received null or undefined data'));
+          reject(new Error("Received null or undefined data"));
           return;
         }
         resolve(data.toString().trim());
@@ -124,12 +131,12 @@ export class CLIInterface {
 
       case MENU_OPTIONS.EXIT:
         Logger.info("Exiting...");
-        process.exit(0);
+        safeExit(0, "User requested exit");
         break;
 
       default:
         Logger.info("Invalid option selected. Exiting...");
-        process.exit(0);
+        safeExit(0, "Invalid option selected");
         break;
     }
   }

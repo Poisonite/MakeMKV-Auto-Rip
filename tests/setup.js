@@ -3,12 +3,12 @@
  * This file runs before all tests and sets up the testing environment
  */
 
-import { vi } from 'vitest';
-import fs from 'fs';
-import path from 'path';
+import { vi } from "vitest";
+import fs from "fs";
+import path from "path";
 
 // Mock external dependencies that require system resources
-vi.mock('win-eject', () => ({
+vi.mock("win-eject", () => ({
   default: {
     eject: vi.fn((drive, callback) => {
       // Simulate successful eject
@@ -17,36 +17,36 @@ vi.mock('win-eject', () => ({
     close: vi.fn((drive, callback) => {
       // Simulate successful close
       setTimeout(() => callback(), 100);
-    })
-  }
+    }),
+  },
 }));
 
 // Mock child_process exec for MakeMKV commands
-vi.mock('child_process', async () => {
-  const actual = await vi.importActual('child_process');
+vi.mock("child_process", async () => {
+  const actual = await vi.importActual("child_process");
   return {
     ...actual,
     exec: vi.fn((command, callback) => {
       // Mock different MakeMKV command responses
-      if (command.includes('info disc:index')) {
+      if (command.includes("info disc:index")) {
         // Mock drive info response
         const mockOutput = `DRV:0,2,999,1,"BD-ROM HL-DT-ST BD-RE  BH16NS40 1.02d","Test Movie Title","/dev/sr0"
 DRV:1,0,999,0,"","",""`;
-        callback(null, mockOutput, '');
-      } else if (command.includes('info disc:')) {
+        callback(null, mockOutput, "");
+      } else if (command.includes("info disc:")) {
         // Mock disc info response
         const mockOutput = `TINFO:0,9,0,"1:23:45"
 TINFO:1,9,0,"0:45:12"
 TINFO:2,9,0,"2:15:30"`;
-        callback(null, mockOutput, '');
-      } else if (command.includes('mkv disc:')) {
+        callback(null, mockOutput, "");
+      } else if (command.includes("mkv disc:")) {
         // Mock ripping response
         const mockOutput = `MSG:5036,0,1,"Copy complete. 1 titles saved."`;
-        callback(null, mockOutput, '');
+        callback(null, mockOutput, "");
       } else {
-        callback(null, '', '');
+        callback(null, "", "");
       }
-    })
+    }),
   };
 });
 
@@ -54,10 +54,29 @@ TINFO:2,9,0,"2:15:30"`;
 const originalFs = { ...fs };
 
 // Create test directories if they don't exist
-const testDirs = ['./test-temp', './test-logs', './test-media'];
-testDirs.forEach(dir => {
+const testDirs = [
+  "./test-temp",
+  "./test-temp/makemkv",
+  "./test-logs",
+  "./test-media",
+];
+
+// Ensure test directories exist
+testDirs.forEach((dir) => {
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log(`Created test directory: ${dir}`);
+    }
+  } catch (error) {
+    console.warn(`Failed to create test directory ${dir}:`, error.message);
+  }
+});
+
+// Verify directories were created
+testDirs.forEach((dir) => {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    console.error(`Test directory ${dir} was not created!`);
   }
 });
 
@@ -65,29 +84,29 @@ testDirs.forEach(dir => {
 globalThis.TEST_CONFIG = {
   // Test configuration paths
   testPaths: {
-    mkvDir: './test-temp/makemkv',
-    movieRips: './test-media',
-    logs: './test-logs'
+    mkvDir: "./test-temp/makemkv",
+    movieRips: "./test-media",
+    logs: "./test-logs",
   },
-  
+
   // Mock MakeMKV responses
   mockResponses: {
     driveInfo: `DRV:0,2,999,1,"BD-ROM HL-DT-ST BD-RE  BH16NS40 1.02d","Test Movie Title","/dev/sr0"`,
     discInfo: `TINFO:0,9,0,"1:23:45"
 TINFO:1,9,0,"0:45:12"
 TINFO:2,9,0,"2:15:30"`,
-    ripComplete: `MSG:5036,0,1,"Copy complete. 1 titles saved."`
-  }
+    ripComplete: `MSG:5036,0,1,"Copy complete. 1 titles saved."`,
+  },
 };
 
 // Setup test environment variables
-process.env.NODE_ENV = 'test';
-process.env.NODE_CONFIG_DIR = './tests/fixtures/config';
+process.env.NODE_ENV = "test";
+process.env.NODE_CONFIG_DIR = "./tests/fixtures/config";
 
 // Cleanup function for after tests
 globalThis.testCleanup = () => {
   // Clean up test directories
-  testDirs.forEach(dir => {
+  testDirs.forEach((dir) => {
     if (fs.existsSync(dir)) {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -95,8 +114,8 @@ globalThis.testCleanup = () => {
 };
 
 // Auto-cleanup on process exit
-process.on('exit', globalThis.testCleanup);
-process.on('SIGINT', () => {
+process.on("exit", globalThis.testCleanup);
+process.on("SIGINT", () => {
   globalThis.testCleanup();
   process.exit();
 });

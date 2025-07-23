@@ -146,12 +146,12 @@ export class DiscService {
       const videoTimeArray = videoTimeString.split(":");
       const videoTimeSeconds = ValidationUtils.getTimeInSeconds(videoTimeArray);
 
-      if (videoTimeSeconds > maxValue) {
+      if (videoTimeSeconds >= maxValue) {
         maxValue = videoTimeSeconds;
         myTitleSectionValue = line.split(",")[0].replace("TINFO:", "");
       }
     });
 
-    return myTitleSectionValue;
+    return myTitleSectionValue || "0";
   }
 }
