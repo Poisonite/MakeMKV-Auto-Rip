@@ -11,10 +11,13 @@ vi.mock("config", () => ({
       const mockConfig = {
         "Path.mkvDir.Dir": "C:\\Program Files (x86)\\MakeMKV",
         "Path.movieRips.Dir": ".\\media",
-        "Path.logToFiles.Enabled": "true",
-        "Path.logToFiles.Dir": ".\\logs",
-        "Path.ejectDVDs.Enabled": "true",
+        "Path.logging.toFiles": "true",
+        "Path.logging.Dir": ".\\logs",
+        "Path.logging.timeFormat": "12hr",
+        "Path.loadDrives.Enabled": "true",
+        "Path.ejectDrives.Enabled": "true",
         "Path.ripAll.Enabled": "false",
+        "Path.rippingMode.Mode": "async",
       };
       return mockConfig[key];
     }),
@@ -70,7 +73,7 @@ describe("AppConfig", () => {
 
         const result = AppConfig.isFileLogEnabled;
 
-        expect(config.get).toHaveBeenCalledWith("Path.logToFiles.Enabled");
+        expect(config.get).toHaveBeenCalledWith("Path.logging.toFiles");
         expect(result).toBe(true);
       });
 
@@ -111,7 +114,7 @@ describe("AppConfig", () => {
       it("should return correct log directory", () => {
         const result = AppConfig.logDir;
 
-        expect(config.get).toHaveBeenCalledWith("Path.logToFiles.Dir");
+        expect(config.get).toHaveBeenCalledWith("Path.logging.Dir");
         expect(result).toBe(".\\logs");
       });
 
@@ -124,20 +127,20 @@ describe("AppConfig", () => {
       });
     });
 
-    describe("isEjectEnabled", () => {
+    describe("isEjectDrivesEnabled", () => {
       it("should return true when ejection is enabled", () => {
         config.get.mockReturnValueOnce("true");
 
-        const result = AppConfig.isEjectEnabled;
+        const result = AppConfig.isEjectDrivesEnabled;
 
-        expect(config.get).toHaveBeenCalledWith("Path.ejectDVDs.Enabled");
+        expect(config.get).toHaveBeenCalledWith("Path.ejectDrives.Enabled");
         expect(result).toBe(true);
       });
 
       it("should return false when ejection is disabled", () => {
         config.get.mockReturnValueOnce("false");
 
-        const result = AppConfig.isEjectEnabled;
+        const result = AppConfig.isEjectDrivesEnabled;
 
         expect(result).toBe(false);
       });
@@ -145,7 +148,7 @@ describe("AppConfig", () => {
       it("should be case insensitive", () => {
         config.get.mockReturnValueOnce("True");
 
-        const result = AppConfig.isEjectEnabled;
+        const result = AppConfig.isEjectDrivesEnabled;
 
         expect(result).toBe(true);
       });
@@ -217,7 +220,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return "";
         if (key === "Path.movieRips.Dir") return ".\\media";
-        if (key === "Path.logToFiles.Dir") return ".\\logs";
+        if (key === "Path.logging.Dir") return ".\\logs";
         return "default";
       });
 
@@ -230,7 +233,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return "C:\\MakeMKV";
         if (key === "Path.movieRips.Dir") return "";
-        if (key === "Path.logToFiles.Dir") return ".\\logs";
+        if (key === "Path.logging.Dir") return ".\\logs";
         return "default";
       });
 
@@ -243,7 +246,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return "C:\\MakeMKV";
         if (key === "Path.movieRips.Dir") return ".\\media";
-        if (key === "Path.logToFiles.Dir") return "";
+        if (key === "Path.logging.Dir") return "";
         return "default";
       });
 
@@ -256,7 +259,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return "";
         if (key === "Path.movieRips.Dir") return "";
-        if (key === "Path.logToFiles.Dir") return ".\\logs";
+        if (key === "Path.logging.Dir") return ".\\logs";
         return "default";
       });
 
@@ -269,7 +272,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return "   ";
         if (key === "Path.movieRips.Dir") return ".\\media";
-        if (key === "Path.logToFiles.Dir") return ".\\logs";
+        if (key === "Path.logging.Dir") return ".\\logs";
         return "default";
       });
 
@@ -282,7 +285,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return null;
         if (key === "Path.movieRips.Dir") return ".\\media";
-        if (key === "Path.logToFiles.Dir") return ".\\logs";
+        if (key === "Path.logging.Dir") return ".\\logs";
         return "default";
       });
 
@@ -295,7 +298,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return undefined;
         if (key === "Path.movieRips.Dir") return ".\\media";
-        if (key === "Path.logToFiles.Dir") return ".\\logs";
+        if (key === "Path.logging.Dir") return ".\\logs";
         return "default";
       });
 
@@ -308,7 +311,7 @@ describe("AppConfig", () => {
       config.get.mockImplementation((key) => {
         if (key === "Path.mkvDir.Dir") return "C:\\MakeMKV";
         if (key === "Path.movieRips.Dir") return "/home/user/movies";
-        if (key === "Path.logToFiles.Dir") return "./logs/output";
+        if (key === "Path.logging.Dir") return "./logs/output";
         return "default";
       });
 
@@ -323,10 +326,13 @@ describe("AppConfig", () => {
         const realConfig = {
           "Path.mkvDir.Dir": "C:\\Program Files (x86)\\MakeMKV",
           "Path.movieRips.Dir": ".\\media",
-          "Path.logToFiles.Enabled": "true",
-          "Path.logToFiles.Dir": ".\\logs",
-          "Path.ejectDVDs.Enabled": "true",
+          "Path.logging.toFiles": "true",
+          "Path.logging.Dir": ".\\logs",
+          "Path.logging.timeFormat": "12hr",
+          "Path.loadDrives.Enabled": "true",
+          "Path.ejectDrives.Enabled": "true",
           "Path.ripAll.Enabled": "false",
+          "Path.rippingMode.Mode": "async",
         };
         return realConfig[key];
       });
@@ -335,7 +341,7 @@ describe("AppConfig", () => {
       expect(AppConfig.movieRipsDir).toBe(".\\media");
       expect(AppConfig.isFileLogEnabled).toBe(true);
       expect(AppConfig.logDir).toBe(".\\logs");
-      expect(AppConfig.isEjectEnabled).toBe(true);
+      expect(AppConfig.isEjectDrivesEnabled).toBe(true);
       expect(AppConfig.isRipAllEnabled).toBe(false);
       expect(AppConfig.makeMKVExecutable).toBe(
         '"C:\\Program Files (x86)\\MakeMKV\\makemkvcon.exe"'

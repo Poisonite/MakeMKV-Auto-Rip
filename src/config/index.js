@@ -17,7 +17,8 @@ export class AppConfig {
   }
 
   static get isFileLogEnabled() {
-    return config.get("Path.logging.toFiles").toLowerCase() === "true";
+    const value = config.get("Path.logging.toFiles");
+    return value ? value.toLowerCase() === "true" : false;
   }
 
   static get logDir() {
@@ -25,16 +26,19 @@ export class AppConfig {
   }
 
   static get logTimeFormat() {
-    const format = config.get("Path.logging.timeFormat").toLowerCase();
-    return format === "24hr" ? "24hr" : "12hr";
+    const format = config.get("Path.logging.timeFormat");
+    if (!format) return "12hr";
+    return format.toLowerCase() === "24hr" ? "24hr" : "12hr";
   }
 
   static get isLoadDrivesEnabled() {
-    return config.get("Path.loadDrives.Enabled").toLowerCase() === "true";
+    const value = config.get("Path.loadDrives.Enabled");
+    return value ? value.toLowerCase() === "true" : false;
   }
 
   static get isEjectDrivesEnabled() {
-    return config.get("Path.ejectDrives.Enabled").toLowerCase() === "true";
+    const value = config.get("Path.ejectDrives.Enabled");
+    return value ? value.toLowerCase() === "true" : false;
   }
 
   static get isRipAllEnabled() {
@@ -43,8 +47,9 @@ export class AppConfig {
   }
 
   static get rippingMode() {
-    const mode = config.get("Path.rippingMode.Mode").toLowerCase();
-    return mode === "sync" ? "sync" : "async";
+    const mode = config.get("Path.rippingMode.Mode");
+    if (!mode) return "async";
+    return mode.toLowerCase() === "sync" ? "sync" : "async";
   }
 
   static get makeMKVExecutable() {

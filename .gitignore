@@ -15,6 +15,7 @@ test-results/
 test-media/
 test-temp/
 test-logs/
+test-*
 
 # Test log files
 test-logs*

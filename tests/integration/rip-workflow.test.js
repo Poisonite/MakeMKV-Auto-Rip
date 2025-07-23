@@ -232,7 +232,7 @@ DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
     it("should handle eject disabled workflow", async () => {
       // Mock AppConfig to disable ejection
       const { AppConfig } = await import("../../src/config/index.js");
-      vi.spyOn(AppConfig, "isEjectEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "makeMKVExecutable", "get").mockReturnValue('"test"');
@@ -272,7 +272,7 @@ DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
     it("should handle rip all enabled workflow", async () => {
       // Mock AppConfig to enable rip all
       const { AppConfig } = await import("../../src/config/index.js");
-      vi.spyOn(AppConfig, "isEjectEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "makeMKVExecutable", "get").mockReturnValue('"test"');
@@ -367,7 +367,7 @@ DRV:1,2,999,1,"DVD","Test Movie","/dev/sr1"`;
     it("should handle file logging when enabled", async () => {
       // Mock AppConfig to enable file logging
       const { AppConfig } = await import("../../src/config/index.js");
-      vi.spyOn(AppConfig, "isEjectEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "makeMKVExecutable", "get").mockReturnValue('"test"');

@@ -29,9 +29,15 @@ describe("Application End-to-End Tests", () => {
       Path: {
         mkvDir: { Dir: testTempDir },
         movieRips: { Dir: path.join(testTempDir, "rips") },
-        logToFiles: { Enabled: "true", Dir: path.join(testTempDir, "logs") },
-        ejectDVDs: { Enabled: "false" }, // Disable for testing
+        logging: {
+          toFiles: "true",
+          Dir: path.join(testTempDir, "logs"),
+          timeFormat: "12hr",
+        },
+        loadDrives: { Enabled: "true" },
+        ejectDrives: { Enabled: "false" }, // Disable for testing
         ripAll: { Enabled: "false" },
+        rippingMode: { Mode: "async" },
       },
     };
 
@@ -69,7 +75,7 @@ describe("Application End-to-End Tests", () => {
       expect(AppConfig.mkvDir).toBe(testTempDir);
       expect(AppConfig.movieRipsDir).toContain("rips");
       expect(AppConfig.isFileLogEnabled).toBe(true);
-      expect(AppConfig.isEjectEnabled).toBe(false);
+      expect(AppConfig.isEjectDrivesEnabled).toBe(false);
     });
 
     it("should handle missing configuration gracefully", async () => {
@@ -359,7 +365,11 @@ describe("Application End-to-End Tests", () => {
         Path: {
           mkvDir: { Dir: "" }, // Empty path
           movieRips: { Dir: "./test" },
-          logToFiles: { Enabled: "true", Dir: "./logs" },
+          logging: {
+            toFiles: "true",
+            Dir: "./logs",
+            timeFormat: "12hr",
+          },
         },
       };
 
