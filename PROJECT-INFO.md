@@ -67,7 +67,7 @@ The application follows strict separation of concerns:
   - Progress tracking and result aggregation
   - Error handling and recovery
   - Integration with logging and drive management
-  - Support for async/sync ripping modes for optimal HDD performance
+  - Support for async/sync ripping modes for optimal SSD/HDD performance
 
 #### DriveService
 
@@ -76,7 +76,7 @@ The application follows strict separation of concerns:
   - `loadAllDrives()` - Closes/loads all optical drives
   - `ejectAllDrives()` - Ejects all optical drives
   - `loadDrivesWithWait()` - Loads drives with user guidance
-- **Configuration Integration**: 
+- **Configuration Integration**:
   - Separate control for loading and ejecting operations
   - Independent enable/disable options for each drive operation
 
@@ -130,22 +130,25 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 
 ### Configurable Processing Modes
 
-Thanks to contributions of @ThreeHats and @Adam8234, we support both parallel and sequential processing for multiple disc operations:
+We support both parallel and sequential processing for multiple disc operations:
+(Thanks to the contributions of @ThreeHats and @Adam8234 for the original parallel processing logic)
 
 **Async Mode (Parallel - Default):**
+
 ```javascript
 const promises = discs.map((disc) => ripDisc(disc));
 await Promise.all(promises);
 ```
 
 **Sync Mode (Sequential):**
+
 ```javascript
 for (const disc of discs) {
   await ripDisc(disc);
 }
 ```
 
-- **Async mode** reduces total ripping time when multiple drives are available
+- **Async mode** reduces total ripping time when writing to solid state storage (like a SSD)
 - **Sync mode** is ideal for HDDs where concurrent write streams significantly impact performance
 
 ### Memory Management
@@ -204,12 +207,6 @@ MakeMKV output follows a structured format that the application parses:
 - **Performance**: Parallel processing and optimized resource usage
 
 ## 🔮 Future Considerations
-
-### Recent Enhancements (V1.0.0)
-
-1. **Granular Drive Control** - Split drive operations into separate load/eject configuration options
-2. **Performance Optimization** - Added sync/async ripping modes for HDD optimization
-3. **Enhanced Logging** - Configurable 12hr/24hr time format options
 
 ### Potential Future Enhancements
 

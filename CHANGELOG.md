@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Complete project refactor** with proper Node.js project structure
 - **Modular architecture** with clear separation of concerns into services, utilities, and CLI modules
 - **Advanced drive management** - Separate configuration options for loading and ejecting drives
-- **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal HDD performance
+- **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal SSD or HDD performance
 - **Enhanced logging** - Configurable 12hr/24hr time format options for console timestamps (defaults to 12hr)
 - **Standalone drive commands** - `npm run load` and `npm run eject` for drive operations without ripping
 - **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @ThreeHats and @Adam8234)
@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Migration Notes
 
 **Configuration Updates Required:**
+
 - Replace `"ejectDVDs": {"Enabled": "true"}` with:
   ```json
   "loadDrives": {"Enabled": "true"},

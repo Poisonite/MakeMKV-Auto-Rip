@@ -25,7 +25,8 @@ export const colors = {
  */
 export class Logger {
   static info(message, title = null) {
-    const timeFormat = AppConfig.logTimeFormat === "12hr" ? "h:mm:ss a" : "HH:mm:ss";
+    const timeFormat =
+      AppConfig.logTimeFormat === "12hr" ? "h:mm:ss a" : "HH:mm:ss";
     const timestamp = colors.time(format(new Date(), timeFormat));
     const dash = colors.dash(" - ");
     const infoText = colors.info(message);
@@ -38,7 +39,8 @@ export class Logger {
   }
 
   static error(message, details = null) {
-    const timeFormat = AppConfig.logTimeFormat === "12hr" ? "h:mm:ss a" : "HH:mm:ss";
+    const timeFormat =
+      AppConfig.logTimeFormat === "12hr" ? "h:mm:ss a" : "HH:mm:ss";
     const timestamp = colors.time(format(new Date(), timeFormat));
     const dash = colors.dash(" - ");
     const errorText = colors.error(message);

@@ -16,7 +16,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 - **📁 Unique folders** - No file conflicts with automatic folder naming
 - **📊 Flexible processing** - Choose between parallel (async) or sequential (sync) ripping
 - **📝 Comprehensive logging** - Optional detailed operation logs with configurable 12hr/24hr console timestamps
-- **⚡ Advanced drive management** - Separate control for loading and ejecting drives
+- **⚡ Advanced drive management** - Separate control for loading and ejecting drive preferences
 - **🎛️ Flexible options** - Rip longest title or all titles (that are above MakeMKV min title length)
 
 ## 🚀 Quick Start
@@ -99,19 +99,18 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 - **`movieRips`** - Root directory for ripped movies (create a dedicated folder)
 - **`logging.toFiles`** - Enable/disable writing MakeMKV output to log files (`"true"` or `"false"`)
 - **`logging.Dir`** - Directory for log files
-- **`logging.timeFormat`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`, defaults to 12hr)
+- **`logging.timeFormat`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
 - **`loadDrives.Enabled`** - Auto-load/close drives before ripping (`"true"` or `"false"`)
 - **`ejectDrives.Enabled`** - Auto-eject drives after ripping completion (`"true"` or `"false"`)
 - **`ripAll.Enabled`** - Rip all titles that are above MakeMKV min length (`"true"`) or longest title only (`"false"`)
-- **`rippingMode.Mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing, defaults to async)
+- **`rippingMode.Mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing
 
 **Important Notes:**
 
 - Use double backslashes (`\\`) in Windows paths
 - Create directories manually - the application cannot create missing folders
 - Recommended: Create dedicated folders for movie rips and logs
-- **New in V1.0.0**: Separate `loadDrives` and `ejectDrives` options replace the old `ejectDVDs` setting
-- **Performance tip**: Use `"sync"` ripping mode for HDDs where concurrent writes impact performance
+- **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance... for SSDs, `"async"` will yield much better overall performance
 
 ### MakeMKV GUI Configuration
 
