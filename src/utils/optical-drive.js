@@ -132,13 +132,13 @@ export class OpticalDriveUtil {
 
   static async #windowsEjectDrive(drive) {
     // Use MCI (Media Control Interface) - available on all supported Windows versions
-    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\") public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door open', $null, 0, [IntPtr]::Zero)"`;
+    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door open', $null, 0, [IntPtr]::Zero)"`;
     await execAsync(command);
   }
 
   static async #windowsLoadDrive(drive) {
     // Use MCI command to close the drive
-    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\") public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
+    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
     await execAsync(command);
   }
 

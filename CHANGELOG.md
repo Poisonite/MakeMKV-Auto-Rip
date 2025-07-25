@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration validation** - Automatic validation of required configuration settings
 - **Better user experience** - 5-second wait after loading drives with user instructions
 - **Cross-platform drive operations** - New optical drive utility supports Windows, macOS, and Linux for loading and ejecting optical drives without external dependencies
+- **Fixed Windows PowerShell syntax error** - Corrected DllImport attribute syntax in MCI commands for proper compilation
 
 ### Changed
 
