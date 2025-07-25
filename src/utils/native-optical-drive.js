@@ -73,7 +73,7 @@ class NativeOpticalDrive {
 
         if (!success) {
           throw new Error(
-            `Drive eject failed. This could be due to: 1) Drive is in use/has disc, 2) Requires administrator privileges for DeviceIoControl method, or 3) Hardware doesn't support software eject.`
+            `Drive eject failed. This could be due to: 1) Drive is in use/has disc, 2) Hardware doesn't support software eject, or 3) System audio/MCI subsystem unavailable.`
           );
         }
 
@@ -116,7 +116,7 @@ class NativeOpticalDrive {
 
         if (!success) {
           throw new Error(
-            `Drive load failed. Loading drives typically requires administrator privileges on Windows. Try running as administrator or manually close the drive tray.`
+            `Drive load failed. This could be due to: 1) Drive is already closed, 2) Hardware doesn't support software loading, or 3) System audio/MCI subsystem unavailable.`
           );
         }
 

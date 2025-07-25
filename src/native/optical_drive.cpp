@@ -2,10 +2,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winioctl.h>
-#include <shlobj.h>  // For Shell API
+#include <mmsystem.h>  // For MCI functions
 #include <string>
 #include <vector>
 #include <iostream>
+#pragma comment(lib, "winmm.lib")  // Link the multimedia library
 #endif
 
 using namespace Napi;
@@ -14,18 +15,26 @@ using namespace Napi;
 // Windows-specific implementation using DeviceIoControl
 class WindowsOpticalDrive {
 public:
-    // Try Shell API approach (doesn't require admin)
-    static bool EjectDriveShellAPI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying Shell API eject for: " << driveLetter << std::endl;
+    // Try MCI approach (doesn't require admin) - same as PowerShell scripts used
+    static bool EjectDriveMCI(const std::string& driveLetter) {
+        std::cout << "[C++ DEBUG] Trying MCI eject (no admin required)" << std::endl;
         
-        // Convert drive letter to root path (e.g., "D:" -> "D:\\")
-        std::string rootPath = driveLetter.substr(0, 1) + ":\\";
+        // Use MCI command to open CD/DVD drive - same as PowerShell scripts
+        MCIERROR result = mciSendStringA("set cdaudio door open", NULL, 0, NULL);
         
-        // Try using SHEjectDisk - this often works without admin rights
-        DWORD result = SHEjectDisk(rootPath.c_str());
+        std::cout << "[C++ DEBUG] mciSendString eject result: " << result << std::endl;
+        return result == 0;  // 0 means success for MCI
+    }
+    
+    // Try MCI approach for loading (doesn't require admin)
+    static bool LoadDriveMCI(const std::string& driveLetter) {
+        std::cout << "[C++ DEBUG] Trying MCI load (no admin required)" << std::endl;
         
-        std::cout << "[C++ DEBUG] SHEjectDisk result: " << result << std::endl;
-        return result == ERROR_SUCCESS;
+        // Use MCI command to close CD/DVD drive - same as PowerShell scripts
+        MCIERROR result = mciSendStringA("set cdaudio door closed", NULL, 0, NULL);
+        
+        std::cout << "[C++ DEBUG] mciSendString load result: " << result << std::endl;
+        return result == 0;  // 0 means success for MCI
     }
 
     static bool EjectDrive(const std::string& driveLetter) {
@@ -69,11 +78,11 @@ public:
             }
         }
         
-        // DeviceIoControl failed, try Shell API approach
+        // DeviceIoControl failed, try MCI approach
         DWORD error = GetLastError();
-        std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << ", trying Shell API..." << std::endl;
+        std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << ", trying MCI..." << std::endl;
         
-        return EjectDriveShellAPI(driveLetter);
+        return EjectDriveMCI(driveLetter);
     }
 
     static bool LoadDrive(const std::string& driveLetter) {
@@ -117,12 +126,11 @@ public:
             }
         }
         
-        // DeviceIoControl failed - unfortunately there's no Shell API equivalent for loading
+        // DeviceIoControl failed, try MCI approach
         DWORD error = GetLastError();
-        std::cout << "[C++ DEBUG] DeviceIoControl load failed with error: " << error << std::endl;
-        std::cout << "[C++ DEBUG] Note: Loading drives without admin rights is not supported by Windows APIs" << std::endl;
+        std::cout << "[C++ DEBUG] DeviceIoControl load failed with error: " << error << ", trying MCI..." << std::endl;
         
-        return false;
+        return LoadDriveMCI(driveLetter);
     }
 };
 #endif
