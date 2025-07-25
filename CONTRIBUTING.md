@@ -17,10 +17,25 @@ We welcome contributions of all kinds:
 
 ### Prerequisites
 
+#### General Development
+
 - **Node.js** >= 22.0.0
 - **Git** for version control
 - **MakeMKV** installed for testing
-- **Windows** (for now - cross-platform support welcome!)
+
+#### Platform-Specific Requirements
+
+**For Windows Optical Drive Development:**
+
+- **Visual Studio 2022+** with "Desktop development with C++" workload (VS 2022 build tools with that workload will work as well)
+- **Python 3.12+** (for node-gyp compilation)
+- **Windows 10+** (for testing drive operations)
+- **Administrator privileges** (for testing drive control)
+
+**For Other Features:**
+
+- **Any Platform** - Windows, macOS, or Linux
+- **No build tools required** - Uses pre-built native components (only used for Windows anyways)
 
 ### Development Setup
 
@@ -38,6 +53,27 @@ We welcome contributions of all kinds:
    ```bash
    git checkout -b feature/your-feature-name
    ```
+
+### Building Native Components (Windows Development Only)
+
+If you're developing Windows optical drive interaction functionality, you may need to rebuild the native addon:
+
+```bash
+# Build the native addon (requires Visual Studio + Python)
+npm run build
+
+# Build debug version for development
+npm run build:debug
+
+# Clean build artifacts
+npm run clean
+```
+
+**Note:** Most contributors won't need to build native components since:
+
+- Pre-built binaries are included in the repository
+- Only Windows optical drive changes require rebuilding
+- Other features work on all platforms without compilation
 
 ## 📋 Development Guidelines
 

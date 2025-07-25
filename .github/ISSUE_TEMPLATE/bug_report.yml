@@ -79,6 +79,18 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: admin-privileges
+    attributes:
+      label: Administrator Privileges (Windows only)
+      description: Are you running the terminal as administrator? (Important for drive operations)
+      options:
+        - "Yes - Running as administrator"
+        - "No - Running as regular user"
+        - "Not applicable (not Windows)"
+    validations:
+      required: false
+
   - type: textarea
     id: config
     attributes:

@@ -80,6 +80,34 @@ The application follows strict separation of concerns:
   - Separate control for loading and ejecting operations
   - Independent enable/disable options for each drive operation
 
+### Optical Drive Management Architecture
+
+The optical drive management system provides cross-platform drive control with platform-specific optimizations:
+
+#### Cross-Platform Support
+
+- **Windows**: Native C++ addon using DeviceIoControl API
+- **macOS**: Uses `drutil` command-line utility
+- **Linux**: Uses `eject` command and `/sys/block` filesystem
+
+#### Windows Native Implementation
+
+- **Technology**: Node.js C++ addon with N-API
+- **API**: Windows DeviceIoControl with `IOCTL_STORAGE_EJECT_MEDIA` / `IOCTL_STORAGE_LOAD_MEDIA`
+- **Detection**: PowerShell WMI queries (`Win32_CDROMDrive`)
+- **Distribution**: Pre-built binary included in repository
+- **Requirements**: Administrator privileges for hardware access
+
+#### Implementation Details
+
+```
+Detection (All Platforms) → Platform Router → Native Implementation
+        ↓                         ↓                      ↓
+   WMI/lsblk/diskutil     OpticalDriveUtil    Windows: DeviceIoControl
+                                              macOS:   drutil commands
+                                              Linux:   eject/filesystem
+```
+
 ### Error Handling Strategy
 
 The application implements a multi-layered error handling approach:
@@ -117,7 +145,14 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **chalk** - Terminal styling and colors
 - **date-fns** - Modern date/time formatting (replaced moment.js)
 - **config** - Configuration file management
-- **win-eject** - Windows optical drive control
+
+### Native Components
+
+- **Windows C++ Addon** - Pre-built native Node.js addon for Windows optical drive control
+  - Uses Windows DeviceIoControl API for direct hardware access
+  - Requires administrator privileges for optimal functionality
+  - Included as pre-built binary (no compilation required)
+  - Cross-platform fallback for macOS/Linux using system utilities
 
 ### Development Principles
 

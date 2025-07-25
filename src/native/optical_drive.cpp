@@ -2,11 +2,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winioctl.h>
-#include <mmsystem.h>  // For MCI functions
 #include <string>
 #include <vector>
 #include <iostream>
-#pragma comment(lib, "winmm.lib")  // Link the multimedia library
 #endif
 
 using namespace Napi;
@@ -15,59 +13,8 @@ using namespace Napi;
 // Windows-specific implementation using DeviceIoControl
 class WindowsOpticalDrive {
 public:
-    // Try MCI approach (doesn't require admin)
-    static bool EjectDriveMCI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying MCI eject with proper device opening" << std::endl;
-        
-        // First open the cdrom device
-        MCIERROR openResult = mciSendStringA("open cdrom", NULL, 0, NULL);
-        std::cout << "[C++ DEBUG] MCI open cdrom result: " << openResult << std::endl;
-        
-        if (openResult == 0) {
-            // Now eject the drive
-            MCIERROR ejectResult = mciSendStringA("set cdrom door open", NULL, 0, NULL);
-            std::cout << "[C++ DEBUG] MCI cdrom eject result: " << ejectResult << std::endl;
-            
-            // Close the device
-            mciSendStringA("close cdrom", NULL, 0, NULL);
-            
-            return ejectResult == 0;
-        }
-        
-        return false;
-    }
-    
-    // Try MCI approach for loading (doesn't require admin)
-    static bool LoadDriveMCI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying MCI load with proper device opening" << std::endl;
-        
-        // First open the cdrom device
-        MCIERROR openResult = mciSendStringA("open cdrom", NULL, 0, NULL);
-        std::cout << "[C++ DEBUG] MCI open cdrom result: " << openResult << std::endl;
-        
-        if (openResult == 0) {
-            // Now close/load the drive
-            MCIERROR loadResult = mciSendStringA("set cdrom door closed", NULL, 0, NULL);
-            std::cout << "[C++ DEBUG] MCI cdrom load result: " << loadResult << std::endl;
-            
-            // Close the device
-            mciSendStringA("close cdrom", NULL, 0, NULL);
-            
-            return loadResult == 0;
-        }
-        
-        return false;
-    }
-
     static bool EjectDrive(const std::string& driveLetter) {
-        // Debug output to console
-        std::cout << "[C++ DEBUG] EjectDrive received: \"" << driveLetter << "\" (length: " << driveLetter.length() << ")" << std::endl;
-        
-        // First try DeviceIoControl approach (fastest, but requires admin)
         std::wstring devicePath = L"\\\\.\\" + std::wstring(driveLetter.begin(), driveLetter.end());
-        
-        // Debug output for device path
-        std::wcout << L"[C++ DEBUG] Device path: \"" << devicePath << L"\"" << std::endl;
         
         HANDLE hDevice = CreateFileW(
             devicePath.c_str(),
@@ -79,43 +26,28 @@ public:
             NULL
         );
 
-        if (hDevice != INVALID_HANDLE_VALUE) {
-            DWORD bytesReturned;
-            BOOL result = DeviceIoControl(
-                hDevice,
-                IOCTL_STORAGE_EJECT_MEDIA,
-                NULL,
-                0,
-                NULL,
-                0,
-                &bytesReturned,
-                NULL
-            );
-
-            CloseHandle(hDevice);
-            
-            if (result) {
-                std::cout << "[C++ DEBUG] DeviceIoControl eject succeeded" << std::endl;
-                return true;
-            }
+        if (hDevice == INVALID_HANDLE_VALUE) {
+            return false;
         }
-        
-        // DeviceIoControl failed, try MCI approach
-        DWORD error = GetLastError();
-        std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << ", trying MCI..." << std::endl;
-        
-        return EjectDriveMCI(driveLetter);
+
+        DWORD bytesReturned;
+        BOOL result = DeviceIoControl(
+            hDevice,
+            IOCTL_STORAGE_EJECT_MEDIA,
+            NULL,
+            0,
+            NULL,
+            0,
+            &bytesReturned,
+            NULL
+        );
+
+        CloseHandle(hDevice);
+        return result != 0;
     }
 
     static bool LoadDrive(const std::string& driveLetter) {
-        // Debug output to console
-        std::cout << "[C++ DEBUG] LoadDrive received: \"" << driveLetter << "\" (length: " << driveLetter.length() << ")" << std::endl;
-        
-        // First try DeviceIoControl approach (fastest, but requires admin)
         std::wstring devicePath = L"\\\\.\\" + std::wstring(driveLetter.begin(), driveLetter.end());
-        
-        // Debug output for device path
-        std::wcout << L"[C++ DEBUG] Device path: \"" << devicePath << L"\"" << std::endl;
         
         HANDLE hDevice = CreateFileW(
             devicePath.c_str(),
@@ -127,32 +59,24 @@ public:
             NULL
         );
 
-        if (hDevice != INVALID_HANDLE_VALUE) {
-            DWORD bytesReturned;
-            BOOL result = DeviceIoControl(
-                hDevice,
-                IOCTL_STORAGE_LOAD_MEDIA,
-                NULL,
-                0,
-                NULL,
-                0,
-                &bytesReturned,
-                NULL
-            );
-
-            CloseHandle(hDevice);
-            
-            if (result) {
-                std::cout << "[C++ DEBUG] DeviceIoControl load succeeded" << std::endl;
-                return true;
-            }
+        if (hDevice == INVALID_HANDLE_VALUE) {
+            return false;
         }
-        
-        // DeviceIoControl failed, try MCI approach
-        DWORD error = GetLastError();
-        std::cout << "[C++ DEBUG] DeviceIoControl load failed with error: " << error << ", trying MCI..." << std::endl;
-        
-        return LoadDriveMCI(driveLetter);
+
+        DWORD bytesReturned;
+        BOOL result = DeviceIoControl(
+            hDevice,
+            IOCTL_STORAGE_LOAD_MEDIA,
+            NULL,
+            0,
+            NULL,
+            0,
+            &bytesReturned,
+            NULL
+        );
+
+        CloseHandle(hDevice);
+        return result != 0;
     }
 };
 #endif

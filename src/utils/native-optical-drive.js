@@ -1,13 +1,38 @@
 import os from "os";
 import { createRequire } from "module";
 import { Logger } from "./logger.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Native optical drive utilities for Windows using C++ DeviceIoControl API
- * Requires the native C++ addon to be built and available
+ * Requires administrator privileges on Windows
  */
 class NativeOpticalDrive {
   static #nativeAddon = null;
+
+  /**
+   * Check if running as administrator on Windows
+   */
+  static #isWindowsAdmin() {
+    if (os.platform() !== "win32") return true;
+
+    try {
+      // Try to access a admin-only registry key
+      const { execSync } = require("child_process");
+      execSync(
+        'reg query "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion" >nul 2>&1',
+        { stdio: "ignore" }
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   /**
    * Initialize the native addon (lazy loading)
@@ -18,12 +43,31 @@ class NativeOpticalDrive {
         // Create require function for ES modules
         const require = createRequire(import.meta.url);
 
+        // Check if pre-built addon exists
+        const addonPath = path.join(
+          __dirname,
+          "../../build/Release/optical_drive_native.node"
+        );
+        if (!fs.existsSync(addonPath)) {
+          throw new Error(
+            `Pre-built native addon not found at ${addonPath}. This may be a corrupted installation.`
+          );
+        }
+
         // Try to load the native addon
         this.#nativeAddon = require("../../build/Release/optical_drive_native.node");
         Logger.info("Native optical drive addon loaded successfully");
+
+        // Warn if not running as admin
+        if (!this.#isWindowsAdmin()) {
+          Logger.warning(
+            "Not running as administrator - optical drive operations may fail"
+          );
+          Logger.info("For best results, run terminal as administrator");
+        }
       } catch (error) {
         Logger.error(`Failed to load native addon: ${error.message}`);
-        this.#nativeAddon = false; // Mark as failed to avoid retries
+        this.#nativeAddon = false;
         throw new Error(
           `Native optical drive addon is required but failed to load: ${error.message}`
         );
@@ -35,7 +79,6 @@ class NativeOpticalDrive {
    * Check if native addon is available
    */
   static get isNativeAvailable() {
-    // Only available on Windows
     if (os.platform() !== "win32") {
       return false;
     }
@@ -65,23 +108,14 @@ class NativeOpticalDrive {
           driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
 
         const success = this.#nativeAddon.ejectDrive(normalizedDriveLetter);
-        Logger.info(
-          `Native eject drive ${normalizedDriveLetter}: ${
-            success ? "success" : "failed"
-          }`
-        );
 
         if (!success) {
-          throw new Error(
-            `Drive eject failed. This could be due to: 1) Drive is in use/has disc, 2) Hardware doesn't support software eject, or 3) System audio/MCI subsystem unavailable.`
-          );
+          throw new Error(`Eject failed - try running as administrator`);
         }
 
         return success;
       } catch (error) {
-        Logger.error(
-          `Native eject failed for ${driveLetter}: ${error.message}`
-        );
+        Logger.error(`Eject failed for ${driveLetter}: ${error.message}`);
         throw error;
       }
     } else {
@@ -108,21 +142,14 @@ class NativeOpticalDrive {
           driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
 
         const success = this.#nativeAddon.loadDrive(normalizedDriveLetter);
-        Logger.info(
-          `Native load drive ${normalizedDriveLetter}: ${
-            success ? "success" : "failed"
-          }`
-        );
 
         if (!success) {
-          throw new Error(
-            `Drive load failed. This could be due to: 1) Drive is already closed, 2) Hardware doesn't support software loading, or 3) System audio/MCI subsystem unavailable.`
-          );
+          throw new Error(`Load failed - try running as administrator`);
         }
 
         return success;
       } catch (error) {
-        Logger.error(`Native load failed for ${driveLetter}: ${error.message}`);
+        Logger.error(`Load failed for ${driveLetter}: ${error.message}`);
         throw error;
       }
     } else {
