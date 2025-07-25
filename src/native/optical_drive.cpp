@@ -14,7 +14,13 @@ using namespace Napi;
 class WindowsOpticalDrive {
 public:
     static bool EjectDrive(const std::string& driveLetter) {
+        // Debug output to console
+        std::cout << "[C++ DEBUG] EjectDrive received: \"" << driveLetter << "\" (length: " << driveLetter.length() << ")" << std::endl;
+        
         std::wstring devicePath = L"\\\\.\\" + std::wstring(driveLetter.begin(), driveLetter.end());
+        
+        // Debug output for device path
+        std::wcout << L"[C++ DEBUG] Device path: \"" << devicePath << L"\"" << std::endl;
         
         HANDLE hDevice = CreateFileW(
             devicePath.c_str(),
@@ -27,6 +33,8 @@ public:
         );
 
         if (hDevice == INVALID_HANDLE_VALUE) {
+            DWORD error = GetLastError();
+            std::cout << "[C++ DEBUG] CreateFileW failed with error: " << error << std::endl;
             return false;
         }
 
@@ -42,12 +50,23 @@ public:
             NULL
         );
 
+        if (!result) {
+            DWORD error = GetLastError();
+            std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << std::endl;
+        }
+
         CloseHandle(hDevice);
         return result != 0;
     }
 
     static bool LoadDrive(const std::string& driveLetter) {
+        // Debug output to console
+        std::cout << "[C++ DEBUG] LoadDrive received: \"" << driveLetter << "\" (length: " << driveLetter.length() << ")" << std::endl;
+        
         std::wstring devicePath = L"\\\\.\\" + std::wstring(driveLetter.begin(), driveLetter.end());
+        
+        // Debug output for device path
+        std::wcout << L"[C++ DEBUG] Device path: \"" << devicePath << L"\"" << std::endl;
         
         HANDLE hDevice = CreateFileW(
             devicePath.c_str(),
@@ -60,6 +79,8 @@ public:
         );
 
         if (hDevice == INVALID_HANDLE_VALUE) {
+            DWORD error = GetLastError();
+            std::cout << "[C++ DEBUG] CreateFileW failed with error: " << error << std::endl;
             return false;
         }
 
@@ -74,6 +95,11 @@ public:
             &bytesReturned,
             NULL
         );
+
+        if (!result) {
+            DWORD error = GetLastError();
+            std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << std::endl;
+        }
 
         CloseHandle(hDevice);
         return result != 0;

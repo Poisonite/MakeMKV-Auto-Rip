@@ -60,9 +60,28 @@ class NativeOpticalDrive {
 
     if (this.isNativeAvailable) {
       try {
-        const success = this.#nativeAddon.ejectDrive(driveLetter);
+        // Debug logging to understand the drive letter format
         Logger.info(
-          `Native eject drive ${driveLetter}: ${success ? "success" : "failed"}`
+          `[DEBUG] Raw drive letter input: "${driveLetter}" (length: ${driveLetter.length})`
+        );
+        Logger.info(
+          `[DEBUG] Drive letter char codes: ${Array.from(driveLetter)
+            .map((c) => c.charCodeAt(0))
+            .join(", ")}`
+        );
+
+        // Ensure proper format: remove any extra colons and normalize
+        const normalizedDriveLetter =
+          driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
+        Logger.info(
+          `[DEBUG] Normalized drive letter: "${normalizedDriveLetter}"`
+        );
+
+        const success = this.#nativeAddon.ejectDrive(normalizedDriveLetter);
+        Logger.info(
+          `Native eject drive ${normalizedDriveLetter}: ${
+            success ? "success" : "failed"
+          }`
         );
         return success;
       } catch (error) {
@@ -90,9 +109,28 @@ class NativeOpticalDrive {
 
     if (this.isNativeAvailable) {
       try {
-        const success = this.#nativeAddon.loadDrive(driveLetter);
+        // Debug logging to understand the drive letter format
         Logger.info(
-          `Native load drive ${driveLetter}: ${success ? "success" : "failed"}`
+          `[DEBUG] Raw drive letter input for load: "${driveLetter}" (length: ${driveLetter.length})`
+        );
+        Logger.info(
+          `[DEBUG] Drive letter char codes for load: ${Array.from(driveLetter)
+            .map((c) => c.charCodeAt(0))
+            .join(", ")}`
+        );
+
+        // Ensure proper format: remove any extra colons and normalize
+        const normalizedDriveLetter =
+          driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
+        Logger.info(
+          `[DEBUG] Normalized drive letter for load: "${normalizedDriveLetter}"`
+        );
+
+        const success = this.#nativeAddon.loadDrive(normalizedDriveLetter);
+        Logger.info(
+          `Native load drive ${normalizedDriveLetter}: ${
+            success ? "success" : "failed"
+          }`
         );
         return success;
       } catch (error) {
