@@ -15,68 +15,24 @@ using namespace Napi;
 // Windows-specific implementation using DeviceIoControl
 class WindowsOpticalDrive {
 public:
-    // Try MCI approach (doesn't require admin) - same as PowerShell scripts used
+    // Try MCI approach (doesn't require admin)
     static bool EjectDriveMCI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying MCI eject for drive: " << driveLetter << std::endl;
+        std::cout << "[C++ DEBUG] Trying MCI eject (cdrom device type)" << std::endl;
         
-        // Extract just the drive letter (remove colon)
-        std::string driveOnly = driveLetter.substr(0, 1);
+        MCIERROR result = mciSendStringA("set cdrom door open", NULL, 0, NULL);
         
-        // First open the drive as a CDAudio device
-        std::string openCommand = "open " + driveOnly + ": type cdaudio alias drive" + driveOnly;
-        std::cout << "[C++ DEBUG] MCI open command: " << openCommand << std::endl;
-        
-        MCIERROR openResult = mciSendStringA(openCommand.c_str(), NULL, 0, NULL);
-        std::cout << "[C++ DEBUG] MCI open result: " << openResult << std::endl;
-        
-        if (openResult == 0) {
-            // Now eject the drive
-            std::string ejectCommand = "set drive" + driveOnly + " door open";
-            std::cout << "[C++ DEBUG] MCI eject command: " << ejectCommand << std::endl;
-            
-            MCIERROR ejectResult = mciSendStringA(ejectCommand.c_str(), NULL, 0, NULL);
-            std::cout << "[C++ DEBUG] MCI eject result: " << ejectResult << std::endl;
-            
-            // Close the device
-            std::string closeCommand = "close drive" + driveOnly;
-            mciSendStringA(closeCommand.c_str(), NULL, 0, NULL);
-            
-            return ejectResult == 0;
-        }
-        
-        return false;
+        std::cout << "[C++ DEBUG] MCI cdrom eject result: " << result << std::endl;
+        return result == 0;
     }
     
     // Try MCI approach for loading (doesn't require admin)
     static bool LoadDriveMCI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying MCI load for drive: " << driveLetter << std::endl;
+        std::cout << "[C++ DEBUG] Trying MCI load (cdrom device type)" << std::endl;
         
-        // Extract just the drive letter (remove colon)
-        std::string driveOnly = driveLetter.substr(0, 1);
+        MCIERROR result = mciSendStringA("set cdrom door closed", NULL, 0, NULL);
         
-        // First open the drive as a CDAudio device
-        std::string openCommand = "open " + driveOnly + ": type cdaudio alias drive" + driveOnly;
-        std::cout << "[C++ DEBUG] MCI open command: " << openCommand << std::endl;
-        
-        MCIERROR openResult = mciSendStringA(openCommand.c_str(), NULL, 0, NULL);
-        std::cout << "[C++ DEBUG] MCI open result: " << openResult << std::endl;
-        
-        if (openResult == 0) {
-            // Now close/load the drive
-            std::string loadCommand = "set drive" + driveOnly + " door closed";
-            std::cout << "[C++ DEBUG] MCI load command: " << loadCommand << std::endl;
-            
-            MCIERROR loadResult = mciSendStringA(loadCommand.c_str(), NULL, 0, NULL);
-            std::cout << "[C++ DEBUG] MCI load result: " << loadResult << std::endl;
-            
-            // Close the device
-            std::string closeCommand = "close drive" + driveOnly;
-            mciSendStringA(closeCommand.c_str(), NULL, 0, NULL);
-            
-            return loadResult == 0;
-        }
-        
-        return false;
+        std::cout << "[C++ DEBUG] MCI cdrom load result: " << result << std::endl;
+        return result == 0;
     }
 
     static bool EjectDrive(const std::string& driveLetter) {
