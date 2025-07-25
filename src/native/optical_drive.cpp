@@ -17,22 +17,46 @@ class WindowsOpticalDrive {
 public:
     // Try MCI approach (doesn't require admin)
     static bool EjectDriveMCI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying MCI eject (cdrom device type)" << std::endl;
+        std::cout << "[C++ DEBUG] Trying MCI eject with proper device opening" << std::endl;
         
-        MCIERROR result = mciSendStringA("set cdrom door open", NULL, 0, NULL);
+        // First open the cdrom device
+        MCIERROR openResult = mciSendStringA("open cdrom", NULL, 0, NULL);
+        std::cout << "[C++ DEBUG] MCI open cdrom result: " << openResult << std::endl;
         
-        std::cout << "[C++ DEBUG] MCI cdrom eject result: " << result << std::endl;
-        return result == 0;
+        if (openResult == 0) {
+            // Now eject the drive
+            MCIERROR ejectResult = mciSendStringA("set cdrom door open", NULL, 0, NULL);
+            std::cout << "[C++ DEBUG] MCI cdrom eject result: " << ejectResult << std::endl;
+            
+            // Close the device
+            mciSendStringA("close cdrom", NULL, 0, NULL);
+            
+            return ejectResult == 0;
+        }
+        
+        return false;
     }
     
     // Try MCI approach for loading (doesn't require admin)
     static bool LoadDriveMCI(const std::string& driveLetter) {
-        std::cout << "[C++ DEBUG] Trying MCI load (cdrom device type)" << std::endl;
+        std::cout << "[C++ DEBUG] Trying MCI load with proper device opening" << std::endl;
         
-        MCIERROR result = mciSendStringA("set cdrom door closed", NULL, 0, NULL);
+        // First open the cdrom device
+        MCIERROR openResult = mciSendStringA("open cdrom", NULL, 0, NULL);
+        std::cout << "[C++ DEBUG] MCI open cdrom result: " << openResult << std::endl;
         
-        std::cout << "[C++ DEBUG] MCI cdrom load result: " << result << std::endl;
-        return result == 0;
+        if (openResult == 0) {
+            // Now close/load the drive
+            MCIERROR loadResult = mciSendStringA("set cdrom door closed", NULL, 0, NULL);
+            std::cout << "[C++ DEBUG] MCI cdrom load result: " << loadResult << std::endl;
+            
+            // Close the device
+            mciSendStringA("close cdrom", NULL, 0, NULL);
+            
+            return loadResult == 0;
+        }
+        
+        return false;
     }
 
     static bool EjectDrive(const std::string& driveLetter) {
