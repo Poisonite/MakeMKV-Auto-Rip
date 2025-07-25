@@ -3,6 +3,7 @@ import { promisify } from "util";
 import os from "os";
 import fs from "fs/promises";
 import { Logger } from "./logger.js";
+import { NativeOpticalDrive } from "./native-optical-drive.js";
 
 const execAsync = promisify(exec);
 
@@ -104,22 +105,25 @@ export class OpticalDriveUtil {
   // Windows implementation - Compatible with Windows 8/Server 2012 and later
   static async #getWindowsOpticalDrives() {
     try {
-      // Use external PowerShell script for better maintainability and IntelliSense support
-      const scriptPath = new URL('../scripts/windows/detect-drives.ps1', import.meta.url).pathname;
-      const { stdout } = await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`);
+      // Use simplified WMI query for optical drives - more reliable approach
+      const { stdout } = await execAsync(
+        'powershell -Command "Get-WmiObject Win32_CDROMDrive | Select-Object Drive, Caption | ConvertTo-Json"'
+      );
 
       let drives = [];
       if (stdout.trim()) {
         const wmiData = JSON.parse(stdout);
         const driveArray = Array.isArray(wmiData) ? wmiData : [wmiData];
 
-        drives = driveArray.map((drive) => ({
-          id: drive.Drive,
-          path: drive.Drive,
-          description: drive.Description || drive.VolumeName || "Optical Drive",
-          mediaType: drive.MediaType || "Optical",
-          platform: "win32",
-        }));
+        drives = driveArray
+          .filter(drive => drive.Drive) // Only include drives with valid drive letters
+          .map((drive) => ({
+            id: drive.Drive,
+            path: drive.Drive,
+            description: drive.Caption || "Optical Drive",
+            mediaType: "Optical",
+            platform: "win32",
+          }));
       }
 
       return drives;
@@ -130,15 +134,43 @@ export class OpticalDriveUtil {
   }
 
   static async #windowsEjectDrive(drive) {
-    // Use external PowerShell script for better maintainability and IntelliSense support
-    const scriptPath = new URL('../scripts/windows/eject-drive.ps1', import.meta.url).pathname;
-    await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}" -DriveLetter "${drive.id}"`);
+    try {
+      // Try native C++ addon first for better reliability
+      if (NativeOpticalDrive.isNativeAvailable) {
+        const success = await NativeOpticalDrive.ejectDrive(drive.id);
+        if (success) {
+          return;
+        }
+        Logger.warning(`Native eject failed for ${drive.id}, falling back to PowerShell`);
+      }
+
+      // Fallback to PowerShell MCI commands
+      const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door open', $null, 0, [IntPtr]::Zero)"`;
+      await execAsync(command);
+    } catch (error) {
+      Logger.error(`Failed to eject drive ${drive.id}: ${error.message}`);
+      throw error;
+    }
   }
 
   static async #windowsLoadDrive(drive) {
-    // Use external PowerShell script for better maintainability and IntelliSense support
-    const scriptPath = new URL('../scripts/windows/load-drive.ps1', import.meta.url).pathname;
-    await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}" -DriveLetter "${drive.id}"`);
+    try {
+      // Try native C++ addon first for better reliability
+      if (NativeOpticalDrive.isNativeAvailable) {
+        const success = await NativeOpticalDrive.loadDrive(drive.id);
+        if (success) {
+          return;
+        }
+        Logger.warning(`Native load failed for ${drive.id}, falling back to PowerShell`);
+      }
+
+      // Fallback to PowerShell MCI commands
+      const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
+      await execAsync(command);
+    } catch (error) {
+      Logger.error(`Failed to load drive ${drive.id}: ${error.message}`);
+      throw error;
+    }
   }
 
   // macOS implementation - Proper optical drive detection

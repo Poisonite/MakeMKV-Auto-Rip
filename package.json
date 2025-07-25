@@ -16,7 +16,12 @@
         "test:run": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --watch",
-        "test:ui": "vitest --ui"
+        "test:ui": "vitest --ui",
+        "build": "node-gyp rebuild",
+        "build:debug": "node-gyp rebuild --debug",
+        "prebuild": "node-gyp configure",
+        "clean": "node-gyp clean",
+        "install": "npm run build"
     },
     "repository": {
         "type": "git",
