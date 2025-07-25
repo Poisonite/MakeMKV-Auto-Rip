@@ -2,6 +2,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winioctl.h>
+#include <shlobj.h>  // For Shell API
 #include <string>
 #include <vector>
 #include <iostream>
@@ -13,10 +14,25 @@ using namespace Napi;
 // Windows-specific implementation using DeviceIoControl
 class WindowsOpticalDrive {
 public:
+    // Try Shell API approach (doesn't require admin)
+    static bool EjectDriveShellAPI(const std::string& driveLetter) {
+        std::cout << "[C++ DEBUG] Trying Shell API eject for: " << driveLetter << std::endl;
+        
+        // Convert drive letter to root path (e.g., "D:" -> "D:\\")
+        std::string rootPath = driveLetter.substr(0, 1) + ":\\";
+        
+        // Try using SHEjectDisk - this often works without admin rights
+        DWORD result = SHEjectDisk(rootPath.c_str());
+        
+        std::cout << "[C++ DEBUG] SHEjectDisk result: " << result << std::endl;
+        return result == ERROR_SUCCESS;
+    }
+
     static bool EjectDrive(const std::string& driveLetter) {
         // Debug output to console
         std::cout << "[C++ DEBUG] EjectDrive received: \"" << driveLetter << "\" (length: " << driveLetter.length() << ")" << std::endl;
         
+        // First try DeviceIoControl approach (fastest, but requires admin)
         std::wstring devicePath = L"\\\\.\\" + std::wstring(driveLetter.begin(), driveLetter.end());
         
         // Debug output for device path
@@ -32,37 +48,39 @@ public:
             NULL
         );
 
-        if (hDevice == INVALID_HANDLE_VALUE) {
-            DWORD error = GetLastError();
-            std::cout << "[C++ DEBUG] CreateFileW failed with error: " << error << std::endl;
-            return false;
+        if (hDevice != INVALID_HANDLE_VALUE) {
+            DWORD bytesReturned;
+            BOOL result = DeviceIoControl(
+                hDevice,
+                IOCTL_STORAGE_EJECT_MEDIA,
+                NULL,
+                0,
+                NULL,
+                0,
+                &bytesReturned,
+                NULL
+            );
+
+            CloseHandle(hDevice);
+            
+            if (result) {
+                std::cout << "[C++ DEBUG] DeviceIoControl eject succeeded" << std::endl;
+                return true;
+            }
         }
-
-        DWORD bytesReturned;
-        BOOL result = DeviceIoControl(
-            hDevice,
-            IOCTL_STORAGE_EJECT_MEDIA,
-            NULL,
-            0,
-            NULL,
-            0,
-            &bytesReturned,
-            NULL
-        );
-
-        if (!result) {
-            DWORD error = GetLastError();
-            std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << std::endl;
-        }
-
-        CloseHandle(hDevice);
-        return result != 0;
+        
+        // DeviceIoControl failed, try Shell API approach
+        DWORD error = GetLastError();
+        std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << ", trying Shell API..." << std::endl;
+        
+        return EjectDriveShellAPI(driveLetter);
     }
 
     static bool LoadDrive(const std::string& driveLetter) {
         // Debug output to console
         std::cout << "[C++ DEBUG] LoadDrive received: \"" << driveLetter << "\" (length: " << driveLetter.length() << ")" << std::endl;
         
+        // First try DeviceIoControl approach (fastest, but requires admin)
         std::wstring devicePath = L"\\\\.\\" + std::wstring(driveLetter.begin(), driveLetter.end());
         
         // Debug output for device path
@@ -78,31 +96,33 @@ public:
             NULL
         );
 
-        if (hDevice == INVALID_HANDLE_VALUE) {
-            DWORD error = GetLastError();
-            std::cout << "[C++ DEBUG] CreateFileW failed with error: " << error << std::endl;
-            return false;
+        if (hDevice != INVALID_HANDLE_VALUE) {
+            DWORD bytesReturned;
+            BOOL result = DeviceIoControl(
+                hDevice,
+                IOCTL_STORAGE_LOAD_MEDIA,
+                NULL,
+                0,
+                NULL,
+                0,
+                &bytesReturned,
+                NULL
+            );
+
+            CloseHandle(hDevice);
+            
+            if (result) {
+                std::cout << "[C++ DEBUG] DeviceIoControl load succeeded" << std::endl;
+                return true;
+            }
         }
-
-        DWORD bytesReturned;
-        BOOL result = DeviceIoControl(
-            hDevice,
-            IOCTL_STORAGE_LOAD_MEDIA,
-            NULL,
-            0,
-            NULL,
-            0,
-            &bytesReturned,
-            NULL
-        );
-
-        if (!result) {
-            DWORD error = GetLastError();
-            std::cout << "[C++ DEBUG] DeviceIoControl failed with error: " << error << std::endl;
-        }
-
-        CloseHandle(hDevice);
-        return result != 0;
+        
+        // DeviceIoControl failed - unfortunately there's no Shell API equivalent for loading
+        DWORD error = GetLastError();
+        std::cout << "[C++ DEBUG] DeviceIoControl load failed with error: " << error << std::endl;
+        std::cout << "[C++ DEBUG] Note: Loading drives without admin rights is not supported by Windows APIs" << std::endl;
+        
+        return false;
     }
 };
 #endif

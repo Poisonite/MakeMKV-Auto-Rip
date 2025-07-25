@@ -123,25 +123,13 @@ export class OpticalDriveUtil {
 
         drives = driveArray
           .filter((drive) => drive.Drive) // Only include drives with valid drive letters
-          .map((drive) => {
-            // Debug logging to see what WMI returns
-            Logger.info(
-              `[DEBUG] WMI returned drive: "${drive.Drive}" caption: "${drive.Caption}"`
-            );
-            Logger.info(
-              `[DEBUG] Drive char codes: ${Array.from(drive.Drive)
-                .map((c) => c.charCodeAt(0))
-                .join(", ")}`
-            );
-
-            return {
-              id: drive.Drive,
-              path: drive.Drive,
-              description: drive.Caption || "Optical Drive",
-              mediaType: "Optical",
-              platform: "win32",
-            };
-          });
+          .map((drive) => ({
+            id: drive.Drive,
+            path: drive.Drive,
+            description: drive.Caption || "Optical Drive",
+            mediaType: "Optical",
+            platform: "win32",
+          }));
       }
 
       return drives;

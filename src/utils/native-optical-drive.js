@@ -60,22 +60,9 @@ class NativeOpticalDrive {
 
     if (this.isNativeAvailable) {
       try {
-        // Debug logging to understand the drive letter format
-        Logger.info(
-          `[DEBUG] Raw drive letter input: "${driveLetter}" (length: ${driveLetter.length})`
-        );
-        Logger.info(
-          `[DEBUG] Drive letter char codes: ${Array.from(driveLetter)
-            .map((c) => c.charCodeAt(0))
-            .join(", ")}`
-        );
-
         // Ensure proper format: remove any extra colons and normalize
         const normalizedDriveLetter =
           driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
-        Logger.info(
-          `[DEBUG] Normalized drive letter: "${normalizedDriveLetter}"`
-        );
 
         const success = this.#nativeAddon.ejectDrive(normalizedDriveLetter);
         Logger.info(
@@ -83,6 +70,13 @@ class NativeOpticalDrive {
             success ? "success" : "failed"
           }`
         );
+
+        if (!success) {
+          throw new Error(
+            `Drive eject failed. This could be due to: 1) Drive is in use/has disc, 2) Requires administrator privileges for DeviceIoControl method, or 3) Hardware doesn't support software eject.`
+          );
+        }
+
         return success;
       } catch (error) {
         Logger.error(
@@ -109,22 +103,9 @@ class NativeOpticalDrive {
 
     if (this.isNativeAvailable) {
       try {
-        // Debug logging to understand the drive letter format
-        Logger.info(
-          `[DEBUG] Raw drive letter input for load: "${driveLetter}" (length: ${driveLetter.length})`
-        );
-        Logger.info(
-          `[DEBUG] Drive letter char codes for load: ${Array.from(driveLetter)
-            .map((c) => c.charCodeAt(0))
-            .join(", ")}`
-        );
-
         // Ensure proper format: remove any extra colons and normalize
         const normalizedDriveLetter =
           driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
-        Logger.info(
-          `[DEBUG] Normalized drive letter for load: "${normalizedDriveLetter}"`
-        );
 
         const success = this.#nativeAddon.loadDrive(normalizedDriveLetter);
         Logger.info(
@@ -132,6 +113,13 @@ class NativeOpticalDrive {
             success ? "success" : "failed"
           }`
         );
+
+        if (!success) {
+          throw new Error(
+            `Drive load failed. Loading drives typically requires administrator privileges on Windows. Try running as administrator or manually close the drive tray.`
+          );
+        }
+
         return success;
       } catch (error) {
         Logger.error(`Native load failed for ${driveLetter}: ${error.message}`);
