@@ -104,10 +104,9 @@ export class OpticalDriveUtil {
   // Windows implementation - Compatible with Windows 8/Server 2012 and later
   static async #getWindowsOpticalDrives() {
     try {
-      // Use WMI to get optical drives - works on all Windows versions we support
-      const { stdout } = await execAsync(
-        'powershell -Command "Get-WmiObject -Class Win32_CDROMDrive | ConvertTo-Json"'
-      );
+      // Use external PowerShell script for better maintainability and IntelliSense support
+      const scriptPath = new URL('../scripts/windows/detect-drives.ps1', import.meta.url).pathname;
+      const { stdout } = await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`);
 
       let drives = [];
       if (stdout.trim()) {
@@ -117,7 +116,7 @@ export class OpticalDriveUtil {
         drives = driveArray.map((drive) => ({
           id: drive.Drive,
           path: drive.Drive,
-          description: drive.Caption || drive.Name || "Optical Drive",
+          description: drive.Description || drive.VolumeName || "Optical Drive",
           mediaType: drive.MediaType || "Optical",
           platform: "win32",
         }));
@@ -131,15 +130,15 @@ export class OpticalDriveUtil {
   }
 
   static async #windowsEjectDrive(drive) {
-    // Use MCI (Media Control Interface) - available on all supported Windows versions
-    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door open', $null, 0, [IntPtr]::Zero)"`;
-    await execAsync(command);
+    // Use external PowerShell script for better maintainability and IntelliSense support
+    const scriptPath = new URL('../scripts/windows/eject-drive.ps1', import.meta.url).pathname;
+    await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}" -DriveLetter "${drive.id}"`);
   }
 
   static async #windowsLoadDrive(drive) {
-    // Use MCI command to close the drive
-    const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
-    await execAsync(command);
+    // Use external PowerShell script for better maintainability and IntelliSense support
+    const scriptPath = new URL('../scripts/windows/load-drive.ps1', import.meta.url).pathname;
+    await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}" -DriveLetter "${drive.id}"`);
   }
 
   // macOS implementation - Proper optical drive detection
