@@ -1,4 +1,4 @@
-import { spawn, exec } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
 import os from "os";
 import fs from "fs/promises";
@@ -10,9 +10,10 @@ const execAsync = promisify(exec);
 /**
  * Cross-platform optical drive utility for ejecting and loading CD/DVD/Blu-ray drives
  * Supports Windows, macOS, and Linux
- * 
- * Windows Support: Windows 8/Server 2012 and later (including Windows 10, 11, Server 2016+)
+ *
+ * Active Windows Support: Windows 8/Server 2012 and later (including Windows 10, 11, Server 2016+)
  * Uses MCI (Media Control Interface) which is available across all supported Windows versions
+ * Note: May work on older Windows versions, but not tested or officially supported
  */
 export class OpticalDriveUtil {
   static #platform = os.platform();
@@ -74,7 +75,9 @@ export class OpticalDriveUtil {
       }
       Logger.info(`Ejected drive: ${drive.description}`);
     } catch (error) {
-      Logger.warning(`Failed to eject drive ${drive.description}: ${error.message}`);
+      Logger.warning(
+        `Failed to eject drive ${drive.description}: ${error.message}`
+      );
     }
   }
 
@@ -98,14 +101,17 @@ export class OpticalDriveUtil {
       }
       Logger.info(`Loaded drive: ${drive.description}`);
     } catch (error) {
-      Logger.warning(`Failed to load drive ${drive.description}: ${error.message}`);
+      Logger.warning(
+        `Failed to load drive ${drive.description}: ${error.message}`
+      );
     }
   }
 
-  // Windows implementation - Compatible with Windows 8/Server 2012 and later
+  // Windows implementation - Hybrid approach: WMI detection + native operations
+  // Uses PowerShell WMI for reliable drive detection, native C++ for eject/load operations
   static async #getWindowsOpticalDrives() {
     try {
-      // Use simplified WMI query for optical drives - more reliable approach
+      // Use PowerShell WMI query for reliable optical drive detection
       const { stdout } = await execAsync(
         'powershell -Command "Get-WmiObject Win32_CDROMDrive | Select-Object Drive, Caption | ConvertTo-Json"'
       );
@@ -116,7 +122,7 @@ export class OpticalDriveUtil {
         const driveArray = Array.isArray(wmiData) ? wmiData : [wmiData];
 
         drives = driveArray
-          .filter(drive => drive.Drive) // Only include drives with valid drive letters
+          .filter((drive) => drive.Drive) // Only include drives with valid drive letters
           .map((drive) => ({
             id: drive.Drive,
             path: drive.Drive,
@@ -135,18 +141,16 @@ export class OpticalDriveUtil {
 
   static async #windowsEjectDrive(drive) {
     try {
-      // Try native C++ addon first for better reliability
+      // Use native C++ addon for reliable Windows optical drive control
       if (NativeOpticalDrive.isNativeAvailable) {
         const success = await NativeOpticalDrive.ejectDrive(drive.id);
         if (success) {
           return;
         }
-        Logger.warning(`Native eject failed for ${drive.id}, falling back to PowerShell`);
+        throw new Error(`Native eject failed for drive ${drive.id}`);
+      } else {
+        throw new Error("Native optical drive addon is not available");
       }
-
-      // Fallback to PowerShell MCI commands
-      const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door open', $null, 0, [IntPtr]::Zero)"`;
-      await execAsync(command);
     } catch (error) {
       Logger.error(`Failed to eject drive ${drive.id}: ${error.message}`);
       throw error;
@@ -155,18 +159,16 @@ export class OpticalDriveUtil {
 
   static async #windowsLoadDrive(drive) {
     try {
-      // Try native C++ addon first for better reliability
+      // Use native C++ addon for reliable Windows optical drive control
       if (NativeOpticalDrive.isNativeAvailable) {
         const success = await NativeOpticalDrive.loadDrive(drive.id);
         if (success) {
           return;
         }
-        Logger.warning(`Native load failed for ${drive.id}, falling back to PowerShell`);
+        throw new Error(`Native load failed for drive ${drive.id}`);
+      } else {
+        throw new Error("Native optical drive addon is not available");
       }
-
-      // Fallback to PowerShell MCI commands
-      const command = `powershell -Command "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class MCI { [DllImport(\\"winmm.dll\\")] public static extern long mciSendString(string command, System.Text.StringBuilder returnValue, int returnLength, IntPtr hwndCallback); }'; [MCI]::mciSendString('set cdaudio door closed', $null, 0, [IntPtr]::Zero)"`;
-      await execAsync(command);
     } catch (error) {
       Logger.error(`Failed to load drive ${drive.id}: ${error.message}`);
       throw error;
@@ -202,18 +204,22 @@ export class OpticalDriveUtil {
       if (drives.length === 0) {
         try {
           const { stdout: diskutilOut } = await execAsync("diskutil list");
-          const lines = diskutilOut.split('\n');
-          
+          const lines = diskutilOut.split("\n");
+
           for (const line of lines) {
             // Look for optical disk entries
-            if (line.includes('(optical)') || line.includes('CD_ROM') || line.includes('DVD')) {
+            if (
+              line.includes("(optical)") ||
+              line.includes("CD_ROM") ||
+              line.includes("DVD")
+            ) {
               const diskMatch = line.match(/\/dev\/(disk\d+)/);
               if (diskMatch) {
                 drives.push({
                   id: diskMatch[1],
                   path: `/dev/r${diskMatch[1]}`,
                   description: "Optical Drive",
-                  mediaType: "Optical", 
+                  mediaType: "Optical",
                   platform: "darwin",
                 });
               }
@@ -262,20 +268,22 @@ export class OpticalDriveUtil {
       // Method 1: Check /proc/sys/dev/cdrom/info for optical drives
       try {
         const cdromInfo = await fs.readFile("/proc/sys/dev/cdrom/info", "utf8");
-        const lines = cdromInfo.split('\n');
-        const driveNameLine = lines.find(line => line.startsWith('drive name:'));
-        
+        const lines = cdromInfo.split("\n");
+        const driveNameLine = lines.find((line) =>
+          line.startsWith("drive name:")
+        );
+
         if (driveNameLine) {
-          const driveNames = driveNameLine.split(':')[1].trim().split(/\s+/);
-          
+          const driveNames = driveNameLine.split(":")[1].trim().split(/\s+/);
+
           for (const driveName of driveNames) {
-            if (driveName && driveName.startsWith('sr')) {
+            if (driveName && driveName.startsWith("sr")) {
               const devicePath = `/dev/${driveName}`;
-              
+
               try {
                 // Verify the device exists and get additional info
                 await fs.access(devicePath);
-                
+
                 let description = "Optical Drive";
                 try {
                   const { stdout } = await execAsync(
@@ -311,30 +319,30 @@ export class OpticalDriveUtil {
       if (drives.length === 0) {
         try {
           const blockDevices = await fs.readdir("/sys/block");
-          
+
           for (const device of blockDevices) {
             // Check if it's a CD/DVD drive by examining the device type
             try {
               const devicePath = `/sys/block/${device}`;
               const removableFile = `${devicePath}/removable`;
               const capabilityFile = `${devicePath}/capability`;
-              
+
               // Check if device is removable
               const removable = await fs.readFile(removableFile, "utf8");
               if (removable.trim() !== "1") continue;
-              
+
               // Check capabilities for optical drive indicators
               const capability = await fs.readFile(capabilityFile, "utf8");
               const capNum = parseInt(capability.trim(), 16);
-              
+
               // Check for optical drive capabilities (bits for CD-ROM, etc.)
               // Bit 3 (0x8) = CD-ROM, Bit 4 (0x10) = DVD
-              if ((capNum & 0x8) || (capNum & 0x10)) {
+              if (capNum & 0x8 || capNum & 0x10) {
                 const deviceFile = `/dev/${device}`;
-                
+
                 try {
                   await fs.access(deviceFile);
-                  
+
                   let description = "Optical Drive";
                   try {
                     const { stdout } = await execAsync(

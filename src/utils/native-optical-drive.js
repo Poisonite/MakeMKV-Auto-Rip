@@ -1,9 +1,10 @@
 import os from "os";
+import { createRequire } from "module";
 import { Logger } from "./logger.js";
 
 /**
  * Native optical drive utilities for Windows using C++ DeviceIoControl API
- * Falls back to platform-specific commands on non-Windows or if native addon fails
+ * Requires the native C++ addon to be built and available
  */
 class NativeOpticalDrive {
   static #nativeAddon = null;
@@ -14,13 +15,18 @@ class NativeOpticalDrive {
   static #initNativeAddon() {
     if (this.#nativeAddon === null && os.platform() === "win32") {
       try {
+        // Create require function for ES modules
+        const require = createRequire(import.meta.url);
+
         // Try to load the native addon
         this.#nativeAddon = require("../../build/Release/optical_drive_native.node");
         Logger.info("Native optical drive addon loaded successfully");
       } catch (error) {
-        Logger.warning(`Failed to load native addon: ${error.message}`);
-        Logger.info("Falling back to PowerShell commands");
+        Logger.error(`Failed to load native addon: ${error.message}`);
         this.#nativeAddon = false; // Mark as failed to avoid retries
+        throw new Error(
+          `Native optical drive addon is required but failed to load: ${error.message}`
+        );
       }
     }
   }
@@ -33,9 +39,11 @@ class NativeOpticalDrive {
     if (os.platform() !== "win32") {
       return false;
     }
-    
+
     this.#initNativeAddon();
-    return this.#nativeAddon && typeof this.#nativeAddon.ejectDrive === "function";
+    return (
+      this.#nativeAddon && typeof this.#nativeAddon.ejectDrive === "function"
+    );
   }
 
   /**
@@ -53,10 +61,14 @@ class NativeOpticalDrive {
     if (this.isNativeAvailable) {
       try {
         const success = this.#nativeAddon.ejectDrive(driveLetter);
-        Logger.info(`Native eject drive ${driveLetter}: ${success ? "success" : "failed"}`);
+        Logger.info(
+          `Native eject drive ${driveLetter}: ${success ? "success" : "failed"}`
+        );
         return success;
       } catch (error) {
-        Logger.error(`Native eject failed for ${driveLetter}: ${error.message}`);
+        Logger.error(
+          `Native eject failed for ${driveLetter}: ${error.message}`
+        );
         throw error;
       }
     } else {
@@ -79,7 +91,9 @@ class NativeOpticalDrive {
     if (this.isNativeAvailable) {
       try {
         const success = this.#nativeAddon.loadDrive(driveLetter);
-        Logger.info(`Native load drive ${driveLetter}: ${success ? "success" : "failed"}`);
+        Logger.info(
+          `Native load drive ${driveLetter}: ${success ? "success" : "failed"}`
+        );
         return success;
       } catch (error) {
         Logger.error(`Native load failed for ${driveLetter}: ${error.message}`);

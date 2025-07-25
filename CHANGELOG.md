@@ -21,9 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration validation** - Automatic validation of required configuration settings
 - **Better user experience** - 5-second wait after loading drives with user instructions
 - **Cross-platform drive operations** - New optical drive utility supports Windows, macOS, and Linux for loading and ejecting optical drives without external dependencies
-- **Native C++ Windows implementation** - Created native Node.js addon using DeviceIoControl API for reliable Windows optical drive operations
-- **Reliable Windows drive detection** - Simplified WMI query approach for better optical drive identification
-- **Graceful fallback system** - Native addon with PowerShell MCI fallback for maximum Windows compatibility
+- **Hybrid Windows drive implementation** - PowerShell WMI for accurate drive detection, native C++ addon using DeviceIoControl API for eject/load operations
 
 ### Changed
 
