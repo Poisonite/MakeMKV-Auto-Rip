@@ -37,28 +37,46 @@ export class OpticalDriveUtil {
 
   /**
    * Eject all optical drives
-   * @returns {Promise<void>}
+   * @returns {Promise<{total: number, successful: number, failed: number}>}
    */
   static async ejectAllDrives() {
     const drives = await this.getOpticalDrives();
     const ejectPromises = drives.map((drive) => this.ejectDrive(drive));
-    await Promise.allSettled(ejectPromises);
+    const results = await Promise.all(ejectPromises);
+
+    const successful = results.filter((result) => result === true).length;
+    const failed = results.filter((result) => result === false).length;
+
+    return {
+      total: drives.length,
+      successful,
+      failed,
+    };
   }
 
   /**
    * Load/close all optical drives
-   * @returns {Promise<void>}
+   * @returns {Promise<{total: number, successful: number, failed: number}>}
    */
   static async loadAllDrives() {
     const drives = await this.getOpticalDrives();
     const loadPromises = drives.map((drive) => this.loadDrive(drive));
-    await Promise.allSettled(loadPromises);
+    const results = await Promise.all(loadPromises);
+
+    const successful = results.filter((result) => result === true).length;
+    const failed = results.filter((result) => result === false).length;
+
+    return {
+      total: drives.length,
+      successful,
+      failed,
+    };
   }
 
   /**
    * Eject a specific optical drive
    * @param {Object} drive - Drive object from getOpticalDrives()
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>} Success status
    */
   static async ejectDrive(drive) {
     try {
@@ -74,17 +92,19 @@ export class OpticalDriveUtil {
           break;
       }
       Logger.info(`Ejected drive: ${drive.description}`);
+      return true;
     } catch (error) {
-      Logger.warning(
-        `Failed to eject drive ${drive.description}: ${error.message}`
+      Logger.error(
+        `Failed to eject drive: "${drive.description}" (${error.message})`
       );
+      return false;
     }
   }
 
   /**
    * Load/close a specific optical drive
    * @param {Object} drive - Drive object from getOpticalDrives()
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>} Success status
    */
   static async loadDrive(drive) {
     try {
@@ -100,10 +120,12 @@ export class OpticalDriveUtil {
           break;
       }
       Logger.info(`Loaded drive: ${drive.description}`);
+      return true;
     } catch (error) {
       Logger.warning(
         `Failed to load drive ${drive.description}: ${error.message}`
       );
+      return false;
     }
   }
 
@@ -152,7 +174,6 @@ export class OpticalDriveUtil {
         throw new Error("Native optical drive addon is not available");
       }
     } catch (error) {
-      Logger.error(`Failed to eject drive ${drive.id}: ${error.message}`);
       throw error;
     }
   }
@@ -170,7 +191,6 @@ export class OpticalDriveUtil {
         throw new Error("Native optical drive addon is not available");
       }
     } catch (error) {
-      Logger.error(`Failed to load drive ${drive.id}: ${error.message}`);
       throw error;
     }
   }

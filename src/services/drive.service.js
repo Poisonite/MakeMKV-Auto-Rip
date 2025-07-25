@@ -18,8 +18,16 @@ export class DriveService {
    */
   static async loadAllDrives() {
     try {
-      await OpticalDriveUtil.loadAllDrives();
-      Logger.info("All optical drives have been loaded/closed.");
+      const results = await OpticalDriveUtil.loadAllDrives();
+      if (results.failed === 0) {
+        Logger.info("All optical drives have been loaded/closed.");
+      } else if (results.successful === 0) {
+        Logger.warning("No optical drives could be loaded.");
+      } else {
+        Logger.info(
+          `${results.successful} of ${results.total} optical drives loaded successfully.`
+        );
+      }
     } catch (error) {
       Logger.error(`Failed to load drives: ${error.message}`);
       throw error;
@@ -32,8 +40,16 @@ export class DriveService {
    */
   static async ejectAllDrives() {
     try {
-      await OpticalDriveUtil.ejectAllDrives();
-      Logger.info("All optical drives have been ejected.");
+      const results = await OpticalDriveUtil.ejectAllDrives();
+      if (results.failed === 0) {
+        Logger.info("All optical drives have been ejected.");
+      } else if (results.successful === 0) {
+        Logger.warning("No optical drives could be ejected.");
+      } else {
+        Logger.info(
+          `${results.successful} of ${results.total} optical drives ejected successfully.`
+        );
+      }
     } catch (error) {
       Logger.error(`Failed to eject drives: ${error.message}`);
       throw error;

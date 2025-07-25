@@ -4,6 +4,7 @@ import { Logger } from "./logger.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,12 +23,8 @@ class NativeOpticalDrive {
     if (os.platform() !== "win32") return true;
 
     try {
-      // Try to access a admin-only registry key
-      const { execSync } = require("child_process");
-      execSync(
-        'reg query "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion" >nul 2>&1',
-        { stdio: "ignore" }
-      );
+      // Try to run a command that requires admin privileges
+      execSync("net session >nul 2>&1", { stdio: "ignore" });
       return true;
     } catch {
       return false;
@@ -58,7 +55,7 @@ class NativeOpticalDrive {
         this.#nativeAddon = require("../../build/Release/optical_drive_native.node");
         Logger.info("Native optical drive addon loaded successfully");
 
-        // Warn if not running as admin
+        // Warn if not running as admin (only once when loading)
         if (!this.#isWindowsAdmin()) {
           Logger.warning(
             "Not running as administrator - optical drive operations may fail"
@@ -115,7 +112,6 @@ class NativeOpticalDrive {
 
         return success;
       } catch (error) {
-        Logger.error(`Eject failed for ${driveLetter}: ${error.message}`);
         throw error;
       }
     } else {
@@ -149,7 +145,6 @@ class NativeOpticalDrive {
 
         return success;
       } catch (error) {
-        Logger.error(`Load failed for ${driveLetter}: ${error.message}`);
         throw error;
       }
     } else {
