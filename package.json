@@ -21,7 +21,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/poisonite/MakeMKV-Auto-Rip.git"
+        "url": "git+https://github.com/Poisonite/MakeMKV-Auto-Rip.git"
     },
     "keywords": [
         "Poisonite",
@@ -47,9 +47,9 @@
     "author": "Zac Ingoglia",
     "license": "GPL-3.0-or-later",
     "bugs": {
-        "url": "https://github.com/poisonite/MakeMKV-Auto-Rip/issues"
+        "url": "https://github.com/Poisonite/MakeMKV-Auto-Rip/issues"
     },
-    "homepage": "https://github.com/poisonite/MakeMKV-Auto-Rip#readme",
+    "homepage": "https://github.com/Poisonite/MakeMKV-Auto-Rip#readme",
     "gypfile": false,
     "dependencies": {
         "chalk": "^5.4.1",
