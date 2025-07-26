@@ -148,10 +148,6 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 ```bash
 npm start          # Interactive ripping interface
-# or
-npm run rip        # Same as above
-# or
-node index.js      # Direct execution
 ```
 
 ### Drive Management Only

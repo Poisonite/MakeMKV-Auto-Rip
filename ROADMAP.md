@@ -49,7 +49,50 @@ Enhancing automated workflows for large-scale disc processing.
   - Warn users about available updates (`MSG:5075`)
   - Provide helpful installation guidance
 
+#### Cross-Platform Support
+
+- **Description**: Add support for Linux and macOS in addition to Windows
+- **Benefits**: Broader user base and flexibility for different environments
+- **Contribution Difficulty**: 🔴 Advanced
+- **Details**:
+  - Update makemkvcon location and path structure handling for each platform
+  - Ensure all file and directory operations are cross-platform compatible
+  - Consider splitting platform support into separate implementation items:
+    - Windows support (existing)
+    - Linux support (makemkvcon path, drive handling, etc.)
+    - macOS support (makemkvcon path, drive handling, etc.)
+
+#### Docker Support
+
+- **Description**: Provide official Docker images and documentation
+- **Benefits**: Simplifies setup and deployment, especially for headless or server environments
+- **Contribution Difficulty**: 🟡 Intermediate
+- **Details**:
+  - Create and maintain a Dockerfile for the project
+  - Document environment variables and volume mounts for MakeMKV and output directories
+  - Configure a base image which builds MakeMKV for Linux
+  - Ensure platform compatibility within containers
+
+#### Default MakeMKV Path Per Platform with Override
+
+- **Description**: Use a sensible default path for makemkvcon on each platform, with an override option in the config
+- **Benefits**: Simplifies setup for most users, but allows advanced customization
+- **Contribution Difficulty**: 🟢 Beginner-Friendly
+- **Details**:
+  - Define default makemkvcon path for Windows, Linux, and macOS in the codebase
+  - Allow users to specify a custom path in the config file to override the default
+
 ### 🎵 Medium Priority
+
+#### Upgrade Config Design (YAML Support)
+
+- **Description**: Migrate from JSON config files to YAML for improved readability and flexibility
+- **Benefits**: Easier configuration management, better support for comments and complex structures
+- **Contribution Difficulty**: 🟢 Beginner-Friendly
+- **Details**:
+  - Replace `default.json` with `config.yaml`
+  - Update config loading logic to support YAML
+  - Document migration steps for users
 
 #### Audio Notifications
 
@@ -63,12 +106,22 @@ Enhancing automated workflows for large-scale disc processing.
 
 #### Repeat Mode Configs
 
-- **Description**: Add configurations to the json file for repeat mode and drive loading delay
+- **Description**: Add configurations to the config file for repeat mode and drive loading delay
 - **Benefits**: Users can easily enable/disable repeat mode and set their preferred delay
 - **Contribution Difficulty**: 🟢 Beginner-Friendly
 - **Details**:
   1. Add a configuration option to turn repeat mode on or off
   2. Add a configuration option to adjust the delay time when loading drives (in seconds)
+
+#### NPM Package Distribution
+
+- **Description**: Package and publish MakeMKV Auto Rip as an npm package
+- **Benefits**: Easier installation and updates for Node.js users
+- **Contribution Difficulty**: 🟡 Intermediate
+- **Details**:
+  - Prepare the codebase for npm packaging
+  - Write documentation for npm installation and usage
+  - Publish to the npm registry
 
 ### 🔄 Lower Priority
 
@@ -79,6 +132,15 @@ Enhancing automated workflows for large-scale disc processing.
 - **Contribution Difficulty**: 🟢 Beginner-Friendly
 - **Details**:
   - Support single forward slashes in paths
+
+#### Clean Up postinstall Script Output
+
+- **Description**: Refine the `postinstall` script in `package.json` for cleaner console output
+- **Benefits**: Improves user experience during installation
+- **Contribution Difficulty**: 🟢 Beginner-Friendly
+- **Details**:
+  - Make the output less verbose and more user-friendly
+  - No change to functionality, just improved UX
 
 ---
 
