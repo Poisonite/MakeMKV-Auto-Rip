@@ -24,6 +24,8 @@ Related to #(issue number)
 
 Please describe the tests that you ran to verify your changes:
 
+### General Testing
+
 - [ ] Tested with DVD discs
 - [ ] Tested with Blu-ray discs
 - [ ] Tested drive loading (`npm run load`)
@@ -32,11 +34,20 @@ Please describe the tests that you ran to verify your changes:
 - [ ] Tested error scenarios (missing discs, invalid config, etc.)
 - [ ] Tested with multiple drives (if available)
 
+### Windows Native Development (if applicable)
+
+- [ ] Rebuilt native addon (`npm run build`)
+- [ ] Tested as administrator
+- [ ] Tested as regular user (expected failures)
+- [ ] Verified pre-built binary still works
+- [ ] No new compilation requirements for end users
+
 **Test Configuration:**
 
 - OS: [e.g. Windows 11]
 - Node.js version: [e.g. v22.0.0]
 - MakeMKV version: [e.g. 1.17.x]
+- Administrator privileges: [Yes/No]
 
 ## Documentation
 

@@ -6,6 +6,14 @@ logs/*
 media/*
 !media/.gitkeep
 
+# Build artifacts (but keep the .node file)
+build/*
+!build/Release/
+build/Release/*
+!build/Release/optical_drive_native.node
+python/*
+python
+
 # Test coverage reports
 coverage/
 .nyc_output/

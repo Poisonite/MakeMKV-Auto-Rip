@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved logging** - Structured logging with consistent formatting and colors
 - **Configuration validation** - Automatic validation of required configuration settings
 - **Better user experience** - 5-second wait after loading drives with user instructions
+- **Cross-platform drive operations** - New optical drive utility supports Windows, macOS, and Linux for loading and ejecting optical drives without external dependencies
+- **Hybrid Windows drive implementation** - PowerShell WMI for accurate drive detection, native C++ addon using DeviceIoControl API for eject/load operations
 
 ### Changed
 
@@ -60,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - All `.bat` files (AutoRip.bat, DriveLoader.bat, Install-Node-Packages.bat)
 - Monolithic `AutoRip.js` file (replaced with modular structure)
+- **`win-eject` dependency** - Replaced with custom cross-platform optical drive utility
 
 ### Migration Notes
 

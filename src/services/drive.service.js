@@ -1,3 +1,4 @@
+import { OpticalDriveUtil } from "../utils/optical-drive.js";
 import { Logger } from "../utils/logger.js";
 import { AppConfig } from "../config/index.js";
 
@@ -13,6 +14,7 @@ if (!AppConfig.isDockerEnvironment) {
 
 /**
  * Service for handling drive operations (loading and ejecting)
+ * Now supports Windows, macOS, and Linux optical drives
  */
 export class DriveService {
   constructor() {
@@ -26,26 +28,21 @@ export class DriveService {
    * @returns {Promise<void>}
    */
   static async loadAllDrives() {
-    if (AppConfig.isDockerEnvironment) {
-      Logger.info("Drive loading skipped in Docker environment (Windows-only feature)");
-      return Promise.resolve();
-    }
-
-    if (!winEject) {
-      Logger.warning("Drive loading not available (win-eject module not loaded)");
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
-      try {
-        winEject.close("", () => {
-          Logger.info("All drives have been loaded/closed.");
-          resolve();
-        });
-      } catch (error) {
-        reject(error);
+    try {
+      const results = await OpticalDriveUtil.loadAllDrives();
+      if (results.failed === 0) {
+        Logger.info("All optical drives have been loaded/closed.");
+      } else if (results.successful === 0) {
+        Logger.warning("No optical drives could be loaded.");
+      } else {
+        Logger.info(
+          `${results.successful} of ${results.total} optical drives loaded successfully.`
+        );
       }
-    });
+    } catch (error) {
+      Logger.error(`Failed to load drives: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -53,26 +50,21 @@ export class DriveService {
    * @returns {Promise<void>}
    */
   static async ejectAllDrives() {
-    if (AppConfig.isDockerEnvironment) {
-      Logger.info("Drive ejection skipped in Docker environment (Windows-only feature)");
-      return Promise.resolve();
-    }
-
-    if (!winEject) {
-      Logger.warning("Drive ejection not available (win-eject module not loaded)");
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
-      try {
-        winEject.eject("", () => {
-          Logger.info("All drives have been ejected.");
-          resolve();
-        });
-      } catch (error) {
-        reject(error);
+    try {
+      const results = await OpticalDriveUtil.ejectAllDrives();
+      if (results.failed === 0) {
+        Logger.info("All optical drives have been ejected.");
+      } else if (results.successful === 0) {
+        Logger.warning("No optical drives could be ejected.");
+      } else {
+        Logger.info(
+          `${results.successful} of ${results.total} optical drives ejected successfully.`
+        );
       }
-    });
+    } catch (error) {
+      Logger.error(`Failed to eject drives: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -92,6 +84,19 @@ export class DriveService {
     await this.wait(5000);
 
     Logger.info("Drive loading complete. Ready to proceed.");
+  }
+
+  /**
+   * Get information about available optical drives
+   * @returns {Promise<Array<Object>>} Array of optical drive objects
+   */
+  static async getOpticalDrives() {
+    try {
+      return await OpticalDriveUtil.getOpticalDrives();
+    } catch (error) {
+      Logger.error(`Failed to get optical drives: ${error.message}`);
+      return [];
+    }
   }
 
   /**
