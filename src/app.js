@@ -14,7 +14,7 @@ import { safeExit, isProcessExitError } from "./utils/process.js";
 export async function main() {
   try {
     // Validate configuration before starting
-    AppConfig.validate();
+    await AppConfig.validate();
 
     // Start the CLI interface
     const cli = new CLIInterface();

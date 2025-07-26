@@ -13,6 +13,10 @@ build/Release/*
 !build/Release/optical_drive_native.node
 python/*
 python
+.venv/*
+.venv/
+venv/*
+venv/
 
 # Test coverage reports
 coverage/

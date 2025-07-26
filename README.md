@@ -28,7 +28,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
    ```
 
 2. **Configure the application:**
-   Edit `config/default.json` with your paths
+   Edit `config.yaml` with your paths
 
 3. **Start ripping:**
    ```bash
@@ -39,13 +39,18 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 ### Essential Software
 
-1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations
-2. **[Node.js](https://nodejs.org/) >= 22.0.0** - Runtime environment
-3. **Windows OS** - Currently only tested on Windows 10+
+1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations (Each new version of Auto Rip is only tested with the most recent MakeMKV version)
+2. **[Node.js](https://nodejs.org/)** - Runtime environment (only >= v22 officially tested)
+3. **Cross-platform OS support** - Works on Windows, macOS, and Linux (only (officially) tested on Windows 10+ & Debian/Ubuntu Linux)
 
-### Optical Drive Management
+### Cross-Platform Support
 
-- **Cross-platform support** - Drive load/eject operations work on Windows, macOS, and Linux
+- **Automatic MakeMKV Detection** - Finds MakeMKV installation automatically on all platforms:
+  - **Windows**: `C:/Program Files/MakeMKV` or `C:/Program Files (x86)/MakeMKV`
+  - **Linux**: `/usr/bin`, `/usr/local/bin`, or `/opt/makemkv/bin`
+  - **macOS**: `/Applications/MakeMKV.app/Contents/MacOS`, `/opt/homebrew/bin`, or `/usr/local/bin`
+- **Manual Override** - Configure custom MakeMKV path in `config.yaml` if needed
+- **Optical Drive Management** - Drive load/eject operations work on Windows, macOS, and Linux
 - **Windows implementation** - Uses native C++ addon for reliable Windows DeviceIoControl API access
 - **Pre-built native components** - No compilation required, native addon included in repository
 - **Administrator privileges required on Windows** - Run terminal as administrator for drive operations
@@ -67,56 +72,105 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 4. **Configure the application** (see Configuration section below)
 5. **Configure MakeMKV GUI** (see MakeMKV Configuration section below)
 
+### Linux Drive Management Setup (Optional)
+
+**Note: Only required for Linux users who want to use automatic drive ejecting**
+
+If you encounter errors related to ejecting drives or receive sudo/admin prompts when inserting/ejecting discs, follow these steps:
+
+1. **Add your user to the cdrom group:**
+
+   ```bash
+   sudo usermod -aG cdrom $USER
+   ```
+
+2. **Create a polkit rule for passwordless optical drive operations:**
+
+   ```bash
+   sudo nano /etc/polkit-1/rules.d/70-udisks2-no-password.rules
+   ```
+
+3. **Add the following content to the file:**
+
+   ```javascript
+   polkit.addRule(function (action, subject) {
+     if (
+       subject.isInGroup("cdrom") &&
+       action.id.startsWith("org.freedesktop.udisks2.")
+     ) {
+       return polkit.Result.YES;
+     }
+   });
+   ```
+
+4. **Reboot your system:**
+   ```bash
+   sudo reboot
+   ```
+   This configuration allows users in the cdrom group to perform optical drive operations without requiring sudo passwords.
+
 ## ⚙️ Configuration
 
-### Application Configuration (`config/default.json`)
+### Application Configuration (`config.yaml`)
 
-```json
-{
-  "Path": {
-    "mkvDir": {
-      "Dir": "C:\\Program Files (x86)\\MakeMKV"
-    },
-    "movieRips": {
-      "Dir": "C:\\Your\\Movie\\Rips"
-    },
-    "logging": {
-      "toFiles": "true",
-      "Dir": "C:\\Your\\Log\\Directory",
-      "timeFormat": "12hr"
-    },
-    "loadDrives": {
-      "Enabled": "true"
-    },
-    "ejectDrives": {
-      "Enabled": "true"
-    },
-    "ripAll": {
-      "Enabled": "false"
-    },
-    "rippingMode": {
-      "Mode": "async"
-    }
-  }
-}
+```yaml
+# MakeMKV Auto Rip Configuration
+# This file contains all configuration settings for the application
+# Paths are automatically normalized for the current operating system
+
+# Application paths and directories
+paths:
+  # MakeMKV installation directory (OPTIONAL - auto-detected if not specified)
+  # Uncomment and set only if you need to override the automatic detection
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+
+  # Directory where ripped movies will be saved
+  movie_rips_dir: "C:/Your/Movie/Rips"
+
+  # Logging configuration
+  logging:
+    # Whether to save logs to files (true/false)
+    enabled: true
+
+    # Directory where log files will be saved
+    dir: "C:/Your/Log/Directory"
+
+    # Time format for log timestamps (12hr/24hr)
+    time_format: "12hr"
+
+# Drive operation settings
+drives:
+  # Automatically load/mount optical drives (true/false)
+  auto_load: true
+
+  # Automatically eject drives after ripping (true/false)
+  auto_eject: true
+
+# Ripping behavior settings
+ripping:
+  # Rip all titles from disc instead of just the main title (true/false)
+  rip_all_titles: false
+
+  # Ripping mode - async for parallel processing, sync for sequential (async/sync)
+  mode: "async"
 ```
 
 #### Configuration Options
 
-- **`mkvDir`** - MakeMKV installation directory (usually default location)
-- **`movieRips`** - Root directory for ripped movies (create a dedicated folder)
-- **`logging.toFiles`** - Enable/disable writing MakeMKV output to log files (`"true"` or `"false"`)
-- **`logging.Dir`** - Directory for log files
-- **`logging.timeFormat`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
-- **`loadDrives.Enabled`** - Auto-load/close drives before ripping (`"true"` or `"false"`)
-- **`ejectDrives.Enabled`** - Auto-eject drives after ripping completion (`"true"` or `"false"`)
-- **`ripAll.Enabled`** - Rip all titles that are above MakeMKV min length (`"true"`) or longest title only (`"false"`)
-- **`rippingMode.Mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing
+- **`paths.makemkv_dir`** - MakeMKV installation directory (OPTIONAL - auto-detected if not specified)
+  - Supports forward slashes on all platforms
+  - For Advanced Users: Only needed if MakeMKV is installed in a non-standard location
+- **`paths.movie_rips_dir`** - Root directory for ripped movies (create a dedicated folder)
+- **`paths.logging.enabled`** - Enable/disable writing MakeMKV output to log files (`true` or `false`)
+- **`paths.logging.dir`** - Directory for log files
+- **`paths.logging.time_format`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
+- **`drives.auto_load`** - Auto-load/close drives before ripping (`true` or `false`)
+- **`drives.auto_eject`** - Auto-eject drives after ripping completion (`true` or `false`)
+- **`ripping.rip_all_titles`** - Rip all titles that are above MakeMKV min length (`true`) or longest title only (`false`)
+- **`ripping.mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing)
 
 **Important Notes:**
 
-- Use double backslashes (`\\`) in Windows paths
-- Create directories manually - the application cannot create missing folders
 - Recommended: Create dedicated folders for movie rips and logs
 - **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance... for SSDs, `"async"` will yield much better overall performance
 
@@ -140,7 +194,7 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 4. **For Blu-ray discs:**
    - Run at least one Blu-ray through the MakeMKV GUI first
-   - Enter a valid key (beta key works) before using Auto Rip
+   - Enter a valid key (beta key works - but please support the MakeMKV team if you find their software useful or time-saving!) before using Auto Rip
 
 ## 🎯 Usage
 
@@ -163,26 +217,26 @@ npm run eject      # Eject all drives
 
 1. **"Failed to start application" error**
 
-   - Check that all paths in `config/default.json` exist
+   - Check that all paths in `config.yaml` exist and use forward slashes (/) for cross-platform compatibility
    - Ensure MakeMKV is properly installed
 
-2. **"Native optical drive addon failed to load" error**
+2. **"(Windows) Native optical drive addon failed to load" error**
 
    - This indicates a corrupted installation or missing native components
-   - Try reinstalling the application: `npm install`
-   - Ensure you're running on a supported Windows version (Windows 10+)
+   - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run build`
+   - Ensure you're running on a supported Windows version (Windows 10+ officially tested - theoretically compatible back to ~Windows 2000)
 
 3. **Drive eject/load operations fail**
 
    - **Windows: Run as administrator** - Right-click terminal and "Run as administrator"
-   - Windows drive operations require elevated privileges for DeviceIoControl API access
-   - macOS/Linux: Standard user privileges should work for most drives
-   - Manual drive operation may be needed if software control isn't supported by hardware
+     - Windows drive operations require elevated privileges for DeviceIoControl API access
+   - macOS/Linux: Standard user privileges should work for most drives (See Linux troubleshooting section above)
+   - Manual drive operation may be needed if software control isn't supported by hardware (or hardware lacks the proper physical mechanism)
 
 4. **No discs detected**
 
    - Make sure discs are inserted and readable
-   - Try running MakeMKV GUI first to test disc compatibility
+   - Try running MakeMKV GUI to test disc compatibility
 
 5. **Drive loading issues**
 
@@ -191,7 +245,7 @@ npm run eject      # Eject all drives
 
 6. **Ripping failures**
    - Check disc condition (scratches, damage)
-   - Try ripping manually with MakeMKV GUI first
+   - Try ripping manually with MakeMKV GUI
    - Increase retry count in MakeMKV settings
 
 ## 📄 License

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Automatic MakeMKV path detection** - The application now automatically detects the MakeMKV installation path across Windows, macOS, and Linux, greatly simplifying setup for users.
+- **Refactored configuration loading and validation** - Configuration loading and validation now handles missing or invalid custom MakeMKV paths gracefully, falling back to automatic detection when necessary (an install path for MakeMKV is no longer required).
+- **Documentation updates** - Documentation has been updated to reflect changes to configuration, including troubleshooting steps related to MakeMKV installation.
 - **Complete project refactor** with proper Node.js project structure
 - **Modular architecture** with clear separation of concerns into services, utilities, and CLI modules
 - **Advanced drive management** - Separate configuration options for loading and ejecting drives
@@ -25,9 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Configuration structure** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
-- **Ripping behavior** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
-- **Logging system** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
+- **Configuration format** - Migrated from JSON (`config/Default.json`) to YAML (`config.yaml`) for improved readability and easier editing
+- **Configuration structure** - Reorganized into logical sections: `paths`, `drives`, and `ripping` for better organization
+- **Path handling** - Cross-platform path normalization with support for forward slashes on all platforms (no more escaped backslashes!)
+- **Configuration validation** - Enhanced validation with clearer error messages referencing `config.yaml`
+- **Configuration drive options** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
+- **Ripping behavior options** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
+- **Logging system options** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
 - **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work in theory, but are not officially supported)
@@ -35,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project structure** - Code organized into logical modules under `src/` directory
 - **Entry point** - Now uses `index.js` as main entry point instead of `AutoRip.js`
 - **Import system** - Updated to ES6 modules throughout
-- **Configuration management** - Centralized configuration handling with validation
+- **Configuration management** - Centralized YAML configuration handling with validation and caching
 - **User interface** - Improved CLI with better prompts and messaging
 
 ### Removed
@@ -48,25 +55,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Configuration Updates Required:**
 
-- Replace `"ejectDVDs": {"Enabled": "true"}` with:
-  ```json
-  "loadDrives": {"Enabled": "true"},
-  "ejectDrives": {"Enabled": "true"}
+- **Migrate from JSON to YAML:** Replace `config/Default.json` with `config.yaml`
+- **New YAML format example:**
+
+  ```yaml
+  paths:
+    makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+    movie_rips_dir: "./media"
+    logging:
+      enabled: true
+      dir: "./logs"
+      time_format: "12hr"
+
+  drives:
+    auto_load: true
+    auto_eject: true
+
+  ripping:
+    rip_all_titles: false
+    mode: "async"
   ```
-- Update logging configuration from `"logToFiles"` to:
-  ```json
-  "logging": {
-    "toFiles": "true",
-    "Dir": ".\\logs",
-    "timeFormat": "12hr"
-  }
-  ```
-- Add new ripping mode setting:
-  ```json
-  "rippingMode": {
-    "Mode": "async"
-  }
-  ```
+
+- **Path format:** Use forward slashes (/) instead of escaped backslashes (\\) for all paths
 
 ---
 

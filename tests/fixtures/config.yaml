@@ -1,0 +1,16 @@
+# Test configuration for unit tests
+paths:
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV"  # Using auto-detection for tests
+  movie_rips_dir: "./media"
+  logging:
+    enabled: true
+    dir: "./logs"
+    time_format: "12hr"
+
+drives:
+  auto_load: true
+  auto_eject: true
+
+ripping:
+  rip_all_titles: false
+  mode: "async"

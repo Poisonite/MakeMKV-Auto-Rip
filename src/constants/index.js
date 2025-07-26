@@ -31,3 +31,19 @@ export const MENU_OPTIONS = Object.freeze({
   RIP: "1",
   EXIT: "2",
 });
+
+/**
+ * Default MakeMKV installation paths by platform.
+ * These are the most common installation locations for each platform
+ */
+export const PLATFORM_DEFAULTS = Object.freeze({
+  MAKEMKV_PATHS: {
+    win32: ["C:/Program Files/MakeMKV", "C:/Program Files (x86)/MakeMKV"],
+    linux: ["/usr/bin", "/usr/local/bin", "/opt/makemkv/bin"],
+    darwin: [
+      "/Applications/MakeMKV.app/Contents/MacOS",
+      "/opt/homebrew/bin",
+      "/usr/local/bin",
+    ],
+  },
+});

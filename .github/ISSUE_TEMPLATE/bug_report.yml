@@ -95,7 +95,7 @@ body:
     id: config
     attributes:
       label: Configuration
-      description: Relevant parts of your config/default.json (remove sensitive paths)
+      description: Relevant parts of your config.yaml (remove sensitive paths)
       render: json
       placeholder: |
         {

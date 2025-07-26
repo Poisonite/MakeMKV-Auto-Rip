@@ -36,7 +36,10 @@ describe("DriveService", () => {
 
   describe("loadAllDrives", () => {
     it("should successfully load all drives", async () => {
-      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue();
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 0,
+      });
 
       await DriveService.loadAllDrives();
 
@@ -55,7 +58,10 @@ describe("DriveService", () => {
 
   describe("ejectAllDrives", () => {
     it("should successfully eject all drives", async () => {
-      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue();
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 0,
+      });
 
       await DriveService.ejectAllDrives();
 
@@ -74,8 +80,11 @@ describe("DriveService", () => {
 
   describe("loadDrivesWithWait", () => {
     it("should load drives and wait 5 seconds", async () => {
-      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue();
-      
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 0,
+      });
+
       // Mock setTimeout to resolve immediately for testing
       vi.spyOn(global, "setTimeout").mockImplementation((callback) => {
         callback();
@@ -117,7 +126,9 @@ describe("DriveService", () => {
         },
       ];
 
-      vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue(mockDrives);
+      vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue(
+        mockDrives
+      );
 
       const result = await DriveService.getOpticalDrives();
 
@@ -150,12 +161,12 @@ describe("DriveService", () => {
 
     it("should resolve after timeout", async () => {
       const startTime = Date.now();
-      
+
       // Use real setTimeout for this test with very short delay
       setTimeout.mockRestore?.();
-      
+
       await DriveService.wait(10);
-      
+
       const elapsed = Date.now() - startTime;
       expect(elapsed).toBeGreaterThanOrEqual(10);
     });
@@ -173,9 +184,17 @@ describe("DriveService", () => {
         },
       ];
 
-      vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue(mockDrives);
-      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue();
-      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue();
+      vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue(
+        mockDrives
+      );
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 1,
+        failed: 0,
+      });
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue({
+        successful: 1,
+        failed: 0,
+      });
 
       // Get drives
       const drives = await DriveService.getOpticalDrives();
@@ -192,7 +211,10 @@ describe("DriveService", () => {
 
     it("should handle mixed success/failure scenarios", async () => {
       vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue([]);
-      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue();
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 0,
+        failed: 0,
+      });
       vi.mocked(OpticalDriveUtil.ejectAllDrives).mockRejectedValue(
         new Error("No drives to eject")
       );

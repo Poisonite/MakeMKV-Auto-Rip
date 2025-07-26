@@ -82,7 +82,7 @@ describe("CLIInterface", () => {
       expect(allOutput).toContain("MakeMKV Auto Rip");
       expect(allOutput).toContain("Zac Ingoglia");
       expect(allOutput).toContain("ABSOLUTELY NO WARRANTY");
-      expect(allOutput).toContain("default.json");
+      expect(allOutput).toContain("config.yaml");
     });
 
     it("should display copyright information", () => {
@@ -101,7 +101,7 @@ describe("CLIInterface", () => {
       const allOutput = calls.join(" ");
 
       expect(allOutput).toContain("WARNING");
-      expect(allOutput).toContain("default.json");
+      expect(allOutput).toContain("config.yaml");
     });
 
     it("should display license information", () => {
