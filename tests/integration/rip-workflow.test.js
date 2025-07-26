@@ -9,15 +9,57 @@ import { exec } from "child_process";
 import { isProcessExitError } from "../../src/utils/process.js";
 import fs from "fs";
 
-// Use real modules but mock external dependencies
+// Mock external dependencies
 vi.mock("child_process");
 vi.mock("../../src/utils/optical-drive.js");
+
+// Mock fs module for config and file operations
 vi.mock("fs", () => ({
   default: {
     existsSync: vi.fn().mockReturnValue(false),
     mkdirSync: vi.fn(),
     writeFile: vi.fn((path, content, encoding, callback) => callback()),
   },
+  readFileSync: vi.fn(
+    () => `
+paths:
+  makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+  movie_rips_dir: "./media"
+  logging:
+    enabled: true
+    dir: "./logs"
+    time_format: "12hr"
+drives:
+  auto_load: true
+  auto_eject: true
+ripping:
+  rip_all_titles: false
+  mode: "async"
+`
+  ),
+}));
+
+// Mock yaml module
+vi.mock("yaml", () => ({
+  parse: vi.fn(() => ({
+    paths: {
+      makemkv_dir: "C:/Program Files (x86)/MakeMKV",
+      movie_rips_dir: "./media",
+      logging: {
+        enabled: true,
+        dir: "./logs",
+        time_format: "12hr",
+      },
+    },
+    drives: {
+      auto_load: true,
+      auto_eject: true,
+    },
+    ripping: {
+      rip_all_titles: false,
+      mode: "async",
+    },
+  })),
 }));
 
 describe("Complete Ripping Workflow Integration", () => {
@@ -75,9 +117,17 @@ Additional MakeMKV output here`;
       });
 
       // Mock successful drive operations
-      const { OpticalDriveUtil } = await import("../../src/utils/optical-drive.js");
-      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue();
-      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue();
+      const { OpticalDriveUtil } = await import(
+        "../../src/utils/optical-drive.js"
+      );
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 0,
+      });
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 0,
+      });
 
       // Execute the workflow
       await ripService.startRipping();

@@ -115,6 +115,14 @@ describe("Application End-to-End Tests", () => {
 
   describe("Service integration", () => {
     it("should integrate all services properly", async () => {
+      // Mock DriveService to avoid waiting
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          loadDrivesWithWait: vi.fn().mockResolvedValue(),
+          ejectAllDrives: vi.fn().mockResolvedValue(),
+        },
+      }));
+
       // Mock external dependencies for testing
       vi.doMock("child_process", () => ({
         exec: vi.fn((command, callback) => {
@@ -147,6 +155,14 @@ describe("Application End-to-End Tests", () => {
     });
 
     it("should create necessary directories during operation", async () => {
+      // Mock DriveService to avoid waiting
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          loadDrivesWithWait: vi.fn().mockResolvedValue(),
+          ejectAllDrives: vi.fn().mockResolvedValue(),
+        },
+      }));
+
       const ripsDir = path.join(testTempDir, "rips");
 
       // Mock external dependencies

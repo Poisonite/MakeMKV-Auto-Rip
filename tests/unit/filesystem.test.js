@@ -6,8 +6,54 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import fs from "fs";
 import { FileSystemUtils } from "../../src/utils/filesystem.js";
 
-// Mock fs module
-vi.mock("fs");
+// Mock fs module including readFileSync for YAML config
+vi.mock("fs", () => ({
+  default: {
+    mkdirSync: vi.fn(),
+    existsSync: vi.fn(),
+    writeFile: vi.fn(),
+  },
+  readFileSync: vi.fn(
+    () => `
+paths:
+  makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+  movie_rips_dir: "./media"
+  logging:
+    enabled: true
+    dir: "./logs"
+    time_format: "12hr"
+drives:
+  auto_load: true
+  auto_eject: true
+ripping:
+  rip_all_titles: false
+  mode: "async"
+`
+  ),
+}));
+
+// Mock yaml module
+vi.mock("yaml", () => ({
+  parse: vi.fn(() => ({
+    paths: {
+      makemkv_dir: "C:/Program Files (x86)/MakeMKV",
+      movie_rips_dir: "./media",
+      logging: {
+        enabled: true,
+        dir: "./logs",
+        time_format: "12hr",
+      },
+    },
+    drives: {
+      auto_load: true,
+      auto_eject: true,
+    },
+    ripping: {
+      rip_all_titles: false,
+      mode: "async",
+    },
+  })),
+}));
 
 describe("FileSystemUtils", () => {
   beforeEach(() => {
