@@ -2,6 +2,8 @@ import { readFileSync } from "fs";
 import { dirname, join, resolve, normalize, sep } from "path";
 import { fileURLToPath } from "url";
 import { parse } from "yaml";
+import { FileSystemUtils } from "../utils/filesystem.js";
+import { Logger } from "../utils/logger.js";
 
 // Get the current file's directory
 const __filename = fileURLToPath(import.meta.url);
@@ -12,6 +14,7 @@ const __dirname = dirname(__filename);
  */
 export class AppConfig {
   static #config = null;
+  static #detectedMkvPath = null;
 
   constructor() {
     throw new Error("AppConfig is a static class and cannot be instantiated");
@@ -51,9 +54,35 @@ export class AppConfig {
     return normalizedPath;
   }
 
-  static get mkvDir() {
+  /**
+   * Get MakeMKV directory with automatic detection fallback
+   * @returns {Promise<string|null>} - MakeMKV directory path
+   */
+  static async getMkvDir() {
     const config = this.#loadConfig();
-    return this.#normalizePath(config.paths?.makemkv_dir);
+    const configuredPath = config.paths?.makemkv_dir;
+
+    // If user has configured a path, use it (with validation)
+    if (configuredPath) {
+      const normalizedPath = this.#normalizePath(configuredPath);
+      const isValid = await FileSystemUtils.validateMakeMKVInstallation(
+        normalizedPath
+      );
+
+      if (isValid) {
+        return normalizedPath;
+      } else {
+        Logger.warning(`Configured MakeMKV path is invalid: ${normalizedPath}`);
+        Logger.info("Falling back to automatic detection...");
+      }
+    }
+
+    // Fall back to automatic detection
+    if (this.#detectedMkvPath === null) {
+      this.#detectedMkvPath = await FileSystemUtils.detectMakeMKVInstallation();
+    }
+
+    return this.#detectedMkvPath;
   }
 
   static get movieRipsDir() {
@@ -98,8 +127,12 @@ export class AppConfig {
     return mode === "sync" ? "sync" : "async";
   }
 
-  static get makeMKVExecutable() {
-    const mkvDir = this.mkvDir;
+  /**
+   * Get MakeMKV executable path with automatic detection
+   * @returns {Promise<string|null>} - Full path to makemkvcon executable
+   */
+  static async getMakeMKVExecutable() {
+    const mkvDir = await this.getMkvDir();
     if (!mkvDir) return null;
 
     // Handle cross-platform executable names
@@ -115,10 +148,19 @@ export class AppConfig {
 
   /**
    * Validate that all required configuration values are present
+   * This includes automatic MakeMKV detection
    */
-  static validate() {
-    const requiredPaths = [this.mkvDir, this.movieRipsDir, this.logDir];
+  static async validate() {
+    // Check MakeMKV installation
+    const mkvDir = await this.getMkvDir();
+    if (!mkvDir) {
+      throw new Error(
+        `MakeMKV installation not found. Please ensure MakeMKV is installed or configure the path manually in config.yaml`
+      );
+    }
 
+    // Check other required paths
+    const requiredPaths = [this.movieRipsDir, this.logDir];
     const missingPaths = requiredPaths.filter(
       (path) => !path || path.trim() === ""
     );

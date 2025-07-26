@@ -89,7 +89,7 @@ export class RipService {
    * @returns {Promise<string>} - Title of the ripped disc
    */
   async ripSingleDisc(commandDataItem, outputPath) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const dir = FileSystemUtils.createUniqueFolder(
         outputPath,
         commandDataItem.title
@@ -97,7 +97,18 @@ export class RipService {
 
       Logger.info(`Ripping Title ${commandDataItem.title} to ${dir}...`);
 
-      const makeMKVCommand = `${AppConfig.makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
+      // Get MakeMKV executable path with cross-platform detection
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        reject(
+          new Error(
+            "MakeMKV executable not found. Please ensure MakeMKV is installed."
+          )
+        );
+        return;
+      }
+
+      const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
 
       exec(makeMKVCommand, async (err, stdout, stderr) => {
         if (err || stderr) {

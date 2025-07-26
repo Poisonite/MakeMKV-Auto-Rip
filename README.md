@@ -39,13 +39,18 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 ### Essential Software
 
-1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations
-2. **[Node.js](https://nodejs.org/) >= 22.0.0** - Runtime environment
-3. **Windows or Linux OS** - Currently only (officially) tested on Windows 10+ & Debian/Ubuntu Linux
+1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations (Each new version of Auto Rip is only tested with the most recent MakeMKV version)
+2. **[Node.js](https://nodejs.org/)** - Runtime environment (only >= v22 officially tested)
+3. **Cross-platform OS support** - Works on Windows, macOS, and Linux (only (officially) tested on Windows 10+ & Debian/Ubuntu Linux)
 
-### Optical Drive Management
+### Cross-Platform Support
 
-- **Cross-platform support** - Drive load/eject operations work on Windows, macOS, and Linux
+- **Automatic MakeMKV Detection** - Finds MakeMKV installation automatically on all platforms:
+  - **Windows**: `C:/Program Files/MakeMKV` or `C:/Program Files (x86)/MakeMKV`
+  - **Linux**: `/usr/bin`, `/usr/local/bin`, or `/opt/makemkv/bin`
+  - **macOS**: `/Applications/MakeMKV.app/Contents/MacOS`, `/opt/homebrew/bin`, or `/usr/local/bin`
+- **Manual Override** - Configure custom MakeMKV path in `config.yaml` if needed
+- **Optical Drive Management** - Drive load/eject operations work on Windows, macOS, and Linux
 - **Windows implementation** - Uses native C++ addon for reliable Windows DeviceIoControl API access
 - **Pre-built native components** - No compilation required, native addon included in repository
 - **Administrator privileges required on Windows** - Run terminal as administrator for drive operations
@@ -115,8 +120,9 @@ If you encounter errors related to ejecting drives or receive sudo/admin prompts
 
 # Application paths and directories
 paths:
-  # MakeMKV installation directory
-  makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+  # MakeMKV installation directory (OPTIONAL - auto-detected if not specified)
+  # Uncomment and set only if you need to override the automatic detection
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV"
 
   # Directory where ripped movies will be saved
   movie_rips_dir: "C:/Your/Movie/Rips"
@@ -149,11 +155,11 @@ ripping:
   mode: "async"
 ```
 
-````
-
 #### Configuration Options
 
-- **`paths.makemkv_dir`** - MakeMKV installation directory (supports forward slashes on all platforms)
+- **`paths.makemkv_dir`** - MakeMKV installation directory (OPTIONAL - auto-detected if not specified)
+  - Supports forward slashes on all platforms
+  - For Advanced Users: Only needed if MakeMKV is installed in a non-standard location
 - **`paths.movie_rips_dir`** - Root directory for ripped movies (create a dedicated folder)
 - **`paths.logging.enabled`** - Enable/disable writing MakeMKV output to log files (`true` or `false`)
 - **`paths.logging.dir`** - Directory for log files
@@ -165,8 +171,6 @@ ripping:
 
 **Important Notes:**
 
-- Use double backslashes (`\\`) in Windows paths
-- Create directories manually - the application cannot create missing folders
 - Recommended: Create dedicated folders for movie rips and logs
 - **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance... for SSDs, `"async"` will yield much better overall performance
 
@@ -190,7 +194,7 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 4. **For Blu-ray discs:**
    - Run at least one Blu-ray through the MakeMKV GUI first
-   - Enter a valid key (beta key works) before using Auto Rip
+   - Enter a valid key (beta key works - but please support the MakeMKV team if you find their software useful or time-saving!) before using Auto Rip
 
 ## 🎯 Usage
 
@@ -198,7 +202,7 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 ```bash
 npm start          # Interactive ripping interface
-````
+```
 
 ### Drive Management Only
 
@@ -216,23 +220,23 @@ npm run eject      # Eject all drives
    - Check that all paths in `config.yaml` exist and use forward slashes (/) for cross-platform compatibility
    - Ensure MakeMKV is properly installed
 
-2. **"Native optical drive addon failed to load" error**
+2. **"(Windows) Native optical drive addon failed to load" error**
 
    - This indicates a corrupted installation or missing native components
-   - Try reinstalling the application: `npm install`
-   - Ensure you're running on a supported Windows version (Windows 10+)
+   - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run build`
+   - Ensure you're running on a supported Windows version (Windows 10+ officially tested - theoretically compatible back to ~Windows 2000)
 
 3. **Drive eject/load operations fail**
 
    - **Windows: Run as administrator** - Right-click terminal and "Run as administrator"
-   - Windows drive operations require elevated privileges for DeviceIoControl API access
-   - macOS/Linux: Standard user privileges should work for most drives
-   - Manual drive operation may be needed if software control isn't supported by hardware
+     - Windows drive operations require elevated privileges for DeviceIoControl API access
+   - macOS/Linux: Standard user privileges should work for most drives (See Linux troubleshooting section above)
+   - Manual drive operation may be needed if software control isn't supported by hardware (or hardware lacks the proper physical mechanism)
 
 4. **No discs detected**
 
    - Make sure discs are inserted and readable
-   - Try running MakeMKV GUI first to test disc compatibility
+   - Try running MakeMKV GUI to test disc compatibility
 
 5. **Drive loading issues**
 
@@ -241,7 +245,7 @@ npm run eject      # Eject all drives
 
 6. **Ripping failures**
    - Check disc condition (scratches, damage)
-   - Try ripping manually with MakeMKV GUI first
+   - Try ripping manually with MakeMKV GUI
    - Increase retry count in MakeMKV settings
 
 ## 📄 License

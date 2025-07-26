@@ -195,7 +195,7 @@ for (const disc of discs) {
 
 ### Command Interface
 
-The application interfaces with MakeMKV through its command-line tool (`makemkvcon.exe`):
+The application interfaces with MakeMKV through its command-line tool (`makemkvcon.exe` / `makemkvcon`):
 
 ```javascript
 // Drive detection

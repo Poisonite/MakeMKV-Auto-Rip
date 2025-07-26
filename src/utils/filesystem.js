@@ -1,5 +1,9 @@
 import fs from "fs";
+import { join } from "path";
 import { Logger } from "./logger.js";
+import { PLATFORM_DEFAULTS } from "../constants/index.js";
+import { access } from "fs/promises";
+import os from "os";
 
 /**
  * Filesystem utilities for file and folder operations
@@ -30,7 +34,7 @@ export class FileSystemUtils {
    * @returns {string} - The full path of the created folder
    */
   static createUniqueFolder(outputPath, folderName) {
-    let dir = `${outputPath}\\${folderName}`;
+    let dir = join(outputPath, folderName);
     let folderCounter = 1;
 
     if (fs.existsSync(dir)) {
@@ -51,7 +55,7 @@ export class FileSystemUtils {
    * @returns {string} - The full path of the unique log file
    */
   static createUniqueLogFile(logDir, fileName) {
-    let dir = `${logDir}\\Log-${fileName}`;
+    let dir = join(logDir, `Log-${fileName}`);
     let fileCounter = 1;
 
     if (fs.existsSync(`${dir}.txt`)) {
@@ -94,6 +98,70 @@ export class FileSystemUtils {
   static ensureDirectoryExists(dirPath) {
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
+    }
+  }
+
+  /**
+   * Detect MakeMKV installation path for the current platform
+   * @returns {Promise<string|null>} - Path to MakeMKV directory or null if not found
+   */
+  static async detectMakeMKVInstallation() {
+    const platform = os.platform();
+    const platformPaths = PLATFORM_DEFAULTS.MAKEMKV_PATHS[platform];
+
+    if (!platformPaths) {
+      Logger.warning(`Unsupported platform: ${platform}`);
+      return null;
+    }
+
+    for (const basePath of platformPaths) {
+      try {
+        // Check if the directory exists
+        await access(basePath);
+
+        // Check if makemkvcon executable exists in this path
+        const executableName =
+          platform === "win32" ? "makemkvcon.exe" : "makemkvcon";
+        const executablePath = join(basePath, executableName);
+
+        try {
+          await access(executablePath);
+          Logger.info(`Found MakeMKV installation at: ${basePath}`);
+          return basePath;
+        } catch {
+          // Executable not found in this directory, try next
+          continue;
+        }
+      } catch {
+        // Directory doesn't exist, try next
+        continue;
+      }
+    }
+
+    Logger.warning(
+      `MakeMKV installation not found in default locations for ${platform}`
+    );
+    return null;
+  }
+
+  /**
+   * Validate that MakeMKV executable exists at given path
+   * @param {string} mkvDir - Path to MakeMKV directory
+   * @returns {Promise<boolean>} - True if executable exists
+   */
+  static async validateMakeMKVInstallation(mkvDir) {
+    if (!mkvDir) return false;
+
+    try {
+      const platform = os.platform();
+      const executableName =
+        platform === "win32" ? "makemkvcon.exe" : "makemkvcon";
+      const executablePath = join(mkvDir, executableName);
+
+      await access(executablePath);
+      return true;
+    } catch {
+      return false;
     }
   }
 }

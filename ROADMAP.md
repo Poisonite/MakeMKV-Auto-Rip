@@ -49,19 +49,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Warn users about available updates (`MSG:5075`)
   - Provide helpful installation guidance
 
-#### Cross-Platform Support
-
-- **Description**: Add support for Linux and macOS in addition to Windows
-- **Benefits**: Broader user base and flexibility for different environments
-- **Contribution Difficulty**: 🔴 Advanced
-- **Details**:
-  - Update makemkvcon location and path structure handling for each platform
-  - Ensure all file and directory operations are cross-platform compatible
-  - Consider splitting platform support into separate implementation items:
-    - Windows support (existing)
-    - Linux support (makemkvcon path, drive handling, etc.)
-    - macOS support (makemkvcon path, drive handling, etc.)
-
 #### Docker Support
 
 - **Description**: Provide official Docker images and documentation
@@ -72,15 +59,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Document environment variables and volume mounts for MakeMKV and output directories
   - Configure a base image which builds MakeMKV for Linux
   - Ensure platform compatibility within containers
-
-#### Default MakeMKV Path Per Platform with Override
-
-- **Description**: Use a sensible default path for makemkvcon on each platform, with an override option in the config
-- **Benefits**: Simplifies setup for most users, but allows advanced customization
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Define default makemkvcon path for Windows, Linux, and macOS in the codebase
-  - Allow users to specify a custom path in the config file to override the default
 
 ### 🎵 Medium Priority
 
@@ -182,9 +160,8 @@ Have ideas for features not listed here? We'd love to hear from you!
 | MakeMKV Installation & Version Check | 📋 Planned | TBD    |
 | Audio Notifications                  | 📋 Planned | TBD    |
 | Repeat Mode Configs                  | 📋 Planned | TBD    |
-| Configuration Improvements (Paths)   | 📋 Planned | TBD    |
 
-\_Last updated: 07/25/2025
+\_Last updated: 07/26/2025
 
 ---
 

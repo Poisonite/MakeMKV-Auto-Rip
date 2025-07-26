@@ -5,7 +5,9 @@
 # Application paths and directories
 paths:
   # MakeMKV installation directory
-  makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+  # Leave empty or comment out to use automatic detection based on your platform:
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV" # For Advanced users only - overwrite the automatic detection
+
   # Directory where ripped movies/tv/media will be saved
   movie_rips_dir: "./media"
 

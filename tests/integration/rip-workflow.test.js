@@ -285,7 +285,7 @@ DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
       vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
-      vi.spyOn(AppConfig, "makeMKVExecutable", "get").mockReturnValue('"test"');
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
       vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
         "./test-media"
       );
@@ -325,7 +325,7 @@ DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
       vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
-      vi.spyOn(AppConfig, "makeMKVExecutable", "get").mockReturnValue('"test"');
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
       vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
         "./test-media"
       );
@@ -420,7 +420,7 @@ DRV:1,2,999,1,"DVD","Test Movie","/dev/sr1"`;
       vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
       vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
       vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(true);
-      vi.spyOn(AppConfig, "makeMKVExecutable", "get").mockReturnValue('"test"');
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
       vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
         "./test-media"
       );

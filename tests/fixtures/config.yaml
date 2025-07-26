@@ -1,6 +1,6 @@
 # Test configuration for unit tests
 paths:
-  makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV"  # Using auto-detection for tests
   movie_rips_dir: "./media"
   logging:
     enabled: true

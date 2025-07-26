@@ -14,10 +14,21 @@ export class DiscService {
    * @returns {Promise<Array>} - Array of drive information objects
    */
   static async getAvailableDiscs() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       Logger.info("Getting info for all discs...");
 
-      const command = `${AppConfig.makeMKVExecutable} -r info disc:index`;
+      // Get MakeMKV executable path with cross-platform detection
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        reject(
+          new Error(
+            "MakeMKV executable not found. Please ensure MakeMKV is installed."
+          )
+        );
+        return;
+      }
+
+      const command = `${makeMKVExecutable} -r info disc:index`;
 
       exec(command, (err, stdout, stderr) => {
         if (stderr) {
@@ -83,12 +94,23 @@ export class DiscService {
    * @returns {Promise<Object>} - Enhanced drive info with file number
    */
   static async getDiscFileInfo(driveInfo) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       Logger.info(
         `Getting file number for drive title ${driveInfo.driveNumber}-${driveInfo.title}.`
       );
 
-      const command = `${AppConfig.makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
+      // Get MakeMKV executable path with cross-platform detection
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        reject(
+          new Error(
+            "MakeMKV executable not found. Please ensure MakeMKV is installed."
+          )
+        );
+        return;
+      }
+
+      const command = `${makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
 
       exec(command, (err, stdout, stderr) => {
         if (stderr) {
