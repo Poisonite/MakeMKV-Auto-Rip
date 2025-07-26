@@ -43,6 +43,14 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 2. **[Node.js](https://nodejs.org/) >= 22.0.0** - Runtime environment
 3. **Windows OS** - Currently only tested on Windows 10+
 
+### Optical Drive Management
+
+- **Cross-platform support** - Drive load/eject operations work on Windows, macOS, and Linux
+- **Windows implementation** - Uses native C++ addon for reliable Windows DeviceIoControl API access
+- **Pre-built native components** - No compilation required, native addon included in repository
+- **Administrator privileges required on Windows** - Run terminal as administrator for drive operations
+- **No Python or build tools required** - Ready to use out of the box
+
 ### Recommended Software
 
 - **Java** - Required for certain MakeMKV features
@@ -140,10 +148,6 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 ```bash
 npm start          # Interactive ripping interface
-# or
-npm run rip        # Same as above
-# or
-node index.js      # Direct execution
 ```
 
 ### Drive Management Only
@@ -162,17 +166,30 @@ npm run eject      # Eject all drives
    - Check that all paths in `config/default.json` exist
    - Ensure MakeMKV is properly installed
 
-2. **No discs detected**
+2. **"Native optical drive addon failed to load" error**
+
+   - This indicates a corrupted installation or missing native components
+   - Try reinstalling the application: `npm install`
+   - Ensure you're running on a supported Windows version (Windows 10+)
+
+3. **Drive eject/load operations fail**
+
+   - **Windows: Run as administrator** - Right-click terminal and "Run as administrator"
+   - Windows drive operations require elevated privileges for DeviceIoControl API access
+   - macOS/Linux: Standard user privileges should work for most drives
+   - Manual drive operation may be needed if software control isn't supported by hardware
+
+4. **No discs detected**
 
    - Make sure discs are inserted and readable
    - Try running MakeMKV GUI first to test disc compatibility
 
-3. **Drive loading issues**
+5. **Drive loading issues**
 
    - Some USB and laptop drives may not support automatic loading
    - Manually close drives that don't auto-close within the 5-second waiting period
 
-4. **Ripping failures**
+6. **Ripping failures**
    - Check disc condition (scratches, damage)
    - Try ripping manually with MakeMKV GUI first
    - Increase retry count in MakeMKV settings

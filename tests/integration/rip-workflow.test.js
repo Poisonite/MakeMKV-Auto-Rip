@@ -11,7 +11,7 @@ import fs from "fs";
 
 // Use real modules but mock external dependencies
 vi.mock("child_process");
-vi.mock("win-eject");
+vi.mock("../../src/utils/optical-drive.js");
 vi.mock("fs", () => ({
   default: {
     existsSync: vi.fn().mockReturnValue(false),
@@ -75,16 +75,16 @@ Additional MakeMKV output here`;
       });
 
       // Mock successful drive operations
-      const { default: winEject } = await import("win-eject");
-      winEject.close.mockImplementation((drive, callback) => callback());
-      winEject.eject.mockImplementation((drive, callback) => callback());
+      const { OpticalDriveUtil } = await import("../../src/utils/optical-drive.js");
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue();
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue();
 
       // Execute the workflow
       await ripService.startRipping();
 
       // Verify drive operations were called
-      expect(winEject.close).toHaveBeenCalled(); // Load drives
-      expect(winEject.eject).toHaveBeenCalled(); // Eject drives
+      expect(OpticalDriveUtil.loadAllDrives).toHaveBeenCalled(); // Load drives
+      expect(OpticalDriveUtil.ejectAllDrives).toHaveBeenCalled(); // Eject drives
 
       // Verify MakeMKV commands were executed
       expect(exec).toHaveBeenCalledWith(

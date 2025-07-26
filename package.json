@@ -9,18 +9,19 @@
     },
     "scripts": {
         "start": "node index.js",
-        "rip": "node index.js",
         "load": "node src/cli/commands.js load",
         "eject": "node src/cli/commands.js eject",
         "test": "vitest",
-        "test:run": "vitest run",
-        "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --watch",
-        "test:ui": "vitest --ui"
+        "test:ui": "vitest --ui",
+        "build": "node-gyp rebuild",
+        "build:debug": "node-gyp rebuild --debug",
+        "clean": "node-gyp clean",
+        "postinstall": "node -e \"console.log('MakeMKV Auto Rip installed successfully!'); if (process.platform === 'win32' && !require('fs').existsSync('./build/Release/optical_drive_native.node')) { console.warn('WARNING: Native Windows addon missing - optical drive operations may not work'); }\""
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/poisonite/MakeMKV-Auto-Rip.git"
+        "url": "git+https://github.com/Poisonite/MakeMKV-Auto-Rip.git"
     },
     "keywords": [
         "Poisonite",
@@ -46,18 +47,19 @@
     "author": "Zac Ingoglia",
     "license": "GPL-3.0-or-later",
     "bugs": {
-        "url": "https://github.com/poisonite/MakeMKV-Auto-Rip/issues"
+        "url": "https://github.com/Poisonite/MakeMKV-Auto-Rip/issues"
     },
-    "homepage": "https://github.com/poisonite/MakeMKV-Auto-Rip#readme",
+    "homepage": "https://github.com/Poisonite/MakeMKV-Auto-Rip#readme",
+    "gypfile": false,
     "dependencies": {
         "chalk": "^5.4.1",
         "config": "^4.0.1",
-        "date-fns": "^4.1.0",
-        "win-eject": "^1.0.2"
+        "date-fns": "^4.1.0"
     },
     "devDependencies": {
-        "vitest": "^3.2.4",
-        "@vitest/coverage-v8": "^3.2.4",
-        "@vitest/ui": "^3.2.4"
+        "@vitest/ui": "^3.2.2",
+        "vitest": "^3.2.2",
+        "node-addon-api": "^8.0.0",
+        "node-gyp": "^10.0.0"
     }
 }
