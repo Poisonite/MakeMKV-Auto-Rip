@@ -41,7 +41,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations
 2. **[Node.js](https://nodejs.org/) >= 22.0.0** - Runtime environment
-3. **Windows OS** - Currently only tested on Windows 10+
+3. **Windows or Linux OS** - Currently only (officially) tested on Windows 10+ & Debian/Ubuntu Linux
 
 ### Optical Drive Management
 
@@ -66,6 +66,43 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
    ```
 4. **Configure the application** (see Configuration section below)
 5. **Configure MakeMKV GUI** (see MakeMKV Configuration section below)
+
+### Linux Drive Management Setup (Optional)
+
+**Note: Only required for Linux users who want to use automatic drive ejecting**
+
+If you encounter errors related to ejecting drives or receive sudo/admin prompts when inserting/ejecting discs, follow these steps:
+
+1. **Add your user to the cdrom group:**
+
+   ```bash
+   sudo usermod -aG cdrom $USER
+   ```
+
+2. **Create a polkit rule for passwordless optical drive operations:**
+
+   ```bash
+   sudo nano /etc/polkit-1/rules.d/70-udisks2-no-password.rules
+   ```
+
+3. **Add the following content to the file:**
+
+   ```javascript
+   polkit.addRule(function (action, subject) {
+     if (
+       subject.isInGroup("cdrom") &&
+       action.id.startsWith("org.freedesktop.udisks2.")
+     ) {
+       return polkit.Result.YES;
+     }
+   });
+   ```
+
+4. **Reboot your system:**
+   ```bash
+   sudo reboot
+   ```
+   This configuration allows users in the cdrom group to perform optical drive operations without requiring sudo passwords.
 
 ## ⚙️ Configuration
 
