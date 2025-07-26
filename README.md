@@ -28,7 +28,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
    ```
 
 2. **Configure the application:**
-   Edit `config/default.json` with your paths
+   Edit `config.yaml` with your paths
 
 3. **Start ripping:**
    ```bash
@@ -69,49 +69,62 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 ## ⚙️ Configuration
 
-### Application Configuration (`config/default.json`)
+### Application Configuration (`config.yaml`)
 
-```json
-{
-  "Path": {
-    "mkvDir": {
-      "Dir": "C:\\Program Files (x86)\\MakeMKV"
-    },
-    "movieRips": {
-      "Dir": "C:\\Your\\Movie\\Rips"
-    },
-    "logging": {
-      "toFiles": "true",
-      "Dir": "C:\\Your\\Log\\Directory",
-      "timeFormat": "12hr"
-    },
-    "loadDrives": {
-      "Enabled": "true"
-    },
-    "ejectDrives": {
-      "Enabled": "true"
-    },
-    "ripAll": {
-      "Enabled": "false"
-    },
-    "rippingMode": {
-      "Mode": "async"
-    }
-  }
-}
+```yaml
+# MakeMKV Auto Rip Configuration
+# This file contains all configuration settings for the application
+# Paths are automatically normalized for the current operating system
+
+# Application paths and directories
+paths:
+  # MakeMKV installation directory
+  makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+
+  # Directory where ripped movies will be saved
+  movie_rips_dir: "C:/Your/Movie/Rips"
+
+  # Logging configuration
+  logging:
+    # Whether to save logs to files (true/false)
+    enabled: true
+
+    # Directory where log files will be saved
+    dir: "C:/Your/Log/Directory"
+
+    # Time format for log timestamps (12hr/24hr)
+    time_format: "12hr"
+
+# Drive operation settings
+drives:
+  # Automatically load/mount optical drives (true/false)
+  auto_load: true
+
+  # Automatically eject drives after ripping (true/false)
+  auto_eject: true
+
+# Ripping behavior settings
+ripping:
+  # Rip all titles from disc instead of just the main title (true/false)
+  rip_all_titles: false
+
+  # Ripping mode - async for parallel processing, sync for sequential (async/sync)
+  mode: "async"
 ```
+
+````
 
 #### Configuration Options
 
-- **`mkvDir`** - MakeMKV installation directory (usually default location)
-- **`movieRips`** - Root directory for ripped movies (create a dedicated folder)
-- **`logging.toFiles`** - Enable/disable writing MakeMKV output to log files (`"true"` or `"false"`)
-- **`logging.Dir`** - Directory for log files
-- **`logging.timeFormat`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
-- **`loadDrives.Enabled`** - Auto-load/close drives before ripping (`"true"` or `"false"`)
-- **`ejectDrives.Enabled`** - Auto-eject drives after ripping completion (`"true"` or `"false"`)
-- **`ripAll.Enabled`** - Rip all titles that are above MakeMKV min length (`"true"`) or longest title only (`"false"`)
-- **`rippingMode.Mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing
+- **`paths.makemkv_dir`** - MakeMKV installation directory (supports forward slashes on all platforms)
+- **`paths.movie_rips_dir`** - Root directory for ripped movies (create a dedicated folder)
+- **`paths.logging.enabled`** - Enable/disable writing MakeMKV output to log files (`true` or `false`)
+- **`paths.logging.dir`** - Directory for log files
+- **`paths.logging.time_format`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
+- **`drives.auto_load`** - Auto-load/close drives before ripping (`true` or `false`)
+- **`drives.auto_eject`** - Auto-eject drives after ripping completion (`true` or `false`)
+- **`ripping.rip_all_titles`** - Rip all titles that are above MakeMKV min length (`true`) or longest title only (`false`)
+- **`ripping.mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing)
 
 **Important Notes:**
 
@@ -148,7 +161,7 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 ```bash
 npm start          # Interactive ripping interface
-```
+````
 
 ### Drive Management Only
 
@@ -163,7 +176,7 @@ npm run eject      # Eject all drives
 
 1. **"Failed to start application" error**
 
-   - Check that all paths in `config/default.json` exist
+   - Check that all paths in `config.yaml` exist and use forward slashes (/) for cross-platform compatibility
    - Ensure MakeMKV is properly installed
 
 2. **"Native optical drive addon failed to load" error**

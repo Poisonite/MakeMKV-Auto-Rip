@@ -25,8 +25,7 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │   │   └── index.js              # Centralized config handling
 │   └── constants/                # Application constants
 │       └── index.js              # Shared constants and enums
-├── config/                       # Configuration files
-│   └── default.json              # Application settings
+├── config.yaml                   # YAML configuration file for application settings
 ├── .github/                      # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/           # Issue templates
 │   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
@@ -122,7 +121,7 @@ The application implements a multi-layered error handling approach:
 ### Ripping Process Flow
 
 ```
-1. User Input (CLI) → 2. Configuration Validation → 3. Drive Loading (if enabled)
+1. User Input (CLI) → 2. YAML Configuration Validation → 3. Drive Loading (if enabled)
                                     ↓
 8. Results Display ← 7. Drive Ejection (if enabled) ← 6. Configurable Ripping ← 5. Disc Detection
                                     ↓                        (Async/Sync)              ↓
@@ -144,7 +143,7 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **Node.js (ES Modules)** - Runtime environment with modern import/export syntax
 - **chalk** - Terminal styling and colors
 - **date-fns** - Modern date/time formatting (replaced moment.js)
-- **config** - Configuration file management
+- **yaml** - YAML configuration file parsing and management
 
 ### Native Components
 
@@ -253,7 +252,7 @@ MakeMKV output follows a structured format that the application parses:
 
 1. **Testing Coverage** - Unit and integration tests needed
 2. **Documentation** - JSDoc coverage for all modules
-3. **Configuration Schema** - JSON schema validation
+3. **Configuration Schema** - YAML schema validation
 
 ## 📝 Code Style and Standards
 

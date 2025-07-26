@@ -1,59 +1,116 @@
-import config from "config";
+import { readFileSync } from "fs";
+import { dirname, join, resolve, normalize, sep } from "path";
+import { fileURLToPath } from "url";
+import { parse } from "yaml";
+
+// Get the current file's directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Configuration management utility
  */
 export class AppConfig {
+  static #config = null;
+
   constructor() {
     throw new Error("AppConfig is a static class and cannot be instantiated");
   }
 
+  /**
+   * Load and parse the YAML configuration file
+   */
+  static #loadConfig() {
+    if (this.#config === null) {
+      try {
+        const configPath = resolve(__dirname, "../../config.yaml");
+        const configContent = readFileSync(configPath, "utf8");
+        this.#config = parse(configContent);
+      } catch (error) {
+        throw new Error(`Failed to load configuration: ${error.message}`);
+      }
+    }
+    return this.#config;
+  }
+
+  /**
+   * Normalize path for the current operating system
+   */
+  static #normalizePath(path) {
+    if (!path) return path;
+
+    // Convert to the platform-specific path format
+    const normalizedPath = normalize(path.replace(/[/\\]/g, sep));
+
+    // Resolve relative paths relative to the project root
+    if (normalizedPath.startsWith(".")) {
+      const projectRoot = resolve(__dirname, "../..");
+      return resolve(projectRoot, normalizedPath);
+    }
+
+    return normalizedPath;
+  }
+
   static get mkvDir() {
-    return config.get("Path.mkvDir.Dir");
+    const config = this.#loadConfig();
+    return this.#normalizePath(config.paths?.makemkv_dir);
   }
 
   static get movieRipsDir() {
-    return config.get("Path.movieRips.Dir");
+    const config = this.#loadConfig();
+    return this.#normalizePath(config.paths?.movie_rips_dir);
   }
 
   static get isFileLogEnabled() {
-    const value = config.get("Path.logging.toFiles");
-    return value ? value.toLowerCase() === "true" : false;
+    const config = this.#loadConfig();
+    return Boolean(config.paths?.logging?.enabled);
   }
 
   static get logDir() {
-    return config.get("Path.logging.Dir");
+    const config = this.#loadConfig();
+    return this.#normalizePath(config.paths?.logging?.dir);
   }
 
   static get logTimeFormat() {
-    const format = config.get("Path.logging.timeFormat");
-    if (!format) return "12hr";
-    return format.toLowerCase() === "24hr" ? "24hr" : "12hr";
+    const config = this.#loadConfig();
+    const format = config.paths?.logging?.time_format;
+    return format === "24hr" ? "24hr" : "12hr";
   }
 
   static get isLoadDrivesEnabled() {
-    const value = config.get("Path.loadDrives.Enabled");
-    return value ? value.toLowerCase() === "true" : false;
+    const config = this.#loadConfig();
+    return Boolean(config.drives?.auto_load);
   }
 
   static get isEjectDrivesEnabled() {
-    const value = config.get("Path.ejectDrives.Enabled");
-    return value ? value.toLowerCase() === "true" : false;
+    const config = this.#loadConfig();
+    return Boolean(config.drives?.auto_eject);
   }
 
   static get isRipAllEnabled() {
-    const value = config.get("Path.ripAll.Enabled");
-    return value ? value.toLowerCase() === "true" : false;
+    const config = this.#loadConfig();
+    return Boolean(config.ripping?.rip_all_titles);
   }
 
   static get rippingMode() {
-    const mode = config.get("Path.rippingMode.Mode");
-    if (!mode) return "async";
-    return mode.toLowerCase() === "sync" ? "sync" : "async";
+    const config = this.#loadConfig();
+    const mode = config.ripping?.mode;
+    return mode === "sync" ? "sync" : "async";
   }
 
   static get makeMKVExecutable() {
-    return `"${this.mkvDir}\\makemkvcon.exe"`;
+    const mkvDir = this.mkvDir;
+    if (!mkvDir) return null;
+
+    // Handle cross-platform executable names
+    const executableName =
+      process.platform === "win32" ? "makemkvcon.exe" : "makemkvcon";
+    const executablePath = join(mkvDir, executableName);
+
+    // Quote the path if it contains spaces (important for Windows paths)
+    return executablePath.includes(" ")
+      ? `"${executablePath}"`
+      : executablePath;
   }
 
   /**
@@ -68,7 +125,7 @@ export class AppConfig {
 
     if (missingPaths.length > 0) {
       throw new Error(
-        `Missing required configuration paths. Please check your default.json file.`
+        `Missing required configuration paths. Please check your config.yaml file.`
       );
     }
   }

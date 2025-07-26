@@ -5,50 +5,53 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import path from "path";
+import { stringify } from "yaml";
 import { isProcessExitError } from "../../src/utils/process.js";
 
 describe("Application End-to-End Tests", () => {
   let testTempDir;
-  let testConfigDir;
+  let originalConfigPath;
 
   beforeEach(async () => {
     // Create temporary directories for testing
     testTempDir = "./test-temp-e2e";
-    testConfigDir = "./test-config-e2e";
 
     if (!fs.existsSync(testTempDir)) {
       fs.mkdirSync(testTempDir, { recursive: true });
     }
 
-    if (!fs.existsSync(testConfigDir)) {
-      fs.mkdirSync(testConfigDir, { recursive: true });
-    }
-
-    // Create test configuration file
+    // Create test configuration in the project root
     const testConfig = {
-      Path: {
-        mkvDir: { Dir: testTempDir },
-        movieRips: { Dir: path.join(testTempDir, "rips") },
+      paths: {
+        makemkv_dir: testTempDir,
+        movie_rips_dir: path.join(testTempDir, "rips"),
         logging: {
-          toFiles: "true",
-          Dir: path.join(testTempDir, "logs"),
-          timeFormat: "12hr",
+          enabled: true,
+          dir: path.join(testTempDir, "logs"),
+          time_format: "12hr",
         },
-        loadDrives: { Enabled: "true" },
-        ejectDrives: { Enabled: "false" }, // Disable for testing
-        ripAll: { Enabled: "false" },
-        rippingMode: { Mode: "async" },
+      },
+      drives: {
+        auto_load: true,
+        auto_eject: false, // Disable for testing
+      },
+      ripping: {
+        rip_all_titles: false,
+        mode: "async",
       },
     };
 
-    fs.writeFileSync(
-      path.join(testConfigDir, "default.json"),
-      JSON.stringify(testConfig, null, 2)
-    );
+    // Backup original config if it exists
+    originalConfigPath = "./config.yaml";
+    if (fs.existsSync(originalConfigPath)) {
+      fs.copyFileSync(originalConfigPath, "./config.yaml.backup");
+    }
 
-    // Set NODE_CONFIG_DIR to use test config
-    process.env.NODE_CONFIG_DIR = testConfigDir;
-    process.env.NODE_ENV = "test";
+    // Write test configuration
+    fs.writeFileSync(originalConfigPath, stringify(testConfig));
+
+    // Clear any cached config - reset modules first then clear cache
+    vi.resetModules();
   });
 
   afterEach(async () => {
@@ -56,13 +59,16 @@ describe("Application End-to-End Tests", () => {
     if (fs.existsSync(testTempDir)) {
       fs.rmSync(testTempDir, { recursive: true, force: true });
     }
-    if (fs.existsSync(testConfigDir)) {
-      fs.rmSync(testConfigDir, { recursive: true, force: true });
+
+    // Restore original config
+    if (fs.existsSync("./config.yaml.backup")) {
+      fs.renameSync("./config.yaml.backup", originalConfigPath);
+    } else if (fs.existsSync(originalConfigPath)) {
+      fs.unlinkSync(originalConfigPath);
     }
 
-    // Reset environment
-    delete process.env.NODE_CONFIG_DIR;
-    delete process.env.NODE_ENV;
+    // Reset modules to clear any cached imports
+    vi.resetModules();
   });
 
   describe("Application startup and configuration", () => {
@@ -72,28 +78,38 @@ describe("Application End-to-End Tests", () => {
       const { AppConfig } = await import("../../src/config/index.js");
 
       expect(() => AppConfig.validate()).not.toThrow();
-      expect(AppConfig.mkvDir).toBe(testTempDir);
+      expect(AppConfig.mkvDir).toContain("test-temp-e2e");
       expect(AppConfig.movieRipsDir).toContain("rips");
       expect(AppConfig.isFileLogEnabled).toBe(true);
       expect(AppConfig.isEjectDrivesEnabled).toBe(false);
     });
 
     it("should handle missing configuration gracefully", async () => {
-      // Mock the config module to return empty values
-      vi.doMock("config", () => ({
-        get: vi.fn().mockReturnValue(""),
-        default: {
-          get: vi.fn().mockReturnValue(""),
-        },
-      }));
+      // Remove the config file to test error handling
+      if (fs.existsSync(originalConfigPath)) {
+        fs.unlinkSync(originalConfigPath);
+      }
+
+      // Reset module cache to force re-import
+      vi.resetModules();
+
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      // Should throw error for missing config
+      expect(() => AppConfig.mkvDir).toThrow("Failed to load configuration");
+    });
+
+    it("should handle invalid YAML configuration", async () => {
+      // Write invalid YAML
+      fs.writeFileSync(originalConfigPath, "invalid: yaml: content: [");
 
       // Reset module cache
       vi.resetModules();
 
       const { AppConfig } = await import("../../src/config/index.js");
 
-      // Should throw error for missing config
-      expect(() => AppConfig.validate()).toThrow();
+      // Should throw error for invalid YAML
+      expect(() => AppConfig.mkvDir).toThrow("Failed to load configuration");
     });
   });
 
@@ -360,23 +376,28 @@ describe("Application End-to-End Tests", () => {
 
   describe("Error scenarios", () => {
     it("should handle configuration errors gracefully", async () => {
-      // Create invalid configuration
+      // Create invalid YAML configuration
       const invalidConfig = {
-        Path: {
-          mkvDir: { Dir: "" }, // Empty path
-          movieRips: { Dir: "./test" },
+        paths: {
+          makemkv_dir: "", // Empty path
+          movie_rips_dir: "./test",
           logging: {
-            toFiles: "true",
-            Dir: "./logs",
-            timeFormat: "12hr",
+            enabled: true,
+            dir: "./logs",
+            time_format: "12hr",
           },
+        },
+        drives: {
+          auto_load: true,
+          auto_eject: true,
+        },
+        ripping: {
+          rip_all_titles: false,
+          mode: "async",
         },
       };
 
-      fs.writeFileSync(
-        path.join(testConfigDir, "default.json"),
-        JSON.stringify(invalidConfig, null, 2)
-      );
+      fs.writeFileSync(originalConfigPath, stringify(invalidConfig));
 
       vi.resetModules();
 

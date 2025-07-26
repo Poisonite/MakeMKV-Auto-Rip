@@ -113,7 +113,7 @@ src/
 
 - Check existing issues to avoid duplicates
 - Test with the latest version
-- Verify the issue isn't configuration-related
+- Verify the issue isn't configuration-related (check `config.yaml` format and values)
 
 When you create a bug report, GitHub will guide you through our bug report template to ensure we get all the information needed to help you.
 P.S. Thank you so much for helping to improve MakeMKV Auto Rip in any capacity! Your feedback is truly appreciated!
@@ -141,7 +141,7 @@ Use clear, descriptive commit messages:
 # Good
 git commit -m "Add parallel processing for multiple disc ripping"
 git commit -m "Fix drive ejection issue on USB drives"
-git commit -m "Update README with new configuration options"
+git commit -m "Update README with new YAML configuration options"
 
 # Less good
 git commit -m "Fix bug"
@@ -179,8 +179,8 @@ When you create a pull request, GitHub will automatically populate it with our p
 
 - **Test with different disc types (if possible)** (DVD, Blu-ray)
 - **Test with multiple drives** when possible
-- **Test error scenarios** (missing discs, invalid config)
-- **Test all npm commands** (`start`, `load`, `eject`)
+- **Test error scenarios** (missing discs, invalid YAML config)
+- **Test all npm (usage) commands** (`start`, `load`, `eject`)
 
 ### Future: Automated Testing
 

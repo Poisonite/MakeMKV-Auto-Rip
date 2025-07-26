@@ -41,7 +41,7 @@ export class CLIInterface {
     Logger.separator();
     Logger.separator();
     Logger.warning(
-      "WARNING--Ensure that you have configured the default.json config file before ripping--WARNING"
+      "WARNING--Ensure that you have configured the config.yaml file before ripping--WARNING"
     );
     Logger.separator();
   }

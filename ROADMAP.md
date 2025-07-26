@@ -84,16 +84,6 @@ Enhancing automated workflows for large-scale disc processing.
 
 ### 🎵 Medium Priority
 
-#### Upgrade Config Design (YAML Support)
-
-- **Description**: Migrate from JSON config files to YAML for improved readability and flexibility
-- **Benefits**: Easier configuration management, better support for comments and complex structures
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Replace `default.json` with `config.yaml`
-  - Update config loading logic to support YAML
-  - Document migration steps for users
-
 #### Audio Notifications
 
 - **Description**: Add optional sound notifications for completed rips
@@ -124,14 +114,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Publish to the npm registry
 
 ### 🔄 Lower Priority
-
-#### Configuration Improvements
-
-- **Description**: Enhanced configuration file handling
-- **Benefits**: Better user experience with config management
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Support single forward slashes in paths
 
 #### Clean Up postinstall Script Output
 
