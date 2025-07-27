@@ -4,6 +4,7 @@ import { Logger } from "../utils/logger.js";
 import { ValidationUtils } from "../utils/validation.js";
 import { FileSystemUtils } from "../utils/filesystem.js";
 import { VALIDATION_CONSTANTS, MEDIA_TYPES } from "../constants/index.js";
+import { DriveService } from "./drive.service.js";
 
 /**
  * Service for handling disc detection and information gathering
@@ -17,6 +18,105 @@ export class DiscService {
     return new Promise(async (resolve, reject) => {
       Logger.info("Getting info for all discs...");
 
+      try {
+        // First attempt to get available discs
+        let commandDataItems = await this.getAvailableDiscsInternal();
+
+        // Always check for unmounted drives if mount detection is enabled
+        if (AppConfig.mountWaitTimeout > 0) {
+          const mountStatus = await DriveService.getDriveMountStatus();
+
+          if (mountStatus.unmounted > 0) {
+            Logger.info(
+              `Found ${commandDataItems.length} disc(s) immediately and ${mountStatus.unmounted} drive(s) still mounting. Waiting for additional drives...`
+            );
+            const additionalDiscs = await this.waitForDriveMount();
+
+            // Merge any newly detected discs with existing ones
+            if (additionalDiscs.length > 0) {
+              commandDataItems = [...commandDataItems, ...additionalDiscs];
+              Logger.info(
+                `Total discs found after waiting: ${commandDataItems.length}`
+              );
+            }
+          } else if (commandDataItems.length === 0) {
+            Logger.info(
+              "No discs detected and no optical drives found that could contain unmounted media."
+            );
+          }
+        }
+
+        resolve(commandDataItems);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Wait for drives to mount media and retry detection
+   * @returns {Promise<Array>} - Array of drive information objects
+   */
+  static async waitForDriveMount() {
+    const waitTimeout = AppConfig.mountWaitTimeout;
+    const pollInterval = AppConfig.mountPollInterval;
+    const maxAttempts = Math.ceil(waitTimeout / pollInterval);
+
+    Logger.info(
+      `Waiting up to ${waitTimeout} seconds for additional drives to mount media...`
+    );
+
+    let lastFoundCount = 0;
+
+    // Poll for mounted drives
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      Logger.info(
+        `Polling attempt ${attempt}/${maxAttempts} for newly mounted drives...`
+      );
+
+      try {
+        const allCurrentDiscs = await this.getAvailableDiscsInternal();
+        const newDiscsFound = allCurrentDiscs.length - lastFoundCount;
+
+        if (newDiscsFound > 0) {
+          Logger.info(
+            `Found ${newDiscsFound} additional disc(s) during polling.`
+          );
+          lastFoundCount = allCurrentDiscs.length;
+        }
+
+        // Check if there are still unmounted drives to wait for
+        const mountStatus = await DriveService.getDriveMountStatus();
+        if (mountStatus.unmounted === 0) {
+          Logger.info(
+            "All optical drives have been checked. No more drives to wait for."
+          );
+          return allCurrentDiscs.slice(-newDiscsFound); // Return only the newly found discs
+        }
+
+        // Wait before next attempt (unless this is the last attempt)
+        if (attempt < maxAttempts) {
+          await this.sleep(pollInterval * 1000);
+        }
+      } catch (error) {
+        Logger.warning(
+          `Error during polling attempt ${attempt}: ${error.message}`
+        );
+      }
+    }
+
+    Logger.info(
+      `Finished waiting ${waitTimeout} seconds for additional drives.`
+    );
+    return [];
+  }
+
+  /**
+   * Internal method to get available discs without waiting logic
+   * @returns {Promise<Array>} - Array of drive information objects
+   */
+  static async getAvailableDiscsInternal() {
+    return new Promise(async (resolve, reject) => {
       // Get MakeMKV executable path with cross-platform detection
       const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
       if (!makeMKVExecutable) {
@@ -37,7 +137,6 @@ export class DiscService {
         }
 
         try {
-          Logger.info("Getting drive info...");
           const driveInfo = this.parseDriveInfo(stdout);
 
           // Get file numbers for each valid disc
@@ -51,6 +150,15 @@ export class DiscService {
         }
       });
     });
+  }
+
+  /**
+   * Sleep for the specified number of milliseconds
+   * @param {number} ms - Milliseconds to sleep
+   * @returns {Promise<void>}
+   */
+  static sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**

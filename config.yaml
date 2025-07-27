@@ -27,6 +27,13 @@ drives:
   # Automatically eject drives after ripping (true/false)
   auto_eject: true
 
+# Mount detection settings
+mount_detection:
+  # Maximum time to wait for drives to mount media before starting rip (in seconds) - 0 to disable
+  wait_timeout: 10
+  # Polling interval to check for newly mounted drives (in seconds)
+  poll_interval: 1
+
 # Ripping behavior settings
 ripping:
   # Rip all titles (over the MakeMKV minimum length) from disc instead of just the longest title (true/false)

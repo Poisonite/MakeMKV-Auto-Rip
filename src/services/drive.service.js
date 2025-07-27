@@ -89,6 +89,61 @@ export class DriveService {
   }
 
   /**
+   * Get count of unmounted optical drives using MakeMKV detection
+   * @returns {Promise<{total: number, mounted: number, unmounted: number}>}
+   */
+  static async getDriveMountStatus() {
+    try {
+      const { AppConfig } = await import("../config/index.js");
+      const { exec } = await import("child_process");
+      const { VALIDATION_CONSTANTS } = await import("../constants/index.js");
+
+      // Get MakeMKV executable path
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        return { total: 0, mounted: 0, unmounted: 0 };
+      }
+
+      const command = `${makeMKVExecutable} -r info disc:index`;
+
+      return new Promise((resolve) => {
+        exec(command, (err, stdout, stderr) => {
+          if (stderr || err) {
+            resolve({ total: 0, mounted: 0, unmounted: 0 });
+            return;
+          }
+
+          try {
+            const lines = stdout.split("\n");
+            const allDriveLines = lines.filter((line) => {
+              const lineArray = line.split(",");
+              return lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER);
+            });
+
+            const mountedDriveLines = lines.filter((line) => {
+              const lineArray = line.split(",");
+              return (
+                lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER) &&
+                lineArray[1] == VALIDATION_CONSTANTS.MEDIA_PRESENT
+              );
+            });
+
+            const total = allDriveLines.length;
+            const mounted = mountedDriveLines.length;
+            const unmounted = total - mounted;
+
+            resolve({ total, mounted, unmounted });
+          } catch (error) {
+            resolve({ total: 0, mounted: 0, unmounted: 0 });
+          }
+        });
+      });
+    } catch (error) {
+      return { total: 0, mounted: 0, unmounted: 0 };
+    }
+  }
+
+  /**
    * Wait for a specified amount of time
    * @param {number} ms - Milliseconds to wait
    * @returns {Promise<void>}

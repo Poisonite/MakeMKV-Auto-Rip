@@ -54,9 +54,12 @@ The application follows strict separation of concerns:
 
 - **Responsibility**: Disc detection, drive enumeration, and title analysis
 - **Key Methods**:
-  - `getAvailableDiscs()` - Scans for inserted discs
+  - `getAvailableDiscs()` - Scans for inserted discs with mount detection wait
+  - `waitForDriveMount()` - Waits for drives to mount media (configurable timeout)
+  - `checkForUnmountedDrives()` - Detects presence of optical drives that may have unmounted media
   - `parseDriveInfo()` - Processes MakeMKV drive output
   - `getFileNumber()` - Identifies longest title on disc
+- **Mount Detection**: Automatically waits for slow-mounting drives to prevent drives from being skipped due to OS mount delays
 
 #### RipService
 
@@ -166,6 +169,19 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 
 We support both parallel and sequential processing for multiple disc operations:
 (Thanks to the contributions of @ThreeHats and @Adam8234 for the original parallel processing logic)
+
+### Mount Detection Configuration
+
+The application includes configurable mount detection to prevent drives from being skipped:
+
+- **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media
+- **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives
+- **Default Values**: 10 seconds timeout, 1 second poll interval
+- **Behavior**: When no discs are initially detected, the system will check for optical drives and poll them for the configured duration
+
+This feature is particularly beneficial on systems where drive mounting can be slower, ensuring all inserted discs are detected before ripping begins.
+
+### Processing Modes
 
 **Async Mode (Parallel - Default):**
 
