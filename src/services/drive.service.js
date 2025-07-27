@@ -115,30 +115,50 @@ export class DriveService {
 
           try {
             const lines = stdout.split("\n");
-            const allDriveLines = lines.filter((line) => {
+
+            // Filter for actual optical drives (exclude virtual slots with state 256)
+            const realDriveLines = lines.filter((line) => {
               const lineArray = line.split(",");
-              return lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER);
+              if (!lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER))
+                return false;
+
+              const driveState = parseInt(lineArray[1]);
+              // State 256 = no physical drive (virtual slot)
+              // State 1 = physical drive present but open/ejected
+              // State 2 = physical drive with media present
+              return driveState !== 256;
             });
 
-            const mountedDriveLines = lines.filter((line) => {
+            // Count drives with mounted media (state 2 AND has media title)
+            const mountedDriveLines = realDriveLines.filter((line) => {
               const lineArray = line.split(",");
+              const driveState = parseInt(lineArray[1]);
+              const mediaTitle = lineArray[5] || "";
+
+              // Drive is considered "mounted" if state is 2 AND has a media title
               return (
-                lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER) &&
-                lineArray[1] == VALIDATION_CONSTANTS.MEDIA_PRESENT
+                driveState === VALIDATION_CONSTANTS.MEDIA_PRESENT &&
+                mediaTitle.trim() !== ""
               );
             });
 
-            const total = allDriveLines.length;
+            const total = realDriveLines.length;
             const mounted = mountedDriveLines.length;
             const unmounted = total - mounted;
 
+            Logger.info(
+              `Drive status: ${total} drives, ${mounted} with mounted media, ${unmounted} available for mounting`
+            );
+
             resolve({ total, mounted, unmounted });
           } catch (error) {
+            Logger.error(`Error parsing drive mount status: ${error.message}`);
             resolve({ total: 0, mounted: 0, unmounted: 0 });
           }
         });
       });
     } catch (error) {
+      Logger.error(`Failed to get drive mount status: ${error.message}`);
       return { total: 0, mounted: 0, unmounted: 0 };
     }
   }

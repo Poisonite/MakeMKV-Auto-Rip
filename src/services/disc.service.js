@@ -177,9 +177,13 @@ export class DiscService {
     return lines
       .filter((line) => {
         const lineArray = line.split(",");
+        const driveState = parseInt(lineArray[1]);
+        const mediaTitle = lineArray[5] || "";
+
         return (
           lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER) &&
-          lineArray[1] == VALIDATION_CONSTANTS.MEDIA_PRESENT
+          driveState == VALIDATION_CONSTANTS.MEDIA_PRESENT &&
+          mediaTitle.trim() !== ""
         );
       })
       .map((line) => {
