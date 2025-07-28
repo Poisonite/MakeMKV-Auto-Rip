@@ -25,6 +25,9 @@ export class DiscService {
         // Always check for unmounted drives if mount detection is enabled
         if (AppConfig.mountWaitTimeout > 0) {
           const mountStatus = await DriveService.getDriveMountStatus();
+          Logger.info(
+            `Debug - Mount status: total=${mountStatus.total}, mounted=${mountStatus.mounted}, unmounted=${mountStatus.unmounted}`
+          );
 
           if (mountStatus.unmounted > 0) {
             Logger.info(
@@ -39,9 +42,11 @@ export class DiscService {
                 `Total discs found after waiting: ${commandDataItems.length}`
               );
             }
-          } else if (commandDataItems.length === 0) {
+          } else if (commandDataItems.length === 0 && mountStatus.total === 0) {
+            Logger.info("No discs detected and no optical drives found.");
+          } else if (commandDataItems.length === 0 && mountStatus.total > 0) {
             Logger.info(
-              "No discs detected and no optical drives found that could contain unmounted media."
+              `Found ${mountStatus.total} optical drive(s) but no media is currently mounted.`
             );
           }
         }

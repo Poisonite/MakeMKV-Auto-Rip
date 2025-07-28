@@ -1,5 +1,6 @@
 import { OpticalDriveUtil } from "../utils/optical-drive.js";
 import { Logger } from "../utils/logger.js";
+import { VALIDATION_CONSTANTS } from "../constants/index.js";
 
 /**
  * Service for handling drive operations (loading and ejecting)
@@ -96,7 +97,6 @@ export class DriveService {
     try {
       const { AppConfig } = await import("../config/index.js");
       const { exec } = await import("child_process");
-      const { VALIDATION_CONSTANTS } = await import("../constants/index.js");
 
       // Get MakeMKV executable path
       const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
@@ -145,6 +145,17 @@ export class DriveService {
             const total = realDriveLines.length;
             const mounted = mountedDriveLines.length;
             const unmounted = total - mounted;
+
+            // Debug logging to understand drive states
+            realDriveLines.forEach((line, index) => {
+              const lineArray = line.split(",");
+              const driveNumber = lineArray[0].substring(4);
+              const driveState = parseInt(lineArray[1]);
+              const mediaTitle = lineArray[5] || "";
+              Logger.info(
+                `Debug - Drive ${driveNumber}: state=${driveState}, title="${mediaTitle}"`
+              );
+            });
 
             Logger.info(
               `Drive status: ${total} drives, ${mounted} with mounted media, ${unmounted} available for mounting`
