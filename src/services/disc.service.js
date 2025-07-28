@@ -24,15 +24,27 @@ export class DiscService {
         console.log("DEBUG: Starting getAvailableDiscsInternal()");
         // First attempt to get available discs
         let commandDataItems = await this.getAvailableDiscsInternal();
+        console.log(
+          "DEBUG: getAvailableDiscsInternal() returned:",
+          commandDataItems.length,
+          "items"
+        );
+        console.log("DEBUG: commandDataItems:", commandDataItems);
 
         // Debug: Check mount detection configuration
         const mountWaitTimeout = AppConfig.mountWaitTimeout;
+        console.log(
+          "DEBUG: About to check mount detection, timeout =",
+          mountWaitTimeout
+        );
         Logger.info(
           `Debug - Mount detection timeout configured: ${mountWaitTimeout} seconds`
         );
 
+        console.log("DEBUG: About to enter mount detection if block");
         // Always check mount status if mount detection is enabled
         if (AppConfig.mountWaitTimeout > 0) {
+          console.log("DEBUG: Inside mount detection if block");
           const mountStatus = await DriveService.getDriveMountStatus();
           Logger.info(
             `Debug - Mount status: total=${mountStatus.total}, mounted=${mountStatus.mounted}, unmounted=${mountStatus.unmounted}`
@@ -178,13 +190,32 @@ export class DiscService {
 
         try {
           const driveInfo = this.parseDriveInfo(stdout);
+          console.log(
+            "DEBUG: parseDriveInfo returned",
+            driveInfo.length,
+            "drives"
+          );
 
           // Get file numbers for each valid disc
           const drivePromises = driveInfo.map((drive) =>
             this.getDiscFileInfo(drive)
           );
+          console.log(
+            "DEBUG: About to wait for",
+            drivePromises.length,
+            "drive file info promises"
+          );
 
-          Promise.all(drivePromises).then(resolve).catch(reject);
+          Promise.all(drivePromises)
+            .then((result) => {
+              console.log(
+                "DEBUG: All drive file info promises completed, returning",
+                result.length,
+                "items"
+              );
+              resolve(result);
+            })
+            .catch(reject);
         } catch (error) {
           reject(error);
         }
