@@ -6,6 +6,7 @@ import { ValidationUtils } from "../utils/validation.js";
 import { DiscService } from "./disc.service.js";
 import { DriveService } from "./drive.service.js";
 import { safeExit } from "../utils/process.js";
+import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
  * Service for handling DVD/Blu-ray ripping operations
@@ -31,6 +32,19 @@ export class RipService {
       Logger.info("Beginning AutoRip... Please Wait.");
       const commandDataItems = await DiscService.getAvailableDiscs();
 
+      // Check if any discs were found
+      if (commandDataItems.length === 0) {
+        Logger.info(
+          "No discs found to rip. No ripping operations will be performed."
+        );
+        Logger.separator();
+        await this.handlePostRipActions();
+        return;
+      }
+
+      Logger.info(
+        `Found ${commandDataItems.length} disc(s) ready for ripping.`
+      );
       await this.processRippingQueue(commandDataItems);
       this.displayResults();
       await this.handlePostRipActions();
@@ -89,7 +103,7 @@ export class RipService {
    * @returns {Promise<string>} - Title of the ripped disc
    */
   async ripSingleDisc(commandDataItem, outputPath) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const dir = FileSystemUtils.createUniqueFolder(
         outputPath,
         commandDataItem.title
@@ -97,9 +111,38 @@ export class RipService {
 
       Logger.info(`Ripping Title ${commandDataItem.title} to ${dir}...`);
 
-      const makeMKVCommand = `${AppConfig.makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
+      // Get MakeMKV executable path with cross-platform detection
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        reject(
+          new Error(
+            "MakeMKV executable not found. Please ensure MakeMKV is installed."
+          )
+        );
+        return;
+      }
+
+      const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
 
       exec(makeMKVCommand, async (err, stdout, stderr) => {
+        // Check for critical MakeMKV messages (not first call, so only check for errors)
+        const shouldContinue = MakeMKVMessages.checkOutput(
+          stdout + (stderr || ""),
+          false
+        );
+
+        if (!shouldContinue) {
+          Logger.error(
+            "MakeMKV version is too old, please update to the latest version"
+          );
+          reject(
+            new Error(
+              "MakeMKV version is too old, please update to the latest version"
+            )
+          );
+          return;
+        }
+
         if (err || stderr) {
           Logger.error(
             `Critical Error Ripping ${commandDataItem.title}`,

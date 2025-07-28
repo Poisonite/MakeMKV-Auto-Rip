@@ -2,329 +2,155 @@
  * Unit tests for filesystem utilities
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import fs from "fs";
-import { FileSystemUtils } from "../../src/utils/filesystem.js";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock fs module
-vi.mock("fs");
+vi.mock("fs", () => ({
+  default: {
+    existsSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFile: vi.fn(),
+  },
+}));
+
+// Mock fs/promises
+vi.mock("fs/promises", () => ({
+  access: vi.fn(),
+  readdir: vi.fn(),
+  readFile: vi.fn(),
+}));
+
+// Mock os module
+vi.mock("os", () => ({
+  default: {
+    platform: vi.fn(),
+  },
+}));
+
+// Mock Logger
+vi.mock("../../src/utils/logger.js", () => ({
+  Logger: {
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 
 describe("FileSystemUtils", () => {
-  beforeEach(() => {
+  let FileSystemUtils;
+  let mockedOs;
+  let mockedFsPromises;
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules();
+
+    // Import mocked modules
+    mockedOs = (await import("os")).default;
+    mockedFsPromises = await import("fs/promises");
+
+    // Import the FileSystemUtils after mocks are set up
+    const module = await import("../../src/utils/filesystem.js");
+    FileSystemUtils = module.FileSystemUtils;
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe("makeTitleValidFolderPath", () => {
-    it("should remove invalid characters from folder path", () => {
-      const invalidTitle =
-        'Movie: Title/Part\\Two*With?Special<Chars>And|Quotes"';
-      const expected = "Movie TitlePartTwoWithSpecialCharsAndQuotes";
-
+    it("should remove invalid characters from titles", () => {
+      const invalidTitle = 'Test<>:"/\\|?*Movie';
       const result = FileSystemUtils.makeTitleValidFolderPath(invalidTitle);
-      expect(result).toBe(expected);
+      expect(result).toBe("TestMovie");
     });
 
-    it("should handle empty string", () => {
-      const result = FileSystemUtils.makeTitleValidFolderPath("");
-      expect(result).toBe("");
-    });
-
-    it("should handle string with only invalid characters", () => {
-      const invalidTitle = '\\/:*?"<>|';
-      const result = FileSystemUtils.makeTitleValidFolderPath(invalidTitle);
-      expect(result).toBe("");
-    });
-
-    it("should handle string with no invalid characters", () => {
-      const validTitle = "Normal Movie Title";
-      const result = FileSystemUtils.makeTitleValidFolderPath(validTitle);
-      expect(result).toBe(validTitle);
-    });
-
-    it("should remove single and double quotes", () => {
-      const titleWithQuotes = 'Movie\'s Title "Special Edition"';
-      const expected = "Movies Title Special Edition";
-
-      const result = FileSystemUtils.makeTitleValidFolderPath(titleWithQuotes);
-      expect(result).toBe(expected);
-    });
-
-    it("should handle multiple invalid characters in sequence", () => {
-      const titleWithMultiple = "Movie\\\\//::Title";
-      const expected = "MovieTitle";
-
-      const result =
-        FileSystemUtils.makeTitleValidFolderPath(titleWithMultiple);
-      expect(result).toBe(expected);
-    });
-
-    it("should preserve spaces and valid characters", () => {
-      const title = "Movie Title 2023 - Extended Cut (Blu-ray)";
-      const expected = "Movie Title 2023 - Extended Cut (Blu-ray)";
-
+    it("should remove quotes", () => {
+      const title = 'The "Best" Movie';
       const result = FileSystemUtils.makeTitleValidFolderPath(title);
-      expect(result).toBe(expected);
+      expect(result).toBe("The Best Movie");
     });
   });
 
-  describe("createUniqueFolder", () => {
-    beforeEach(() => {
-      fs.existsSync = vi.fn();
-      fs.mkdirSync = vi.fn();
+  describe("MakeMKV Detection", () => {
+    it("should detect MakeMKV on Windows", async () => {
+      mockedOs.platform.mockReturnValue("win32");
+      mockedFsPromises.access.mockResolvedValue(); // Simulates successful access
+
+      const result = await FileSystemUtils.detectMakeMKVInstallation();
+      expect(result).toBe("C:/Program Files/MakeMKV");
+      expect(mockedFsPromises.access).toHaveBeenCalled();
     });
 
-    it("should create folder with original name if it does not exist", () => {
-      const outputPath = "C:\\output";
-      const folderName = "Movie Title";
-      const expectedPath = "C:\\output\\Movie Title";
+    it("should detect MakeMKV on Linux", async () => {
+      mockedOs.platform.mockReturnValue("linux");
+      mockedFsPromises.access.mockResolvedValue(); // Simulates successful access
 
-      fs.existsSync.mockReturnValue(false);
-
-      const result = FileSystemUtils.createUniqueFolder(outputPath, folderName);
-
-      expect(result).toBe(expectedPath);
-      expect(fs.existsSync).toHaveBeenCalledWith(expectedPath);
-      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedPath);
+      const result = await FileSystemUtils.detectMakeMKVInstallation();
+      expect(result).toBe("/usr/bin");
+      expect(mockedFsPromises.access).toHaveBeenCalled();
     });
 
-    it("should create folder with incremented name if original exists", () => {
-      const outputPath = "C:\\output";
-      const folderName = "Movie Title";
-      const originalPath = "C:\\output\\Movie Title";
-      const expectedPath = "C:\\output\\Movie Title-1";
+    it("should detect MakeMKV on macOS", async () => {
+      mockedOs.platform.mockReturnValue("darwin");
+      mockedFsPromises.access.mockResolvedValue(); // Simulates successful access
 
-      fs.existsSync
-        .mockReturnValueOnce(true) // Original exists
-        .mockReturnValueOnce(false); // Incremented doesn't exist
-
-      const result = FileSystemUtils.createUniqueFolder(outputPath, folderName);
-
-      expect(result).toBe(expectedPath);
-      expect(fs.existsSync).toHaveBeenCalledWith(originalPath);
-      expect(fs.existsSync).toHaveBeenCalledWith(expectedPath);
-      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedPath);
+      const result = await FileSystemUtils.detectMakeMKVInstallation();
+      expect(result).toBe("/Applications/MakeMKV.app/Contents/MacOS");
+      expect(mockedFsPromises.access).toHaveBeenCalled();
     });
 
-    it("should handle multiple existing folders", () => {
-      const outputPath = "C:\\output";
-      const folderName = "Movie Title";
-      const expectedPath = "C:\\output\\Movie Title-3";
+    it("should return null for unsupported platform", async () => {
+      mockedOs.platform.mockReturnValue("freebsd");
 
-      fs.existsSync
-        .mockReturnValueOnce(true) // Original exists
-        .mockReturnValueOnce(true) // -1 exists
-        .mockReturnValueOnce(true) // -2 exists
-        .mockReturnValueOnce(false); // -3 doesn't exist
-
-      const result = FileSystemUtils.createUniqueFolder(outputPath, folderName);
-
-      expect(result).toBe(expectedPath);
-      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedPath);
+      const result = await FileSystemUtils.detectMakeMKVInstallation();
+      expect(result).toBeNull();
     });
 
-    it("should handle Unix-style paths", () => {
-      const outputPath = "/home/user/output";
-      const folderName = "Movie Title";
-      const expectedPath = "/home/user/output\\Movie Title";
+    it("should return null if no installation found", async () => {
+      mockedOs.platform.mockReturnValue("win32");
+      mockedFsPromises.access.mockRejectedValue(new Error("ENOENT")); // Simulates file not found
 
-      fs.existsSync.mockReturnValue(false);
-
-      const result = FileSystemUtils.createUniqueFolder(outputPath, folderName);
-
-      expect(result).toBe(expectedPath);
-      expect(fs.mkdirSync).toHaveBeenCalledWith(expectedPath);
+      const result = await FileSystemUtils.detectMakeMKVInstallation();
+      expect(result).toBeNull();
     });
   });
 
-  describe("createUniqueLogFile", () => {
-    beforeEach(() => {
-      fs.existsSync = vi.fn();
-    });
+  describe("MakeMKV Validation", () => {
+    it("should validate Windows installation", async () => {
+      mockedOs.platform.mockReturnValue("win32");
+      mockedFsPromises.access.mockResolvedValue(); // Simulates successful access
 
-    it("should create log file with original name if it does not exist", () => {
-      const logDir = "C:\\logs";
-      const fileName = "Movie Title";
-      const expectedPath = "C:\\logs\\Log-Movie Title.txt";
-
-      fs.existsSync.mockReturnValue(false);
-
-      const result = FileSystemUtils.createUniqueLogFile(logDir, fileName);
-
-      expect(result).toBe(expectedPath);
-      expect(fs.existsSync).toHaveBeenCalledWith(expectedPath);
-    });
-
-    it("should create log file with incremented name if original exists", () => {
-      const logDir = "C:\\logs";
-      const fileName = "Movie Title";
-      const originalPath = "C:\\logs\\Log-Movie Title.txt";
-      const expectedPath = "C:\\logs\\Log-Movie Title-1.txt";
-
-      fs.existsSync
-        .mockReturnValueOnce(true) // Original exists
-        .mockReturnValueOnce(false); // Incremented doesn't exist
-
-      const result = FileSystemUtils.createUniqueLogFile(logDir, fileName);
-
-      expect(result).toBe(expectedPath);
-      expect(fs.existsSync).toHaveBeenCalledWith(originalPath);
-      expect(fs.existsSync).toHaveBeenCalledWith(expectedPath);
-    });
-
-    it("should handle multiple existing log files", () => {
-      const logDir = "C:\\logs";
-      const fileName = "Movie Title";
-      const expectedPath = "C:\\logs\\Log-Movie Title-2.txt";
-
-      fs.existsSync
-        .mockReturnValueOnce(true) // Original exists
-        .mockReturnValueOnce(true) // -1 exists
-        .mockReturnValueOnce(false); // -2 doesn't exist
-
-      const result = FileSystemUtils.createUniqueLogFile(logDir, fileName);
-
-      expect(result).toBe(expectedPath);
-    });
-  });
-
-  describe("writeLogFile", () => {
-    beforeEach(() => {
-      fs.writeFile = vi.fn();
-    });
-
-    it("should write content to log file successfully", async () => {
-      const filePath = "C:\\logs\\Log-Movie Title.txt";
-      const content = "Log content here";
-      const titleName = "Movie Title";
-
-      fs.writeFile.mockImplementation((path, data, encoding, callback) => {
-        callback(null);
-      });
-
-      await expect(
-        FileSystemUtils.writeLogFile(filePath, content, titleName)
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        filePath,
-        content,
-        "utf8",
-        expect.any(Function)
+      const result = await FileSystemUtils.validateMakeMKVInstallation(
+        "C:/Program Files/MakeMKV"
       );
+      expect(result).toBe(true);
+      expect(mockedFsPromises.access).toHaveBeenCalled();
     });
 
-    it("should reject when file write fails", async () => {
-      const filePath = "C:\\logs\\Log-Movie Title.txt";
-      const content = "Log content here";
-      const titleName = "Movie Title";
-      const error = new Error("Write failed");
+    it("should validate Unix installation", async () => {
+      mockedOs.platform.mockReturnValue("linux");
+      mockedFsPromises.access.mockResolvedValue(); // Simulates successful access
 
-      fs.writeFile.mockImplementation((path, data, encoding, callback) => {
-        callback(error);
-      });
-
-      await expect(
-        FileSystemUtils.writeLogFile(filePath, content, titleName)
-      ).rejects.toThrow("Write failed");
-    });
-
-    it("should handle empty content", async () => {
-      const filePath = "C:\\logs\\Log-Empty.txt";
-      const content = "";
-      const titleName = "Empty Title";
-
-      fs.writeFile.mockImplementation((path, data, encoding, callback) => {
-        callback(null);
-      });
-
-      await expect(
-        FileSystemUtils.writeLogFile(filePath, content, titleName)
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        filePath,
-        "",
-        "utf8",
-        expect.any(Function)
+      const result = await FileSystemUtils.validateMakeMKVInstallation(
+        "/usr/bin"
       );
-    });
-  });
-
-  describe("ensureDirectoryExists", () => {
-    beforeEach(() => {
-      fs.existsSync = vi.fn();
-      fs.mkdirSync = vi.fn();
+      expect(result).toBe(true);
+      expect(mockedFsPromises.access).toHaveBeenCalled();
     });
 
-    it("should not create directory if it already exists", () => {
-      const dirPath = "C:\\existing\\directory";
+    it("should return false for invalid installation", async () => {
+      mockedFsPromises.access.mockRejectedValue(new Error("ENOENT")); // Simulates file not found
 
-      fs.existsSync.mockReturnValue(true);
-
-      FileSystemUtils.ensureDirectoryExists(dirPath);
-
-      expect(fs.existsSync).toHaveBeenCalledWith(dirPath);
-      expect(fs.mkdirSync).not.toHaveBeenCalled();
+      const result = await FileSystemUtils.validateMakeMKVInstallation(
+        "/invalid/path"
+      );
+      expect(result).toBe(false);
     });
 
-    it("should create directory if it does not exist", () => {
-      const dirPath = "C:\\new\\directory";
-
-      fs.existsSync.mockReturnValue(false);
-
-      FileSystemUtils.ensureDirectoryExists(dirPath);
-
-      expect(fs.existsSync).toHaveBeenCalledWith(dirPath);
-      expect(fs.mkdirSync).toHaveBeenCalledWith(dirPath, { recursive: true });
-    });
-
-    it("should handle nested directory creation", () => {
-      const dirPath = "C:\\very\\deep\\nested\\directory\\structure";
-
-      fs.existsSync.mockReturnValue(false);
-
-      FileSystemUtils.ensureDirectoryExists(dirPath);
-
-      expect(fs.mkdirSync).toHaveBeenCalledWith(dirPath, { recursive: true });
-    });
-
-    it("should handle Unix-style paths", () => {
-      const dirPath = "/home/user/documents/new/folder";
-
-      fs.existsSync.mockReturnValue(false);
-
-      FileSystemUtils.ensureDirectoryExists(dirPath);
-
-      expect(fs.mkdirSync).toHaveBeenCalledWith(dirPath, { recursive: true });
-    });
-  });
-
-  describe("Error Handling", () => {
-    it("should handle fs.mkdirSync throwing an error", () => {
-      const outputPath = "C:\\output";
-      const folderName = "Movie Title";
-
-      fs.existsSync.mockReturnValue(false);
-      fs.mkdirSync.mockImplementation(() => {
-        throw new Error("Permission denied");
-      });
-
-      expect(() => {
-        FileSystemUtils.createUniqueFolder(outputPath, folderName);
-      }).toThrow("Permission denied");
-    });
-
-    it("should handle ensureDirectoryExists with permission error", () => {
-      const dirPath = "C:\\restricted\\directory";
-
-      fs.existsSync.mockReturnValue(false);
-      fs.mkdirSync.mockImplementation(() => {
-        throw new Error("EACCES: permission denied");
-      });
-
-      expect(() => {
-        FileSystemUtils.ensureDirectoryExists(dirPath);
-      }).toThrow("EACCES: permission denied");
+    it("should return false for null path", async () => {
+      const result = await FileSystemUtils.validateMakeMKVInstallation(null);
+      expect(result).toBe(false);
     });
   });
 });

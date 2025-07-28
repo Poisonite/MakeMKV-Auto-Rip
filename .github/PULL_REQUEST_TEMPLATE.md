@@ -31,7 +31,7 @@ Please describe the tests that you ran to verify your changes:
 - [ ] Tested drive loading (`npm run load`)
 - [ ] Tested drive ejection (`npm run eject`)
 - [ ] Tested main ripping functionality (`npm start`)
-- [ ] Tested error scenarios (missing discs, invalid config, etc.)
+- [ ] Tested error scenarios (missing discs, invalid YAML config, etc.)
 - [ ] Tested with multiple drives (if available)
 
 ### Windows Native Development (if applicable)
@@ -53,7 +53,7 @@ Please describe the tests that you ran to verify your changes:
 
 - [ ] Updated README.md if needed
 - [ ] Added/updated JSDoc comments for new code
-- [ ] Updated configuration documentation
+- [ ] Updated YAML configuration documentation if needed
 - [ ] Updated CHANGELOG.md
 - [ ] Updated PROJECT-INFO.md if architecture changed
 

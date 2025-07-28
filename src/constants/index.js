@@ -31,3 +31,28 @@ export const MENU_OPTIONS = Object.freeze({
   RIP: "1",
   EXIT: "2",
 });
+
+/**
+ * MakeMKV message codes related to program version for output parsing
+ */
+export const MAKEMKV_VERSION_MESSAGES = Object.freeze({
+  VERSION_INFO: "MSG:1005",
+  VERSION_TOO_OLD: "MSG:5021",
+  UPDATE_AVAILABLE: "MSG:5075",
+});
+
+/**
+ * Default MakeMKV installation paths by platform.
+ * These are the most common installation locations for each platform
+ */
+export const PLATFORM_DEFAULTS = Object.freeze({
+  MAKEMKV_PATHS: {
+    win32: ["C:/Program Files/MakeMKV", "C:/Program Files (x86)/MakeMKV"],
+    linux: ["/usr/bin", "/usr/local/bin", "/opt/makemkv/bin"],
+    darwin: [
+      "/Applications/MakeMKV.app/Contents/MacOS",
+      "/opt/homebrew/bin",
+      "/usr/local/bin",
+    ],
+  },
+});

@@ -4,42 +4,235 @@ import { Logger } from "../utils/logger.js";
 import { ValidationUtils } from "../utils/validation.js";
 import { FileSystemUtils } from "../utils/filesystem.js";
 import { VALIDATION_CONSTANTS, MEDIA_TYPES } from "../constants/index.js";
+import { DriveService } from "./drive.service.js";
+import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
  * Service for handling disc detection and information gathering
  */
 export class DiscService {
+  static isFirstMakeMKVCall = true;
+
   /**
-   * Get information about all available drives with discs
-   * @returns {Promise<Array>} - Array of drive information objects
+   * Main method: Get all available discs with mount detection and complete title processing
+   * @returns {Promise<Array>} - Array of complete drive information objects
    */
   static async getAvailableDiscs() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       Logger.info("Getting info for all discs...");
 
-      const command = `${AppConfig.makeMKVExecutable} -r info disc:index`;
+      try {
+        // First: Detect any immediately available discs (without processing)
+        let detectedDiscs = await this.detectAvailableDiscs();
+
+        // Check for additional drives if mount detection is enabled
+        if (AppConfig.mountWaitTimeout > 0) {
+          const mountStatus = await DriveService.getDriveMountStatus();
+
+          if (detectedDiscs.length > 0 && mountStatus.unmounted === 0) {
+            Logger.info(
+              `Found ${detectedDiscs.length} disc(s) immediately. All drives are ready, proceeding with ripping.`
+            );
+          } else if (mountStatus.unmounted > 0) {
+            Logger.info(
+              `Found ${detectedDiscs.length} disc(s) immediately and ${mountStatus.unmounted} drive(s) still mounting. Waiting for additional drives...`
+            );
+            const additionalDiscs = await this.waitForDriveMount();
+
+            // Merge any newly detected discs with existing ones
+            if (additionalDiscs.length > 0) {
+              detectedDiscs = [...detectedDiscs, ...additionalDiscs];
+              Logger.info(
+                `Total discs found after waiting: ${detectedDiscs.length}`
+              );
+            }
+          } else if (detectedDiscs.length === 0 && mountStatus.total === 0) {
+            Logger.info("No discs detected and no optical drives found.");
+          } else if (detectedDiscs.length === 0 && mountStatus.total > 0) {
+            Logger.info(
+              `Found ${mountStatus.total} optical drive(s) but no media is currently mounted.`
+            );
+          }
+        }
+
+        // Finally: Process complete disc information for ALL discovered discs
+        if (detectedDiscs.length > 0) {
+          Logger.separator();
+          Logger.info(
+            `Processing complete disc information for ${detectedDiscs.length} disc(s)...`
+          );
+          const completeDiscInfo = await this.getCompleteDiscInfo(
+            detectedDiscs
+          );
+          resolve(completeDiscInfo);
+        } else {
+          resolve([]);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Detect available discs without processing file information (fast)
+   * @returns {Promise<Array>} - Array of basic disc information objects
+   */
+  static async detectAvailableDiscs() {
+    return new Promise(async (resolve, reject) => {
+      // Get MakeMKV executable path with cross-platform detection
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        reject(
+          new Error(
+            "MakeMKV executable not found. Please ensure MakeMKV is installed."
+          )
+        );
+        return;
+      }
+
+      const command = `${makeMKVExecutable} -r info disc:index`;
 
       exec(command, (err, stdout, stderr) => {
-        if (stderr) {
-          reject(stderr);
+        // Check for critical MakeMKV messages first
+        const isFirstCall = DiscService.isFirstMakeMKVCall;
+        const shouldContinue = MakeMKVMessages.checkOutput(
+          stdout + (stderr || ""),
+          isFirstCall
+        );
+
+        if (!shouldContinue) {
+          reject(
+            new Error(
+              "MakeMKV version is too old, please update to the latest version"
+            )
+          );
+          return;
+        }
+
+        // Mark that we've made our first call
+        if (isFirstCall) {
+          DiscService.isFirstMakeMKVCall = false;
+        }
+
+        // Only fail if we have no stdout data
+        if (!stdout || stdout.trim() === "") {
+          Logger.error("No output from MakeMKV command");
+          reject(new Error("No output from MakeMKV command"));
           return;
         }
 
         try {
-          Logger.info("Getting drive info...");
           const driveInfo = this.parseDriveInfo(stdout);
-
-          // Get file numbers for each valid disc
-          const drivePromises = driveInfo.map((drive) =>
-            this.getDiscFileInfo(drive)
-          );
-
-          Promise.all(drivePromises).then(resolve).catch(reject);
+          resolve(driveInfo);
         } catch (error) {
           reject(error);
         }
       });
     });
+  }
+
+  /**
+   * Get complete disc information including file numbers for all discs
+   * @param {Array} detectedDiscs - Array of basic disc information
+   * @returns {Promise<Array>} - Array of complete disc information with file numbers
+   */
+  static async getCompleteDiscInfo(detectedDiscs) {
+    // Get file numbers for each detected disc
+    const drivePromises = detectedDiscs.map((drive) =>
+      this.getDiscFileInfo(drive)
+    );
+
+    return Promise.all(drivePromises);
+  }
+
+  /**
+   * Wait for drives to mount media and retry detection
+   * @returns {Promise<Array>} - Array of basic disc information for newly found discs
+   */
+  static async waitForDriveMount() {
+    const waitTimeout = AppConfig.mountWaitTimeout;
+    const pollInterval = AppConfig.mountPollInterval;
+    const maxAttempts = Math.ceil(waitTimeout / pollInterval);
+
+    Logger.info(
+      `Waiting up to ${waitTimeout} seconds for additional drives to mount media...`
+    );
+
+    let initialDiscCount = 0;
+
+    // Poll for mounted drives
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      Logger.info(
+        `Polling attempt ${attempt}/${maxAttempts} for newly mounted drives...`
+      );
+
+      try {
+        // Use fast detection during polling (no file processing)
+        const allCurrentDiscs = await this.detectAvailableDiscs();
+        const mountStatus = await DriveService.getDriveMountStatus();
+
+        // Set initial count on first attempt
+        if (attempt === 1) {
+          initialDiscCount = allCurrentDiscs.length;
+        }
+
+        const newDiscsFound = allCurrentDiscs.length - initialDiscCount;
+
+        if (newDiscsFound > 0) {
+          Logger.info(
+            `Found ${newDiscsFound} additional disc(s) during polling.`
+          );
+        }
+
+        Logger.info(
+          `Current status: ${allCurrentDiscs.length} discs ready, ${mountStatus.unmounted} drives still mounting`
+        );
+
+        // Only exit when there are no more unmounted drives to wait for
+        if (mountStatus.unmounted === 0) {
+          Logger.info(
+            "All optical drives have been checked. No more drives to wait for."
+          );
+
+          // Return just the newly found basic disc info (processing happens later)
+          const newDiscs = allCurrentDiscs.slice(initialDiscCount);
+          return newDiscs;
+        }
+
+        // Wait before next attempt (unless this is the last attempt)
+        if (attempt < maxAttempts) {
+          Logger.separator();
+          await this.sleep(pollInterval * 1000);
+        }
+      } catch (error) {
+        Logger.warning(
+          `Error during polling attempt ${attempt}: ${error.message}`
+        );
+      }
+    }
+
+    Logger.info(
+      `Finished waiting ${waitTimeout} seconds for additional drives.`
+    );
+
+    // Return any newly found discs after timeout
+    try {
+      const finalDiscs = await this.detectAvailableDiscs();
+      const newDiscs = finalDiscs.slice(initialDiscCount);
+      return newDiscs;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  /**
+   * Sleep for the specified number of milliseconds
+   * @param {number} ms - Milliseconds to sleep
+   * @returns {Promise<void>}
+   */
+  static sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -58,9 +251,13 @@ export class DiscService {
     return lines
       .filter((line) => {
         const lineArray = line.split(",");
+        const driveState = parseInt(lineArray[1]);
+        const mediaTitle = lineArray[5] || "";
+
         return (
           lineArray[0].startsWith(VALIDATION_CONSTANTS.DRIVE_FILTER) &&
-          lineArray[1] == VALIDATION_CONSTANTS.MEDIA_PRESENT
+          driveState == VALIDATION_CONSTANTS.MEDIA_PRESENT &&
+          mediaTitle.trim() !== ""
         );
       })
       .map((line) => {
@@ -83,16 +280,44 @@ export class DiscService {
    * @returns {Promise<Object>} - Enhanced drive info with file number
    */
   static async getDiscFileInfo(driveInfo) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       Logger.info(
         `Getting file number for drive title ${driveInfo.driveNumber}-${driveInfo.title}.`
       );
 
-      const command = `${AppConfig.makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
+      // Get MakeMKV executable path with cross-platform detection
+      const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
+      if (!makeMKVExecutable) {
+        reject(
+          new Error(
+            "MakeMKV executable not found. Please ensure MakeMKV is installed."
+          )
+        );
+        return;
+      }
+
+      const command = `${makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
 
       exec(command, (err, stdout, stderr) => {
-        if (stderr) {
-          reject(stderr);
+        // Check for critical MakeMKV messages (not first call, so only check for errors)
+        const shouldContinue = MakeMKVMessages.checkOutput(
+          stdout + (stderr || ""),
+          false
+        );
+
+        if (!shouldContinue) {
+          reject(
+            new Error(
+              "MakeMKV version is too old, please update to the latest version"
+            )
+          );
+          return;
+        }
+
+        // Only fail if we have no stdout data
+        if (!stdout || stdout.trim() === "") {
+          Logger.error("No output from MakeMKV command");
+          reject(new Error("No output from MakeMKV command"));
           return;
         }
 

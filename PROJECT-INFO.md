@@ -20,13 +20,13 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │   ├── utils/                    # Utility modules
 │   │   ├── filesystem.js         # File system operations
 │   │   ├── logger.js             # Logging and output formatting
+│   │   ├── makemkv-messages.js   # MakeMKV output message parsing and version checking
 │   │   └── validation.js         # Data validation utilities
 │   ├── config/                   # Configuration management
 │   │   └── index.js              # Centralized config handling
 │   └── constants/                # Application constants
 │       └── index.js              # Shared constants and enums
-├── config/                       # Configuration files
-│   └── default.json              # Application settings
+├── config.yaml                   # YAML configuration file for application settings
 ├── docker/                       # Docker deployment files
 │   ├── Dockerfile                # Multi-stage Docker build
 │   ├── docker-compose.yml        # Container orchestration
@@ -59,9 +59,13 @@ The application follows strict separation of concerns:
 
 - **Responsibility**: Disc detection, drive enumeration, and title analysis
 - **Key Methods**:
-  - `getAvailableDiscs()` - Scans for inserted discs
+  - `getAvailableDiscs()` - Scans for inserted discs with mount detection wait
+  - `waitForDriveMount()` - Waits for drives to mount media (configurable timeout)
+  - `detectAvailableDiscs()` - Fast disc detection without file processing
+  - `getCompleteDiscInfo()` - Processes complete disc information including file numbers
   - `parseDriveInfo()` - Processes MakeMKV drive output
-  - `getFileNumber()` - Identifies longest title on disc
+  - `getDiscFileInfo()` - Identifies longest title on disc
+- **Mount Detection**: Automatically waits for slow-mounting drives to prevent drives from being skipped due to OS mount delays
 
 #### RipService
 
@@ -75,14 +79,17 @@ The application follows strict separation of concerns:
 
 #### DriveService
 
-- **Responsibility**: Physical drive operations
+- **Responsibility**: Physical drive operations and drive status monitoring
 - **Key Methods**:
   - `loadAllDrives()` - Closes/loads all optical drives
   - `ejectAllDrives()` - Ejects all optical drives
-  - `loadDrivesWithWait()` - Loads drives with user guidance
+  - `loadDrivesWithWait()` - Loads drives with configurable delay and user guidance
+  - `getDriveMountStatus()` - Monitors drive mount status using MakeMKV to detect mounted/unmounted drives
 - **Configuration Integration**:
   - Separate control for loading and ejecting operations
   - Independent enable/disable options for each drive operation
+  - Configurable delay time for drive loading operations
+- **Mount Status Detection**: Uses MakeMKV drive state analysis to identify drives that are still mounting media vs. those that are ready for ripping
 
 ### Optical Drive Management Architecture
 
@@ -112,6 +119,26 @@ Detection (All Platforms) → Platform Router → Native Implementation
                                               Linux:   eject/filesystem
 ```
 
+### Interface Behavior Configuration
+
+The application supports configurable interface behavior to adapt to different user workflows:
+
+#### Repeat Mode
+
+- **Configuration**: `interface.repeat_mode` (default: `true`)
+- **Behavior**: Controls whether the application prompts for additional ripping operations after completing a rip
+- **Use Cases**:
+  - `true`: Batch processing multiple discs without restarting the application
+  - `false`: Single-rip operations that exit after completion
+
+#### Drive Loading Delay
+
+- **Configuration**: `drives.load_delay` (default: `0`)
+- **Behavior**: Configurable delay time after loading drives to allow for manual drive closing
+- **Use Cases**:
+  - `0`: No delay, immediate progression to ripping
+  - `> 0`: Custom delay for drives that require manual intervention
+
 ### Error Handling Strategy
 
 The application implements a multi-layered error handling approach:
@@ -126,7 +153,7 @@ The application implements a multi-layered error handling approach:
 ### Ripping Process Flow
 
 ```
-1. User Input (CLI) → 2. Configuration Validation → 3. Drive Loading (if enabled)
+1. User Input (CLI) → 2. YAML Configuration Validation → 3. Drive Loading (if enabled)
                                     ↓
 8. Results Display ← 7. Drive Ejection (if enabled) ← 6. Configurable Ripping ← 5. Disc Detection
                                     ↓                        (Async/Sync)              ↓
@@ -148,7 +175,7 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **Node.js (ES Modules)** - Runtime environment with modern import/export syntax
 - **chalk** - Terminal styling and colors
 - **date-fns** - Modern date/time formatting (replaced moment.js)
-- **config** - Configuration file management
+- **yaml** - YAML configuration file parsing and management
 
 ### Native Components
 
@@ -187,6 +214,18 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 We support both parallel and sequential processing for multiple disc operations:
 (Thanks to the contributions of @ThreeHats and @Adam8234 for the original parallel processing logic)
 
+### Mount Detection Configuration
+
+The application includes configurable mount detection to prevent drives from being skipped:
+
+- **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media
+- **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives
+- **Default Values**: 10 seconds timeout, 1 second poll interval
+- **Behavior**: When drives are detected but no media is loaded, the system will poll them for the configured duration to allow for slow OS media detection
+- **Architecture**: Uses fast disc detection during polling to avoid expensive file processing operations, only processing complete disc title information after all drives are confirmed mounted
+
+### Processing Modes
+
 **Async Mode (Parallel - Default):**
 
 ```javascript
@@ -215,7 +254,7 @@ for (const disc of discs) {
 
 ### Command Interface
 
-The application interfaces with MakeMKV through its command-line tool:
+The application interfaces with MakeMKV through its command-line tool (`makemkvcon.exe` / `makemkvcon`):
 
 **Windows:**
 ```javascript
@@ -239,17 +278,35 @@ makemkvcon -r info disc:{driveNumber}
 makemkvcon -r mkv disc:{driveNumber} {fileNumber} "{outputPath}"
 ```
 
-### Cross-Platform Adaptation
+### Version Checking and Validation
 
-The application automatically adapts to different environments:
+The application includes comprehensive MakeMKV version checking to ensure compatibility:
 
-| Feature | Windows | Docker/Linux |
-|---------|---------|--------------|
-| MakeMKV Path | `"C:\Program Files (x86)\MakeMKV\makemkvcon.exe"` | `makemkvcon` |
-| Drive Loading | Enabled (win-eject) | Disabled (not applicable) |
-| Drive Ejection | Enabled (win-eject) | Disabled (not applicable) |
-| File Paths | Windows-style (`\`) | Unix-style (`/`) |
-| Time Format | 12hr (default) | 24hr (production) |
+#### Version Validation
+
+- **Critical Error Detection**: Automatically detects when MakeMKV version is too old for MakeMKV to allow ripping
+- **Graceful Failure**: Stops all operations with clear error message when version is incompatible
+- **Cross-Service Integration**: Version checking integrated into all MakeMKV command executions
+
+#### Version Reporting
+
+- **First-Run Detection**: Reports installed MakeMKV version on first command execution
+- **Update Notifications**: Warns users when newer versions are available
+- **User-Friendly Messages**: Clear, actionable messages for version-related issues
+
+#### Implementation Details
+
+```javascript
+// Version checking utility
+MakeMKVMessages.checkOutput(output, isFirstCall);
+
+// Message codes handled
+MAKEMKV_VERSION_MESSAGES = {
+  VERSION_INFO: "MSG:1005", // Version information
+  VERSION_TOO_OLD: "MSG:5021", // Version too old error
+  UPDATE_AVAILABLE: "MSG:5075", // Update available warning
+};
+```
 
 ### Output Parsing
 
@@ -258,6 +315,7 @@ MakeMKV output follows a structured format that the application parses:
 - **Drive Information**: `DRV:` prefix with comma-separated values
 - **Title Information**: `TINFO:` prefix with metadata
 - **Completion Status**: `MSG:5036` or "Copy complete" indicators
+- **Version Messages**: `MSG:1005`, `MSG:5021`, `MSG:5075` for version-related information
 
 ## 🎯 Migration from v0.6.0
 
@@ -392,8 +450,6 @@ The package is configured for cross-platform distribution:
 
 1. **Testing Coverage** - Docker-specific integration tests needed
 2. **Documentation** - Container deployment guides
-3. **Configuration Schema** - JSON schema validation
-4. **Security Hardening** - Container security best practices
 
 ## 📝 Code Style and Standards
 

@@ -404,11 +404,18 @@ export class OpticalDriveUtil {
   }
 
   static async #linuxEjectDrive(drive) {
-    await execAsync(`eject ${drive.path}`);
+    try {
+      await execAsync(`udisksctl unmount -b ${drive.path}`);
+      await execAsync(`udisksctl eject -b ${drive.path}`);
+    } catch (error) {
+      // Fallback to traditional eject if udisksctl fails
+      await execAsync(`eject ${drive.path}`);
+    }
   }
 
   static async #linuxLoadDrive(drive) {
     try {
+      // No direct udisksctl load/close, so fallback to eject -t
       await execAsync(`eject -t ${drive.path}`);
     } catch (error) {
       Logger.warning(`Drive ${drive.path} may not support automatic loading`);

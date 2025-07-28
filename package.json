@@ -69,8 +69,8 @@
     "gypfile": false,
     "dependencies": {
         "chalk": "^5.4.1",
-        "config": "^4.0.1",
-        "date-fns": "^4.1.0"
+        "date-fns": "^4.1.0",
+        "yaml": "^2.8.0"
     },
     "optionalDependencies": {
         "win-eject": "^1.0.2"
@@ -85,8 +85,8 @@
     ],
     "devDependencies": {
         "@vitest/ui": "^3.2.2",
-        "vitest": "^3.2.2",
         "node-addon-api": "^8.0.0",
-        "node-gyp": "^10.0.0"
+        "node-gyp": "^10.0.0",
+        "vitest": "^3.2.2"
     }
 }

@@ -15,6 +15,13 @@ vi.mock("../../src/services/rip.service.js", () => ({
   })),
 }));
 
+// Mock AppConfig for repeat mode testing
+vi.mock("../../src/config/index.js", () => ({
+  AppConfig: {
+    isRepeatModeEnabled: true,
+  },
+}));
+
 describe("CLIInterface", () => {
   let cliInterface;
   let consoleSpy;
@@ -82,7 +89,7 @@ describe("CLIInterface", () => {
       expect(allOutput).toContain("MakeMKV Auto Rip");
       expect(allOutput).toContain("Zac Ingoglia");
       expect(allOutput).toContain("ABSOLUTELY NO WARRANTY");
-      expect(allOutput).toContain("default.json");
+      expect(allOutput).toContain("config.yaml");
     });
 
     it("should display copyright information", () => {
@@ -101,7 +108,7 @@ describe("CLIInterface", () => {
       const allOutput = calls.join(" ");
 
       expect(allOutput).toContain("WARNING");
-      expect(allOutput).toContain("default.json");
+      expect(allOutput).toContain("config.yaml");
     });
 
     it("should display license information", () => {
@@ -289,6 +296,22 @@ describe("CLIInterface", () => {
       );
 
       await expect(cliInterface.handleUserChoice("1")).rejects.toBe(ripError);
+    });
+
+    it("should exit after ripping when repeat mode is disabled", async () => {
+      // Mock AppConfig to disable repeat mode
+      const { AppConfig } = await import("../../src/config/index.js");
+      AppConfig.isRepeatModeEnabled = false;
+
+      await expect(cliInterface.handleUserChoice("1")).rejects.toThrow();
+
+      try {
+        await cliInterface.handleUserChoice("1");
+      } catch (error) {
+        expect(isProcessExitError(error)).toBe(true);
+        expect(error.exitCode).toBe(0);
+        expect(error.message).toContain("Ripping complete");
+      }
     });
   });
 

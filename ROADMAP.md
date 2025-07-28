@@ -38,30 +38,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Add version validation and compatibility checking
   - Implement automatic retry logic for transient failures
 
-#### MakeMKV Installation & Version Validation
-
-- **Description**: Automatically verify MakeMKV is installed and compatible
-- **Benefits**: Prevent runtime errors and guide users through setup
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Check for MakeMKV installation on startup
-  - Validate version compatibility using `MSG:1005` and `MSG:5021`
-  - Warn users about available updates (`MSG:5075`)
-  - Provide helpful installation guidance
-
-#### Cross-Platform Support
-
-- **Description**: Add support for Linux and macOS in addition to Windows
-- **Benefits**: Broader user base and flexibility for different environments
-- **Contribution Difficulty**: 🔴 Advanced
-- **Details**:
-  - Update makemkvcon location and path structure handling for each platform
-  - Ensure all file and directory operations are cross-platform compatible
-  - Consider splitting platform support into separate implementation items:
-    - Windows support (existing)
-    - Linux support (makemkvcon path, drive handling, etc.)
-    - macOS support (makemkvcon path, drive handling, etc.)
-
 #### Docker Support
 
 - **Description**: Provide official Docker images and documentation
@@ -73,26 +49,7 @@ Enhancing automated workflows for large-scale disc processing.
   - Configure a base image which builds MakeMKV for Linux
   - Ensure platform compatibility within containers
 
-#### Default MakeMKV Path Per Platform with Override
-
-- **Description**: Use a sensible default path for makemkvcon on each platform, with an override option in the config
-- **Benefits**: Simplifies setup for most users, but allows advanced customization
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Define default makemkvcon path for Windows, Linux, and macOS in the codebase
-  - Allow users to specify a custom path in the config file to override the default
-
 ### 🎵 Medium Priority
-
-#### Upgrade Config Design (YAML Support)
-
-- **Description**: Migrate from JSON config files to YAML for improved readability and flexibility
-- **Benefits**: Easier configuration management, better support for comments and complex structures
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Replace `default.json` with `config.yaml`
-  - Update config loading logic to support YAML
-  - Document migration steps for users
 
 #### Audio Notifications
 
@@ -103,15 +60,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Configurable sound alerts for successful/failed rips
   - System notification integration
   - Custom sound file support
-
-#### Repeat Mode Configs
-
-- **Description**: Add configurations to the config file for repeat mode and drive loading delay
-- **Benefits**: Users can easily enable/disable repeat mode and set their preferred delay
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  1. Add a configuration option to turn repeat mode on or off
-  2. Add a configuration option to adjust the delay time when loading drives (in seconds)
 
 #### NPM Package Distribution
 
@@ -124,14 +72,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Publish to the npm registry
 
 ### 🔄 Lower Priority
-
-#### Configuration Improvements
-
-- **Description**: Enhanced configuration file handling
-- **Benefits**: Better user experience with config management
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Support single forward slashes in paths
 
 #### Clean Up postinstall Script Output
 
@@ -159,55 +99,3 @@ Enhancing automated workflows for large-scale disc processing.
 - **🟡 Intermediate** and **🔴 Advanced** features welcome your expertise
 - Consider **breaking down large features** into smaller, manageable PRs
 - **Document your changes** thoroughly, especially for complex features
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/Poisonite/MakeMKV-Auto-Rip.git
-cd MakeMKV-Auto-Rip
-
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-```
-
-## 📅 Release Planning
-
-We don't have strict timelines, but generally prioritize:
-
-1. **Bug fixes and stability** improvements
-2. **High-impact user experience** enhancements
-3. **New features** that align with our core mission
-
-## 💬 Feedback & Suggestions
-
-Have ideas for features not listed here? We'd love to hear from you!
-
-- **Create a feature request** in our [GitHub Issues](../../issues)
-- **Join discussions** in existing feature request threads
-- **Share your use cases** - help us understand how you use MakeMKV Auto Rip
-
----
-
-## 📊 Progress Tracking
-
-| Feature                              | Status     | Target |
-| ------------------------------------ | ---------- | ------ |
-| Enhanced Error Handling & Validation | 📋 Planned | TBD    |
-| MakeMKV Installation & Version Check | 📋 Planned | TBD    |
-| Audio Notifications                  | 📋 Planned | TBD    |
-| Repeat Mode Configs                  | 📋 Planned | TBD    |
-| Configuration Improvements (Paths)   | 📋 Planned | TBD    |
-
-\_Last updated: 07/25/2025
-
----
-
-**Legend:**
-
-- 🟢 Beginner-Friendly: Good for first-time contributors
-- 🟡 Intermediate: Requires some familiarity with the codebase
-- 🔴 Advanced: Complex features requiring deep technical knowledge

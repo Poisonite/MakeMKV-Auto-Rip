@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **MakeMKV version checking and validation** - The application now automatically checks MakeMKV version compatibility and provides user-friendly error messages when the installed version is too old MakeMKV to allow ripping. It also reports the installed version and warns about available updates.
+- **Automatic MakeMKV path detection** - The application now automatically detects the MakeMKV installation path across Windows, macOS, and Linux, greatly simplifying setup for users.
+- **Refactored configuration loading and validation** - Configuration loading and validation now handles missing or invalid custom MakeMKV paths gracefully, falling back to automatic detection when necessary (an install path for MakeMKV is no longer required).
+- **Documentation updates** - Documentation has been updated to reflect changes to configuration, including troubleshooting steps related to MakeMKV installation.
 - **Complete project refactor** with proper Node.js project structure
 - **Modular architecture** with clear separation of concerns into services, utilities, and CLI modules
 - **Docker support** - Full Docker containerization with multi-platform compatibility
@@ -35,19 +39,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced error handling** - Comprehensive error handling throughout the application
 - **Improved logging** - Structured logging with consistent formatting and colors
 - **Configuration validation** - Automatic validation of required configuration settings
-- **Better user experience** - 5-second wait after loading drives with user instructions
+- **Configurable drive loading delay** - Users can now set custom delay times for drive loading operations, with the ability to disable delays entirely. The wait is disabled by default (only needed if you're ripping with certain USB or laptop/slimline drives that lack a retract mechanism).
 - **Cross-platform drive operations** - New optical drive utility supports Windows, macOS, and Linux for loading and ejecting optical drives without external dependencies
 - **Hybrid Windows drive implementation** - PowerShell WMI for accurate drive detection, native C++ addon using DeviceIoControl API for eject/load operations
+- **Mount detection and waiting** - Configurable wait and re-polling mechanism to prevent drives from being skipped due to slow OS media detection.
+- **Windows uses 64 bit** - Windows OS now uses the 64 bit version of makemkvcon (makemkvcon64.exe). Other OSes don't have seperate 32 vs 64 bit versions.
+- **Configurable repeat mode** - Users can now enable/disable repeat mode through configuration, allowing the application to exit after ripping instead of prompting again
 
 ### Changed
 
-- **Configuration structure** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
-- **Ripping behavior** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
-- **Logging system** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
-- **Cross-platform executable paths** - MakeMKV executable path now adapts to Windows vs Docker/Linux environments
-- **Dependency management** - `win-eject` moved to optional dependencies for non-Windows compatibility
-- **Drive operations** - Automatically disabled in Docker environments with informative logging
-- **Package distribution** - Files list updated to exclude development and test files from npm package
+- **Configuration format** - Migrated from JSON (`config/Default.json`) to YAML (`config.yaml`) for improved readability and easier editing
+- **Configuration structure** - Reorganized into logical sections: `paths`, `drives`, `ripping`, etc for better organization
+- **Path handling** - Cross-platform path normalization with support for forward slashes on all platforms (no more escaped backslashes!)
+- **Configuration validation** - Enhanced validation with clearer error messages referencing `config.yaml`
+- **Configuration drive options** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
+- **Ripping behavior options** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
+- **Logging system options** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
+- **Cross-platform executable paths** - MakeMKV executable path now adapts to Windows vs Linux vs MacOS environments
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
 - **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work in theory, but are not officially supported)
@@ -55,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project structure** - Code organized into logical modules under `src/` directory
 - **Entry point** - Now uses `index.js` as main entry point instead of `AutoRip.js`
 - **Import system** - Updated to ES6 modules throughout
-- **Configuration management** - Centralized configuration handling with validation
+- **Configuration management** - Centralized YAML configuration handling with validation and caching
 - **User interface** - Improved CLI with better prompts and messaging
 
 ### Removed
@@ -68,25 +76,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Configuration Updates Required:**
 
-- Replace `"ejectDVDs": {"Enabled": "true"}` with:
-  ```json
-  "loadDrives": {"Enabled": "true"},
-  "ejectDrives": {"Enabled": "true"}
+- **Migrate from JSON to YAML:** Replace `config/Default.json` with `config.yaml`
+- **New YAML format example:**
+
+  ```yaml
+  paths:
+    makemkv_dir: "C:/Program Files (x86)/MakeMKV"
+    movie_rips_dir: "./media"
+    logging:
+      enabled: true
+      dir: "./logs"
+      time_format: "12hr"
+
+  drives:
+    auto_load: true
+    auto_eject: true
+
+  ripping:
+    rip_all_titles: false
+    mode: "async"
   ```
-- Update logging configuration from `"logToFiles"` to:
-  ```json
-  "logging": {
-    "toFiles": "true",
-    "Dir": ".\\logs",
-    "timeFormat": "12hr"
-  }
-  ```
-- Add new ripping mode setting:
-  ```json
-  "rippingMode": {
-    "Mode": "async"
-  }
-  ```
+
+- **Path format:** Use forward slashes (/) instead of escaped backslashes (\\) for all paths
 
 ---
 
