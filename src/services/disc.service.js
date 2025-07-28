@@ -54,6 +54,7 @@ export class DiscService {
 
         // Finally: Process complete disc information for ALL discovered discs
         if (detectedDiscs.length > 0) {
+          Logger.separator();
           Logger.info(
             `Processing complete disc information for ${detectedDiscs.length} disc(s)...`
           );
@@ -177,6 +178,7 @@ export class DiscService {
 
         // Wait before next attempt (unless this is the last attempt)
         if (attempt < maxAttempts) {
+          Logger.separator();
           await this.sleep(pollInterval * 1000);
         }
       } catch (error) {

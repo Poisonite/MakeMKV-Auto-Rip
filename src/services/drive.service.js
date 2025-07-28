@@ -154,6 +154,7 @@ export class DriveService {
             Logger.info(
               `Drive status: ${total} drives, ${mounted} with mounted media, ${unmounted} available for mounting`
             );
+            Logger.separator();
 
             resolve({ total, mounted, unmounted });
           } catch (error) {

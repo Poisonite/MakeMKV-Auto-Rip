@@ -153,6 +153,14 @@ ripping:
 
   # Ripping mode - async for parallel processing, sync for sequential (async/sync)
   mode: "async"
+
+# Mount detection settings
+mount_detection:
+  # Maximum time to wait for drives to mount media before starting rip (in seconds) - 0 to disable
+  wait_timeout: 10
+
+  # Polling interval to check for newly mounted drives (in seconds)
+  poll_interval: 1
 ```
 
 #### Configuration Options
@@ -168,11 +176,14 @@ ripping:
 - **`drives.auto_eject`** - Auto-eject drives after ripping completion (`true` or `false`)
 - **`ripping.rip_all_titles`** - Rip all titles that are above MakeMKV min length (`true`) or longest title only (`false`)
 - **`ripping.mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing)
+- **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media before starting rip (`0` to disable, default: `10`)
+- **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives (default: `1`)
 
 **Important Notes:**
 
 - Recommended: Create dedicated folders for movie rips and logs
 - **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance... for SSDs, `"async"` will yield much better overall performance
+- **Mount detection**: The mount detection feature prevents drives from being skipped due to slow OS media detection, especially beneficial on older hardware. Set `wait_timeout: 0` to disable this feature.
 
 ### MakeMKV GUI Configuration
 

@@ -56,9 +56,10 @@ The application follows strict separation of concerns:
 - **Key Methods**:
   - `getAvailableDiscs()` - Scans for inserted discs with mount detection wait
   - `waitForDriveMount()` - Waits for drives to mount media (configurable timeout)
-  - `checkForUnmountedDrives()` - Detects presence of optical drives that may have unmounted media
+  - `detectAvailableDiscs()` - Fast disc detection without file processing
+  - `getCompleteDiscInfo()` - Processes complete disc information including file numbers
   - `parseDriveInfo()` - Processes MakeMKV drive output
-  - `getFileNumber()` - Identifies longest title on disc
+  - `getDiscFileInfo()` - Identifies longest title on disc
 - **Mount Detection**: Automatically waits for slow-mounting drives to prevent drives from being skipped due to OS mount delays
 
 #### RipService
@@ -73,14 +74,16 @@ The application follows strict separation of concerns:
 
 #### DriveService
 
-- **Responsibility**: Physical drive operations
+- **Responsibility**: Physical drive operations and drive status monitoring
 - **Key Methods**:
   - `loadAllDrives()` - Closes/loads all optical drives
   - `ejectAllDrives()` - Ejects all optical drives
   - `loadDrivesWithWait()` - Loads drives with user guidance
+  - `getDriveMountStatus()` - Monitors drive mount status using MakeMKV to detect mounted/unmounted drives
 - **Configuration Integration**:
   - Separate control for loading and ejecting operations
   - Independent enable/disable options for each drive operation
+- **Mount Status Detection**: Uses MakeMKV drive state analysis to identify drives that are still mounting media vs. those that are ready for ripping
 
 ### Optical Drive Management Architecture
 
@@ -177,9 +180,8 @@ The application includes configurable mount detection to prevent drives from bei
 - **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media
 - **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives
 - **Default Values**: 10 seconds timeout, 1 second poll interval
-- **Behavior**: When no discs are initially detected, the system will check for optical drives and poll them for the configured duration
-
-This feature is particularly beneficial on systems where drive mounting can be slower, ensuring all inserted discs are detected before ripping begins.
+- **Behavior**: When drives are detected but no media is loaded, the system will poll them for the configured duration to allow for slow OS media detection
+- **Architecture**: Uses fast disc detection during polling to avoid expensive file processing operations, only processing complete disc title information after all drives are confirmed mounted
 
 ### Processing Modes
 
