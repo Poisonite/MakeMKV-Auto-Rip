@@ -146,6 +146,9 @@ drives:
   # Automatically eject drives after ripping (true/false)
   auto_eject: true
 
+  # Delay time when loading drives (in seconds) - allows time for manual drive closing if needed - 0 to disable
+  load_delay: 0
+
 # Ripping behavior settings
 ripping:
   # Rip all titles from disc instead of just the main title (true/false)
@@ -161,6 +164,11 @@ mount_detection:
 
   # Polling interval to check for newly mounted drives (in seconds)
   poll_interval: 1
+
+# Interface behavior settings
+interface:
+  # Enable repeat mode - after ripping, prompt again for another round (true/false)
+  repeat_mode: true
 ```
 
 #### Configuration Options
@@ -174,10 +182,12 @@ mount_detection:
 - **`paths.logging.time_format`** - Time format for console/terminal timestamps (`"12hr"` or `"24hr"`)
 - **`drives.auto_load`** - Auto-load/close drives before ripping (`true` or `false`)
 - **`drives.auto_eject`** - Auto-eject drives after ripping completion (`true` or `false`)
+- **`drives.load_delay`** - Delay time (in seconds) when loading drives, allows time for manual drive closing (`0` to disable, default: `0`)
 - **`ripping.rip_all_titles`** - Rip all titles that are above MakeMKV min length (`true`) or longest title only (`false`)
 - **`ripping.mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing)
 - **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media before starting rip (`0` to disable, default: `10`)
 - **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives (default: `1`)
+- **`interface.repeat_mode`** - Enable repeat mode to prompt again after ripping (`true` or `false`, default: `true`)
 
 **Important Notes:**
 

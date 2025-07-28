@@ -26,6 +26,8 @@ drives:
   auto_load: true
   # Automatically eject drives after ripping (true/false)
   auto_eject: true
+  # Delay time when loading drives (in seconds) - allows time for manual drive closing if needed - 0 to disable
+  load_delay: 0
 
 # Mount detection settings
 mount_detection:
@@ -40,3 +42,8 @@ ripping:
   rip_all_titles: false
   # Ripping mode - async for parallel processing, sync for sequential (async/sync)
   mode: "async"
+
+# Interface behavior settings
+interface:
+  # Enable repeat mode - after ripping, prompt again for another round (true/false)
+  repeat_mode: true

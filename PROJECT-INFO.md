@@ -79,11 +79,12 @@ The application follows strict separation of concerns:
 - **Key Methods**:
   - `loadAllDrives()` - Closes/loads all optical drives
   - `ejectAllDrives()` - Ejects all optical drives
-  - `loadDrivesWithWait()` - Loads drives with user guidance
+  - `loadDrivesWithWait()` - Loads drives with configurable delay and user guidance
   - `getDriveMountStatus()` - Monitors drive mount status using MakeMKV to detect mounted/unmounted drives
 - **Configuration Integration**:
   - Separate control for loading and ejecting operations
   - Independent enable/disable options for each drive operation
+  - Configurable delay time for drive loading operations
 - **Mount Status Detection**: Uses MakeMKV drive state analysis to identify drives that are still mounting media vs. those that are ready for ripping
 
 ### Optical Drive Management Architecture
@@ -113,6 +114,26 @@ Detection (All Platforms) → Platform Router → Native Implementation
                                               macOS:   drutil commands
                                               Linux:   eject/filesystem
 ```
+
+### Interface Behavior Configuration
+
+The application supports configurable interface behavior to adapt to different user workflows:
+
+#### Repeat Mode
+
+- **Configuration**: `interface.repeat_mode` (default: `true`)
+- **Behavior**: Controls whether the application prompts for additional ripping operations after completing a rip
+- **Use Cases**:
+  - `true`: Batch processing multiple discs without restarting the application
+  - `false`: Single-rip operations that exit after completion
+
+#### Drive Loading Delay
+
+- **Configuration**: `drives.load_delay` (default: `0`)
+- **Behavior**: Configurable delay time after loading drives to allow for manual drive closing
+- **Use Cases**:
+  - `0`: No delay, immediate progression to ripping
+  - `> 0`: Custom delay for drives that require manual intervention
 
 ### Error Handling Strategy
 

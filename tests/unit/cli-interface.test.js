@@ -15,6 +15,13 @@ vi.mock("../../src/services/rip.service.js", () => ({
   })),
 }));
 
+// Mock AppConfig for repeat mode testing
+vi.mock("../../src/config/index.js", () => ({
+  AppConfig: {
+    isRepeatModeEnabled: true,
+  },
+}));
+
 describe("CLIInterface", () => {
   let cliInterface;
   let consoleSpy;
@@ -289,6 +296,22 @@ describe("CLIInterface", () => {
       );
 
       await expect(cliInterface.handleUserChoice("1")).rejects.toBe(ripError);
+    });
+
+    it("should exit after ripping when repeat mode is disabled", async () => {
+      // Mock AppConfig to disable repeat mode
+      const { AppConfig } = await import("../../src/config/index.js");
+      AppConfig.isRepeatModeEnabled = false;
+
+      await expect(cliInterface.handleUserChoice("1")).rejects.toThrow();
+
+      try {
+        await cliInterface.handleUserChoice("1");
+      } catch (error) {
+        expect(isProcessExitError(error)).toBe(true);
+        expect(error.exitCode).toBe(0);
+        expect(error.message).toContain("Ripping complete");
+      }
     });
   });
 

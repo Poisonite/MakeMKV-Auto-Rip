@@ -79,7 +79,7 @@ describe("DriveService", () => {
   });
 
   describe("loadDrivesWithWait", () => {
-    it("should load drives and wait 5 seconds", async () => {
+    it("should load drives and complete successfully", async () => {
       vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
         successful: 2,
         failed: 0,
@@ -94,7 +94,6 @@ describe("DriveService", () => {
       await DriveService.loadDrivesWithWait();
 
       expect(OpticalDriveUtil.loadAllDrives).toHaveBeenCalledOnce();
-      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
     });
 
     it("should handle errors during load and wait", async () => {

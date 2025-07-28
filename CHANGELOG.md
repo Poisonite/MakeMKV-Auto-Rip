@@ -23,11 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced error handling** - Comprehensive error handling throughout the application
 - **Improved logging** - Structured logging with consistent formatting and colors
 - **Configuration validation** - Automatic validation of required configuration settings
-- **Better user experience** - 5-second wait after loading drives with user instructions
+- **Configurable drive loading delay** - Users can now set custom delay times for drive loading operations, with the ability to disable delays entirely. The wait is disabled by default (only needed if you're ripping with certain USB or laptop/slimline drives that lack a retract mechanism).
 - **Cross-platform drive operations** - New optical drive utility supports Windows, macOS, and Linux for loading and ejecting optical drives without external dependencies
 - **Hybrid Windows drive implementation** - PowerShell WMI for accurate drive detection, native C++ addon using DeviceIoControl API for eject/load operations
 - **Mount detection and waiting** - Configurable wait and re-polling mechanism to prevent drives from being skipped due to slow OS media detection.
 - **Windows uses 64 bit** - Windows OS now uses the 64 bit version of makemkvcon (makemkvcon64.exe). Other OSes don't have seperate 32 vs 64 bit versions.
+- **Configurable repeat mode** - Users can now enable/disable repeat mode through configuration, allowing the application to exit after ripping instead of prompting again
 
 ### Changed
 

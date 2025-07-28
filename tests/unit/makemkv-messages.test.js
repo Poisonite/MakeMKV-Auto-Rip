@@ -1,6 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { MakeMKVMessages } from "../../src/utils/makemkv-messages.js";
 import { MAKEMKV_VERSION_MESSAGES } from "../../src/constants/index.js";
+
+// Mock the Logger to avoid config file dependencies
+vi.mock("../../src/utils/logger.js", () => ({
+  Logger: {
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+  },
+}));
 
 describe("MakeMKVMessages", () => {
   describe("checkOutput", () => {

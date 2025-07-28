@@ -139,6 +139,17 @@ export class AppConfig {
     return typeof interval === "number" && interval > 0 ? interval : 1;
   }
 
+  static get driveLoadDelay() {
+    const config = this.#loadConfig();
+    const delay = config.drives?.load_delay;
+    return typeof delay === "number" && delay >= 0 ? delay : 0;
+  }
+
+  static get isRepeatModeEnabled() {
+    const config = this.#loadConfig();
+    return Boolean(config.interface?.repeat_mode);
+  }
+
   /**
    * Get MakeMKV executable path with automatic detection
    * @returns {Promise<string|null>} - Full path to makemkvcon executable

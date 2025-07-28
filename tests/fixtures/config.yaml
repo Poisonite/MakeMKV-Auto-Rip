@@ -10,7 +10,15 @@ paths:
 drives:
   auto_load: true
   auto_eject: true
+  load_delay: 0
+
+mount_detection:
+  wait_timeout: 10
+  poll_interval: 1
 
 ripping:
   rip_all_titles: false
   mode: "async"
+
+interface:
+  repeat_mode: true

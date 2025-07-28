@@ -61,15 +61,6 @@ Enhancing automated workflows for large-scale disc processing.
   - System notification integration
   - Custom sound file support
 
-#### Repeat Mode Configs
-
-- **Description**: Add configurations to the config file for repeat mode and drive loading delay
-- **Benefits**: Users can easily enable/disable repeat mode and set their preferred delay
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  1. Add a configuration option to turn repeat mode on or off
-  2. Add a configuration option to adjust the delay time when loading drives (in seconds)
-
 #### NPM Package Distribution
 
 - **Description**: Package and publish MakeMKV Auto Rip as an npm package

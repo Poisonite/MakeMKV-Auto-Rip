@@ -65,14 +65,19 @@ export class DriveService {
   static async loadDrivesWithWait() {
     await this.loadAllDrives();
 
-    Logger.separator();
-    Logger.warning("Waiting 5 seconds...");
-    Logger.warning(
-      "Please manually close any drives that were not automatically closed."
-    );
-    Logger.separator();
+    const { AppConfig } = await import("../config/index.js");
+    const delaySeconds = AppConfig.driveLoadDelay;
 
-    await this.wait(5000);
+    if (delaySeconds > 0) {
+      Logger.separator();
+      Logger.warning(`Waiting ${delaySeconds} seconds...`);
+      Logger.warning(
+        "Please manually close any drives that were not automatically closed."
+      );
+      Logger.separator();
+
+      await this.wait(delaySeconds * 1000);
+    }
 
     Logger.info("Drive loading complete. Ready to proceed.");
   }

@@ -125,8 +125,14 @@ export class CLIInterface {
     switch (choice) {
       case MENU_OPTIONS.RIP:
         await this.ripService.startRipping();
-        // After ripping, prompt again for another round
-        await this.promptUser();
+        // After ripping, check if repeat mode is enabled
+        const { AppConfig } = await import("../config/index.js");
+        if (AppConfig.isRepeatModeEnabled) {
+          await this.promptUser();
+        } else {
+          Logger.info("Ripping complete. Exiting...");
+          safeExit(0, "Ripping complete");
+        }
         break;
 
       case MENU_OPTIONS.EXIT:
