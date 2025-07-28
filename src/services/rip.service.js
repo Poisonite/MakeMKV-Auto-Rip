@@ -31,6 +31,19 @@ export class RipService {
       Logger.info("Beginning AutoRip... Please Wait.");
       const commandDataItems = await DiscService.getAvailableDiscs();
 
+      // Check if any discs were found
+      if (commandDataItems.length === 0) {
+        Logger.info(
+          "No discs found to rip. No ripping operations will be performed."
+        );
+        Logger.separator();
+        await this.handlePostRipActions();
+        return;
+      }
+
+      Logger.info(
+        `Found ${commandDataItems.length} disc(s) ready for ripping.`
+      );
       await this.processRippingQueue(commandDataItems);
       this.displayResults();
       await this.handlePostRipActions();

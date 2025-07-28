@@ -127,6 +127,18 @@ export class AppConfig {
     return mode === "sync" ? "sync" : "async";
   }
 
+  static get mountWaitTimeout() {
+    const config = this.#loadConfig();
+    const timeout = config.mount_detection?.wait_timeout;
+    return typeof timeout === "number" && timeout >= 0 ? timeout : 10;
+  }
+
+  static get mountPollInterval() {
+    const config = this.#loadConfig();
+    const interval = config.mount_detection?.poll_interval;
+    return typeof interval === "number" && interval > 0 ? interval : 1;
+  }
+
   /**
    * Get MakeMKV executable path with automatic detection
    * @returns {Promise<string|null>} - Full path to makemkvcon executable

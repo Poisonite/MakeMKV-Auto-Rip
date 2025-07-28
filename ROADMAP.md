@@ -38,16 +38,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Add version validation and compatibility checking
   - Implement automatic retry logic for transient failures
 
-#### Drive Mount Detection & Wait (Bug: Drives Skipped If Not Mounted)
-
-- **Description**: Fix a bug where a drive can be skipped from ripping if ripping begins before the OS has had time to mount the disc and determine that media exists (replicable on Linux).
-- **Benefits**: Prevents drives from being missed due to slow OS/media detection, especially on Linux and with multiple drives.
-- **Contribution Difficulty**: 🟡 Intermediate
-- **Details**:
-  - When starting the ripping process, if any optical drives are detected that do not have a disc/media loaded, the application should wait and re-poll once per second for up to 10 seconds (make this duration configurable in `config.yaml`).
-  - After the wait period, whatever the status is (drives with media present) will be used for ripping.
-  - This ensures all drives have a fair chance to be detected and included in the ripping process, even if the OS is slow to mount the disc.
-
 #### MakeMKV Installation & Version Validation
 
 - **Description**: Automatically verify MakeMKV is installed and compatible

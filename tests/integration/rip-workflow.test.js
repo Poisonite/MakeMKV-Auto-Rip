@@ -164,6 +164,17 @@ Additional MakeMKV output here`;
     });
 
     it("should handle single disc ripping workflow", async () => {
+      // Mock AppConfig to disable mount detection for this test
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "mountWaitTimeout", "get").mockReturnValue(0);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+
       const mockDriveData = `DRV:0,2,999,1,"BD-ROM HL-DT-ST","Single Movie","/dev/sr0"`;
       const mockFileData = `TINFO:0,9,0,"1:45:30"`;
       const mockRipOutput = `MSG:5036,0,1,"Copy complete. 1 titles saved."`;
@@ -184,7 +195,8 @@ Additional MakeMKV output here`;
 
       await ripService.startRipping();
 
-      // Verify single disc workflow
+      // Verify single disc workflow - expects 3 calls: index, disc info, rip
+      // (mount detection is disabled so no additional exec calls)
       expect(exec).toHaveBeenCalledTimes(3); // index, disc info, rip
     });
   });
@@ -542,6 +554,236 @@ DRV:2,2,999,1,"BD-ROM","Movie 3","/dev/sr2"`;
       // Should handle many titles and select the longest one
       expect(exec).toHaveBeenCalledWith(
         expect.stringMatching(/mkv disc:0 \d+/),
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe("Mount detection integration", () => {
+    it("should handle mount detection with slow-mounting drives", async () => {
+      // Mock AppConfig to enable mount detection
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "mountWaitTimeout", "get").mockReturnValue(5);
+      vi.spyOn(AppConfig, "mountPollInterval", "get").mockReturnValue(1);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+
+      // Mock DriveService.getDriveMountStatus to simulate slow mounting
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      vi.spyOn(DriveService, "getDriveMountStatus")
+        .mockResolvedValueOnce({ total: 2, mounted: 1, unmounted: 1 }) // First call - one drive still mounting
+        .mockResolvedValueOnce({ total: 2, mounted: 2, unmounted: 0 }); // Second call - all drives mounted
+
+      const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
+
+      const mockFileData = `TINFO:0,9,0,"1:30:00"`;
+      const mockRipOutput = `MSG:5036,0,1,"Copy complete."`;
+
+      exec.mockImplementation((command, callback) => {
+        if (command.includes("info disc:index")) {
+          setImmediate(() => callback(null, mockDriveData, ""));
+        } else if (command.includes("info disc:")) {
+          setImmediate(() => callback(null, mockFileData, ""));
+        } else if (command.includes("mkv disc:")) {
+          setImmediate(() => callback(null, mockRipOutput, ""));
+        }
+      });
+
+      const { default: winEject } = await import("win-eject");
+      winEject.close.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+      winEject.eject.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+
+      await ripService.startRipping();
+
+      // Should have called mount status check
+      expect(DriveService.getDriveMountStatus).toHaveBeenCalled();
+
+      // Should have processed both discs
+      expect(exec).toHaveBeenCalledWith(
+        expect.stringContaining("mkv disc:0"),
+        expect.any(Function)
+      );
+      expect(exec).toHaveBeenCalledWith(
+        expect.stringContaining("mkv disc:1"),
+        expect.any(Function)
+      );
+    });
+
+    it("should handle mount detection timeout", async () => {
+      // Mock AppConfig with short timeout
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "mountWaitTimeout", "get").mockReturnValue(1);
+      vi.spyOn(AppConfig, "mountPollInterval", "get").mockReturnValue(0.5);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+
+      // Mock DriveService to always return unmounted drives (simulating timeout)
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      vi.spyOn(DriveService, "getDriveMountStatus").mockResolvedValue({
+        total: 1,
+        mounted: 0,
+        unmounted: 1,
+      });
+
+      const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"`;
+      const mockFileData = `TINFO:0,9,0,"1:30:00"`;
+      const mockRipOutput = `MSG:5036,0,1,"Copy complete."`;
+
+      exec.mockImplementation((command, callback) => {
+        if (command.includes("info disc:index")) {
+          setImmediate(() => callback(null, mockDriveData, ""));
+        } else if (command.includes("info disc:")) {
+          setImmediate(() => callback(null, mockFileData, ""));
+        } else if (command.includes("mkv disc:")) {
+          setImmediate(() => callback(null, mockRipOutput, ""));
+        }
+      });
+
+      const { default: winEject } = await import("win-eject");
+      winEject.close.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+      winEject.eject.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+
+      await ripService.startRipping();
+
+      // Should have called mount status check
+      expect(DriveService.getDriveMountStatus).toHaveBeenCalled();
+
+      // Should still process the disc that was detected
+      expect(exec).toHaveBeenCalledWith(
+        expect.stringContaining("mkv disc:0"),
+        expect.any(Function)
+      );
+    });
+
+    it("should handle mount detection with no drives found", async () => {
+      // Mock AppConfig to enable mount detection
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "mountWaitTimeout", "get").mockReturnValue(5);
+      vi.spyOn(AppConfig, "mountPollInterval", "get").mockReturnValue(1);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+
+      // Mock DriveService to return no drives
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      vi.spyOn(DriveService, "getDriveMountStatus").mockResolvedValue({
+        total: 0,
+        mounted: 0,
+        unmounted: 0,
+      });
+
+      exec.mockImplementation((command, callback) => {
+        setImmediate(() => callback(null, 'DRV:0,0,999,0,"","",""', ""));
+      });
+
+      const { default: winEject } = await import("win-eject");
+      winEject.close.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+      winEject.eject.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+
+      await ripService.startRipping();
+
+      // Should have called mount status check
+      expect(DriveService.getDriveMountStatus).toHaveBeenCalled();
+
+      // Should not have called any ripping commands
+      expect(exec).not.toHaveBeenCalledWith(
+        expect.stringContaining("mkv disc:"),
+        expect.any(Function)
+      );
+    });
+
+    it("should handle mount detection with virtual drives", async () => {
+      // Mock AppConfig to enable mount detection
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "mountWaitTimeout", "get").mockReturnValue(5);
+      vi.spyOn(AppConfig, "mountPollInterval", "get").mockReturnValue(1);
+      vi.spyOn(AppConfig, "isEjectDrivesEnabled", "get").mockReturnValue(true);
+      vi.spyOn(AppConfig, "isRipAllEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "isFileLogEnabled", "get").mockReturnValue(false);
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+
+      // Mock DriveService to return drives including virtual ones
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      vi.spyOn(DriveService, "getDriveMountStatus").mockResolvedValue({
+        total: 2,
+        mounted: 1,
+        unmounted: 1,
+      }); // Real drives only
+
+      const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,256,999,1,"Virtual Drive","Virtual","/dev/sr1"`; // Virtual drive should be filtered
+
+      const mockFileData = `TINFO:0,9,0,"1:30:00"`;
+      const mockRipOutput = `MSG:5036,0,1,"Copy complete."`;
+
+      exec.mockImplementation((command, callback) => {
+        if (command.includes("info disc:index")) {
+          setImmediate(() => callback(null, mockDriveData, ""));
+        } else if (command.includes("info disc:")) {
+          setImmediate(() => callback(null, mockFileData, ""));
+        } else if (command.includes("mkv disc:")) {
+          setImmediate(() => callback(null, mockRipOutput, ""));
+        }
+      });
+
+      const { default: winEject } = await import("win-eject");
+      winEject.close.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+      winEject.eject.mockImplementation((drive, callback) =>
+        setImmediate(() => callback())
+      );
+
+      await ripService.startRipping();
+
+      // Should have called mount status check
+      expect(DriveService.getDriveMountStatus).toHaveBeenCalled();
+
+      // Should only process the real drive (not the virtual one)
+      expect(exec).toHaveBeenCalledWith(
+        expect.stringContaining("mkv disc:0"),
+        expect.any(Function)
+      );
+      expect(exec).not.toHaveBeenCalledWith(
+        expect.stringContaining("mkv disc:1"),
         expect.any(Function)
       );
     });

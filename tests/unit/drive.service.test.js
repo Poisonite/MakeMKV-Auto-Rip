@@ -232,4 +232,166 @@ describe("DriveService", () => {
       );
     });
   });
+
+  describe("getDriveMountStatus", () => {
+    beforeEach(() => {
+      // Mock child_process exec
+      vi.doMock("child_process", () => ({
+        exec: vi.fn(),
+      }));
+    });
+
+    it("should return mount status for drives with mounted media", async () => {
+      const { exec } = await import("child_process");
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM HL-DT-ST","Movie 1","/dev/sr0"
+DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"
+DRV:2,0,999,1,"BD-ROM","Empty Drive","/dev/sr2"`;
+
+      exec.mockImplementation((command, callback) => {
+        callback(null, mockStdout, "");
+      });
+
+      // Mock AppConfig
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue('"makemkvcon"'),
+        },
+      }));
+
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await DriveService.getDriveMountStatus();
+
+      expect(result).toEqual({
+        total: 3,
+        mounted: 2,
+        unmounted: 1,
+      });
+    });
+
+    it("should return zero counts when no drives are found", async () => {
+      const { exec } = await import("child_process");
+      exec.mockImplementation((command, callback) => {
+        callback(null, "", "");
+      });
+
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue('"makemkvcon"'),
+        },
+      }));
+
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await DriveService.getDriveMountStatus();
+
+      expect(result).toEqual({
+        total: 0,
+        mounted: 0,
+        unmounted: 0,
+      });
+    });
+
+    it("should filter out virtual drives (state 256)", async () => {
+      const { exec } = await import("child_process");
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,256,999,1,"Virtual Drive","Virtual","/dev/sr1"
+DRV:2,2,999,1,"DVD","Movie 2","/dev/sr2"`;
+
+      exec.mockImplementation((command, callback) => {
+        callback(null, mockStdout, "");
+      });
+
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue('"makemkvcon"'),
+        },
+      }));
+
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await DriveService.getDriveMountStatus();
+
+      expect(result).toEqual({
+        total: 2, // Only real drives, excluding virtual drive
+        mounted: 2,
+        unmounted: 0,
+      });
+    });
+
+    it("should handle MakeMKV executable not found", async () => {
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue(null),
+        },
+      }));
+
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await DriveService.getDriveMountStatus();
+
+      expect(result).toEqual({
+        total: 0,
+        mounted: 0,
+        unmounted: 0,
+      });
+    });
+
+    it("should handle exec errors gracefully", async () => {
+      const { exec } = await import("child_process");
+      exec.mockImplementation((command, callback) => {
+        callback(new Error("MakeMKV not found"), "", "");
+      });
+
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue('"makemkvcon"'),
+        },
+      }));
+
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await DriveService.getDriveMountStatus();
+
+      expect(result).toEqual({
+        total: 0,
+        mounted: 0,
+        unmounted: 0,
+      });
+    });
+
+    it("should correctly identify mounted vs unmounted drives", async () => {
+      const { exec } = await import("child_process");
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,0,999,1,"DVD","","/dev/sr1"
+DRV:2,2,999,1,"BD-ROM","Movie 2","/dev/sr2"
+DRV:3,0,999,1,"DVD","","/dev/sr3"`;
+
+      exec.mockImplementation((command, callback) => {
+        callback(null, mockStdout, "");
+      });
+
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue('"makemkvcon"'),
+        },
+      }));
+
+      const { DriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await DriveService.getDriveMountStatus();
+
+      expect(result).toEqual({
+        total: 4,
+        mounted: 2, // Only drives with state 2 AND media title
+        unmounted: 2, // Drives with state 0 or no media title
+      });
+    });
+  });
 });
