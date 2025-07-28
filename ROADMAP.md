@@ -38,17 +38,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Add version validation and compatibility checking
   - Implement automatic retry logic for transient failures
 
-#### MakeMKV Installation & Version Validation
-
-- **Description**: Automatically verify MakeMKV is installed and compatible
-- **Benefits**: Prevent runtime errors and guide users through setup
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Check for MakeMKV installation on startup
-  - Validate version compatibility using `MSG:1005` and `MSG:5021`
-  - Warn users about available updates (`MSG:5075`)
-  - Provide helpful installation guidance
-
 #### Docker Support
 
 - **Description**: Provide official Docker images and documentation
@@ -119,5 +108,3 @@ Enhancing automated workflows for large-scale disc processing.
 - **🟡 Intermediate** and **🔴 Advanced** features welcome your expertise
 - Consider **breaking down large features** into smaller, manageable PRs
 - **Document your changes** thoroughly, especially for complex features
-
-### Development Setup

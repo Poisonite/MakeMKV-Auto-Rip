@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **MakeMKV version checking and validation** - The application now automatically checks MakeMKV version compatibility and provides user-friendly error messages when the installed version is too old MakeMKV to allow ripping. It also reports the installed version and warns about available updates.
 - **Automatic MakeMKV path detection** - The application now automatically detects the MakeMKV installation path across Windows, macOS, and Linux, greatly simplifying setup for users.
 - **Refactored configuration loading and validation** - Configuration loading and validation now handles missing or invalid custom MakeMKV paths gracefully, falling back to automatic detection when necessary (an install path for MakeMKV is no longer required).
 - **Documentation updates** - Documentation has been updated to reflect changes to configuration, including troubleshooting steps related to MakeMKV installation.
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cross-platform drive operations** - New optical drive utility supports Windows, macOS, and Linux for loading and ejecting optical drives without external dependencies
 - **Hybrid Windows drive implementation** - PowerShell WMI for accurate drive detection, native C++ addon using DeviceIoControl API for eject/load operations
 - **Mount detection and waiting** - Configurable wait and re-polling mechanism to prevent drives from being skipped due to slow OS media detection.
+- **Windows uses 64 bit** - Windows OS now uses the 64 bit version of makemkvcon (makemkvcon64.exe). Other OSes don't have seperate 32 vs 64 bit versions.
 
 ### Changed
 

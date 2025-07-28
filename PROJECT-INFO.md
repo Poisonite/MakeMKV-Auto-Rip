@@ -20,6 +20,7 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │   ├── utils/                    # Utility modules
 │   │   ├── filesystem.js         # File system operations
 │   │   ├── logger.js             # Logging and output formatting
+│   │   ├── makemkv-messages.js   # MakeMKV output message parsing and version checking
 │   │   └── validation.js         # Data validation utilities
 │   ├── config/                   # Configuration management
 │   │   └── index.js              # Centralized config handling
@@ -226,6 +227,36 @@ makemkvcon -r info disc:{driveNumber}
 makemkvcon -r mkv disc:{driveNumber} {fileNumber} "{outputPath}"
 ```
 
+### Version Checking and Validation
+
+The application includes comprehensive MakeMKV version checking to ensure compatibility:
+
+#### Version Validation
+
+- **Critical Error Detection**: Automatically detects when MakeMKV version is too old for MakeMKV to allow ripping
+- **Graceful Failure**: Stops all operations with clear error message when version is incompatible
+- **Cross-Service Integration**: Version checking integrated into all MakeMKV command executions
+
+#### Version Reporting
+
+- **First-Run Detection**: Reports installed MakeMKV version on first command execution
+- **Update Notifications**: Warns users when newer versions are available
+- **User-Friendly Messages**: Clear, actionable messages for version-related issues
+
+#### Implementation Details
+
+```javascript
+// Version checking utility
+MakeMKVMessages.checkOutput(output, isFirstCall);
+
+// Message codes handled
+MAKEMKV_VERSION_MESSAGES = {
+  VERSION_INFO: "MSG:1005", // Version information
+  VERSION_TOO_OLD: "MSG:5021", // Version too old error
+  UPDATE_AVAILABLE: "MSG:5075", // Update available warning
+};
+```
+
 ### Output Parsing
 
 MakeMKV output follows a structured format that the application parses:
@@ -233,6 +264,7 @@ MakeMKV output follows a structured format that the application parses:
 - **Drive Information**: `DRV:` prefix with comma-separated values
 - **Title Information**: `TINFO:` prefix with metadata
 - **Completion Status**: `MSG:5036` or "Copy complete" indicators
+- **Version Messages**: `MSG:1005`, `MSG:5021`, `MSG:5075` for version-related information
 
 ## 🎯 Migration from v0.6.0
 

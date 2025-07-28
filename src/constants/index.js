@@ -33,6 +33,15 @@ export const MENU_OPTIONS = Object.freeze({
 });
 
 /**
+ * MakeMKV message codes related to program version for output parsing
+ */
+export const MAKEMKV_VERSION_MESSAGES = Object.freeze({
+  VERSION_INFO: "MSG:1005",
+  VERSION_TOO_OLD: "MSG:5021",
+  UPDATE_AVAILABLE: "MSG:5075",
+});
+
+/**
  * Default MakeMKV installation paths by platform.
  * These are the most common installation locations for each platform
  */

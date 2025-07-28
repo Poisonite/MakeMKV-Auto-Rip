@@ -6,6 +6,7 @@ import { ValidationUtils } from "../utils/validation.js";
 import { DiscService } from "./disc.service.js";
 import { DriveService } from "./drive.service.js";
 import { safeExit } from "../utils/process.js";
+import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
  * Service for handling DVD/Blu-ray ripping operations
@@ -124,6 +125,24 @@ export class RipService {
       const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
 
       exec(makeMKVCommand, async (err, stdout, stderr) => {
+        // Check for critical MakeMKV messages (not first call, so only check for errors)
+        const shouldContinue = MakeMKVMessages.checkOutput(
+          stdout + (stderr || ""),
+          false
+        );
+
+        if (!shouldContinue) {
+          Logger.error(
+            "MakeMKV version is too old, please update to the latest version"
+          );
+          reject(
+            new Error(
+              "MakeMKV version is too old, please update to the latest version"
+            )
+          );
+          return;
+        }
+
         if (err || stderr) {
           Logger.error(
             `Critical Error Ripping ${commandDataItem.title}`,
