@@ -149,7 +149,7 @@ export class AppConfig {
 
     // Handle cross-platform executable names
     const executableName =
-      process.platform === "win32" ? "makemkvcon.exe" : "makemkvcon";
+      process.platform === "win32" ? "makemkvcon64.exe" : "makemkvcon";
     const executablePath = join(mkvDir, executableName);
 
     // Quote the path if it contains spaces (important for Windows paths)

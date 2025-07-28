@@ -1,6 +1,7 @@
 import { OpticalDriveUtil } from "../utils/optical-drive.js";
 import { Logger } from "../utils/logger.js";
 import { VALIDATION_CONSTANTS } from "../constants/index.js";
+import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
  * Service for handling drive operations (loading and ejecting)
@@ -108,6 +109,20 @@ export class DriveService {
 
       return new Promise((resolve) => {
         exec(command, (err, stdout, stderr) => {
+          // Check for critical MakeMKV messages (not first call, so only check for errors)
+          const shouldContinue = MakeMKVMessages.checkOutput(
+            stdout + (stderr || ""),
+            false
+          );
+
+          if (!shouldContinue) {
+            Logger.error(
+              "MakeMKV version is too old, please update to the latest version"
+            );
+            resolve({ total: 0, mounted: 0, unmounted: 0 });
+            return;
+          }
+
           // Don't treat stderr as fatal error - MakeMKV often writes warnings there
           // Only fail if we have no stdout data or a critical exec error
           if (!stdout || stdout.trim() === "") {

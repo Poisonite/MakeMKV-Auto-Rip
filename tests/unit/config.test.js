@@ -237,7 +237,7 @@ describe("AppConfig", () => {
       expect(result).toBeTruthy();
 
       if (process.platform === "win32") {
-        expect(result).toContain("makemkvcon.exe");
+        expect(result).toContain("makemkvcon64.exe");
       } else {
         expect(result).toContain("makemkvcon");
       }

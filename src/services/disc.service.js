@@ -5,11 +5,14 @@ import { ValidationUtils } from "../utils/validation.js";
 import { FileSystemUtils } from "../utils/filesystem.js";
 import { VALIDATION_CONSTANTS, MEDIA_TYPES } from "../constants/index.js";
 import { DriveService } from "./drive.service.js";
+import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
  * Service for handling disc detection and information gathering
  */
 export class DiscService {
+  static isFirstMakeMKVCall = true;
+
   /**
    * Main method: Get all available discs with mount detection and complete title processing
    * @returns {Promise<Array>} - Array of complete drive information objects
@@ -91,6 +94,27 @@ export class DiscService {
       const command = `${makeMKVExecutable} -r info disc:index`;
 
       exec(command, (err, stdout, stderr) => {
+        // Check for critical MakeMKV messages first
+        const isFirstCall = DiscService.isFirstMakeMKVCall;
+        const shouldContinue = MakeMKVMessages.checkOutput(
+          stdout + (stderr || ""),
+          isFirstCall
+        );
+
+        if (!shouldContinue) {
+          reject(
+            new Error(
+              "MakeMKV version is too old, please update to the latest version"
+            )
+          );
+          return;
+        }
+
+        // Mark that we've made our first call
+        if (isFirstCall) {
+          DiscService.isFirstMakeMKVCall = false;
+        }
+
         // Only fail if we have no stdout data
         if (!stdout || stdout.trim() === "") {
           Logger.error("No output from MakeMKV command");
@@ -275,6 +299,21 @@ export class DiscService {
       const command = `${makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
 
       exec(command, (err, stdout, stderr) => {
+        // Check for critical MakeMKV messages (not first call, so only check for errors)
+        const shouldContinue = MakeMKVMessages.checkOutput(
+          stdout + (stderr || ""),
+          false
+        );
+
+        if (!shouldContinue) {
+          reject(
+            new Error(
+              "MakeMKV version is too old, please update to the latest version"
+            )
+          );
+          return;
+        }
+
         // Only fail if we have no stdout data
         if (!stdout || stdout.trim() === "") {
           Logger.error("No output from MakeMKV command");
