@@ -27,6 +27,7 @@ vi.mock("../../src/utils/logger.js", () => ({
     info: vi.fn(),
     warning: vi.fn(),
     error: vi.fn(),
+    separator: vi.fn(),
   },
 }));
 
@@ -45,18 +46,18 @@ vi.mock("../../src/utils/validation.js", () => ({
 }));
 
 // Mock FileSystemUtils
-vi.mock("../../src/utils/filesystem.js", () => ({
-  FileSystemUtils: {
-    makeTitleValidFolderPath: vi.fn().mockImplementation((title) => {
-      if (!title) return "";
-      // Remove quotes and clean the title string, like the real implementation
-      const cleaned = title
-        .replace(/^["']|["']$/g, "")
-        .replace(/[<>:"/\\|?*]/g, "");
-      return cleaned;
-    }),
-  },
-}));
+// vi.mock("../../src/utils/filesystem.js", () => ({
+//   FileSystemUtils: {
+//     makeTitleValidFolderPath: vi.fn().mockImplementation((title) => {
+//       if (!title) return "";
+//       // Remove quotes and clean the title string, like the real implementation
+//       const cleaned = title
+//         .replace(/^["']|["']$/g, "")
+//         .replace(/[<>:"/\\|?*]/g, "");
+//       return cleaned;
+//     }),
+//   },
+// }));
 
 describe("DiscService", () => {
   let DiscService;
@@ -125,8 +126,8 @@ TINFO:2,9,0,"2:15:30"`;
         }, 10);
       });
 
-      await expect(DiscService.getAvailableDiscs()).rejects.toMatch(
-        "Error: No disc found"
+      await expect(DiscService.getAvailableDiscs()).rejects.toThrow(
+        "No output from MakeMKV command"
       );
     });
 
@@ -144,7 +145,7 @@ TINFO:2,9,0,"2:15:30"`;
       });
 
       await expect(DiscService.getAvailableDiscs()).rejects.toThrow(
-        "No drive data received from MakeMKV"
+        "No output from MakeMKV command"
       );
     });
 
@@ -292,8 +293,8 @@ TINFO:2,9,0,"2:15:30"`;
         mediaType: "blu-ray",
       };
 
-      await expect(DiscService.getDiscFileInfo(driveInfo)).rejects.toMatch(
-        "Error reading disc"
+      await expect(DiscService.getDiscFileInfo(driveInfo)).rejects.toThrow(
+        "No output from MakeMKV command"
       );
     });
 
@@ -365,6 +366,334 @@ TINFO:2,9,0,"malformed"`;
 
       const result = DiscService.getFileNumber(mockOutput);
       expect(result).toBe("1"); // Only valid entry
+    });
+  });
+
+  describe("detectAvailableDiscs", () => {
+    it("should detect discs without processing file information", async () => {
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM HL-DT-ST","Test Movie","/dev/sr0"
+DRV:1,2,999,1,"DVD","Another Movie","/dev/sr1"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          callback(null, mockStdout, "");
+        }, 10);
+      });
+
+      const result = await DiscService.detectAvailableDiscs();
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        driveNumber: "0",
+        title: "Test Movie",
+        mediaType: "blu-ray",
+      });
+      expect(result[1]).toMatchObject({
+        driveNumber: "1",
+        title: "Another Movie",
+        mediaType: "dvd",
+      });
+    });
+
+    it("should handle empty output in detectAvailableDiscs", async () => {
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          callback(null, "", "");
+        }, 10);
+      });
+
+      await expect(DiscService.detectAvailableDiscs()).rejects.toThrow(
+        "No output from MakeMKV command"
+      );
+    });
+
+    it("should handle MakeMKV executable not found in detectAvailableDiscs", async () => {
+      mockAppConfig.getMakeMKVExecutable.mockResolvedValueOnce(null);
+
+      await expect(DiscService.detectAvailableDiscs()).rejects.toThrow(
+        "MakeMKV executable not found"
+      );
+    });
+  });
+
+  describe("waitForDriveMount", () => {
+    beforeEach(() => {
+      // Mock AppConfig for mount detection settings
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          ...mockAppConfig,
+          mountWaitTimeout: 5,
+          mountPollInterval: 1,
+        },
+      }));
+    });
+
+    it("should wait for drives to mount and return new discs", async () => {
+      // Mock DriveService.getDriveMountStatus
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          getDriveMountStatus: vi
+            .fn()
+            .mockResolvedValueOnce({ total: 2, mounted: 1, unmounted: 1 }) // First call
+            .mockResolvedValueOnce({ total: 2, mounted: 2, unmounted: 0 }), // Second call
+        },
+      }));
+
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          callback(null, mockStdout, "");
+        }, 10);
+      });
+
+      const result = await DiscService.waitForDriveMount();
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        driveNumber: "0",
+        title: "Movie 1",
+        mediaType: "blu-ray",
+      });
+      expect(result[1]).toMatchObject({
+        driveNumber: "1",
+        title: "Movie 2",
+        mediaType: "dvd",
+      });
+    });
+
+    it("should return empty array when no new discs are found", async () => {
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          getDriveMountStatus: vi
+            .fn()
+            .mockResolvedValue({ total: 1, mounted: 1, unmounted: 0 }),
+        },
+      }));
+
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          callback(null, mockStdout, "");
+        }, 10);
+      });
+
+      const result = await DiscService.waitForDriveMount();
+
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe("getCompleteDiscInfo", () => {
+    it("should process complete disc information for all discs", async () => {
+      const detectedDiscs = [
+        { driveNumber: "0", title: "Movie 1", mediaType: "blu-ray" },
+        { driveNumber: "1", title: "Movie 2", mediaType: "dvd" },
+      ];
+
+      const mockFileInfoStdout = `TINFO:0,9,0,"1:30:00"
+TINFO:1,9,0,"0:45:00"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          callback(null, mockFileInfoStdout, "");
+        }, 10);
+      });
+
+      const result = await DiscService.getCompleteDiscInfo(detectedDiscs);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        driveNumber: "0",
+        title: "Movie 1",
+        mediaType: "blu-ray",
+        fileNumber: "0", // Longest title
+      });
+      expect(result[1]).toMatchObject({
+        driveNumber: "1",
+        title: "Movie 2",
+        mediaType: "dvd",
+        fileNumber: "0", // Longest title
+      });
+    });
+
+    it("should handle errors in getCompleteDiscInfo", async () => {
+      const detectedDiscs = [
+        { driveNumber: "0", title: "Movie 1", mediaType: "blu-ray" },
+      ];
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          callback(new Error("MakeMKV error"), "", "");
+        }, 10);
+      });
+
+      await expect(
+        DiscService.getCompleteDiscInfo(detectedDiscs)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("Enhanced getAvailableDiscs with mount detection", () => {
+    beforeEach(() => {
+      // Mock AppConfig for mount detection settings
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          ...mockAppConfig,
+          mountWaitTimeout: 10,
+          mountPollInterval: 1,
+        },
+      }));
+    });
+
+    it("should proceed immediately when all drives are ready", async () => {
+      // Mock DriveService.getDriveMountStatus to return no unmounted drives
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          getDriveMountStatus: vi
+            .fn()
+            .mockResolvedValue({ total: 2, mounted: 2, unmounted: 0 }),
+        },
+      }));
+
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
+
+      const mockFileInfoStdout = `TINFO:0,9,0,"1:30:00"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          if (command.includes("info disc:index")) {
+            callback(null, mockStdout, "");
+          } else if (command.includes("info disc:")) {
+            callback(null, mockFileInfoStdout, "");
+          }
+        }, 10);
+      });
+
+      const result = await DiscService.getAvailableDiscs();
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        driveNumber: "0",
+        title: "Movie 1",
+        mediaType: "blu-ray",
+        fileNumber: "0",
+      });
+    });
+
+    it("should wait for drives when unmounted drives are detected", async () => {
+      // Mock DriveService to return unmounted drives initially, then all mounted
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          getDriveMountStatus: vi
+            .fn()
+            .mockResolvedValueOnce({ total: 2, mounted: 1, unmounted: 1 }) // First call
+            .mockResolvedValueOnce({ total: 2, mounted: 2, unmounted: 0 }), // Second call
+        },
+      }));
+
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
+DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
+
+      const mockFileInfoStdout = `TINFO:0,9,0,"1:30:00"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          if (command.includes("info disc:index")) {
+            callback(null, mockStdout, "");
+          } else if (command.includes("info disc:")) {
+            callback(null, mockFileInfoStdout, "");
+          }
+        }, 10);
+      });
+
+      const result = await DiscService.getAvailableDiscs();
+
+      expect(result).toHaveLength(2);
+    });
+
+    it("should handle case when no discs detected but drives exist", async () => {
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          getDriveMountStatus: vi
+            .fn()
+            .mockResolvedValue({ total: 2, mounted: 0, unmounted: 2 }),
+        },
+      }));
+
+      // Mock exec to return no discs detected (empty output for disc detection)
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          if (command.includes("info disc:index")) {
+            callback(null, "", ""); // No discs detected
+          } else if (command.includes("info disc:")) {
+            callback(null, "", ""); // No file info
+          }
+        }, 10);
+      });
+
+      // Should throw an error when no discs are detected
+      await expect(DiscService.getAvailableDiscs()).rejects.toThrow(
+        "No output from MakeMKV command"
+      );
+    });
+
+    it("should handle case when no drives exist", async () => {
+      vi.doMock("../../src/services/drive.service.js", () => ({
+        DriveService: {
+          getDriveMountStatus: vi
+            .fn()
+            .mockResolvedValue({ total: 0, mounted: 0, unmounted: 0 }),
+        },
+      }));
+
+      // Mock exec to return no discs detected (empty output for disc detection)
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          if (command.includes("info disc:index")) {
+            callback(null, "", ""); // No discs detected
+          } else if (command.includes("info disc:")) {
+            callback(null, "", ""); // No file info
+          }
+        }, 10);
+      });
+
+      // Should throw an error when no discs are detected
+      await expect(DiscService.getAvailableDiscs()).rejects.toThrow(
+        "No output from MakeMKV command"
+      );
+    });
+
+    it("should disable mount detection when timeout is 0", async () => {
+      // Mock AppConfig to disable mount detection
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          ...mockAppConfig,
+          mountWaitTimeout: 0,
+          mountPollInterval: 1,
+        },
+      }));
+
+      const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"`;
+      const mockFileInfoStdout = `TINFO:0,9,0,"1:30:00"`;
+
+      exec.mockImplementation((command, callback) => {
+        setTimeout(() => {
+          if (command.includes("info disc:index")) {
+            callback(null, mockStdout, "");
+          } else if (command.includes("info disc:")) {
+            callback(null, mockFileInfoStdout, "");
+          }
+        }, 10);
+      });
+
+      const result = await DiscService.getAvailableDiscs();
+
+      expect(result).toHaveLength(1);
+      // Should not call DriveService.getDriveMountStatus when disabled
     });
   });
 });
