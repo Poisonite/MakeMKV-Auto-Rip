@@ -101,19 +101,25 @@ export class DriveService {
       // Get MakeMKV executable path
       const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
       if (!makeMKVExecutable) {
+        Logger.error("MakeMKV executable not found");
         return { total: 0, mounted: 0, unmounted: 0 };
       }
 
+      Logger.info(`Running MakeMKV: ${makeMKVExecutable} -r info disc:index`);
       const command = `${makeMKVExecutable} -r info disc:index`;
 
       return new Promise((resolve) => {
         exec(command, (err, stdout, stderr) => {
-          if (stderr || err) {
+          // Don't treat stderr as fatal error - MakeMKV often writes warnings there
+          // Only fail if we have no stdout data or a critical exec error
+          if (!stdout || stdout.trim() === "") {
+            Logger.error("No output from MakeMKV command");
             resolve({ total: 0, mounted: 0, unmounted: 0 });
             return;
           }
 
           try {
+            Logger.info(`MakeMKV output: ${stdout}`);
             const lines = stdout.split("\n");
 
             // Filter for actual optical drives (exclude virtual slots with state 256)
@@ -123,9 +129,11 @@ export class DriveService {
                 return false;
 
               const driveState = parseInt(lineArray[1]);
-              // State 256 = no physical drive (virtual slot)
-              // State 1 = physical drive present but open/ejected
-              // State 2 = physical drive with media present
+              // State 0 = Physical drive present, closed, no media/empty
+              // State 1 = Physical drive present but open/ejected
+              // State 2 = Physical drive with media present and mounted
+              // State 3 = Physical drive loaded but still processing (OS mounting)
+              // State 256 = No physical drive (virtual slot)
               return driveState !== 256;
             });
 
@@ -147,15 +155,21 @@ export class DriveService {
             const unmounted = total - mounted;
 
             // Debug logging to understand drive states
-            realDriveLines.forEach((line, index) => {
-              const lineArray = line.split(",");
-              const driveNumber = lineArray[0].substring(4);
-              const driveState = parseInt(lineArray[1]);
-              const mediaTitle = lineArray[5] || "";
-              Logger.info(
-                `Debug - Drive ${driveNumber}: state=${driveState}, title="${mediaTitle}"`
-              );
-            });
+            if (realDriveLines.length > 0) {
+              Logger.info("Debug - Drive states:");
+              realDriveLines.forEach((line) => {
+                const lineArray = line.split(",");
+                const driveNumber = lineArray[0].substring(4);
+                const driveState = parseInt(lineArray[1]);
+                const mediaTitle = lineArray[5] || "";
+                const devicePath = lineArray[6] || "";
+                Logger.info(
+                  `  Drive ${driveNumber}: state=${driveState}, title="${mediaTitle}", device="${devicePath}"`
+                );
+              });
+            } else {
+              Logger.info("Debug - No real drives found in MakeMKV output");
+            }
 
             Logger.info(
               `Drive status: ${total} drives, ${mounted} with mounted media, ${unmounted} available for mounting`

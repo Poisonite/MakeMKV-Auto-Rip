@@ -22,14 +22,18 @@ export class DiscService {
         // First attempt to get available discs
         let commandDataItems = await this.getAvailableDiscsInternal();
 
-        // Always check for unmounted drives if mount detection is enabled
+        // Always check mount status if mount detection is enabled
         if (AppConfig.mountWaitTimeout > 0) {
           const mountStatus = await DriveService.getDriveMountStatus();
           Logger.info(
             `Debug - Mount status: total=${mountStatus.total}, mounted=${mountStatus.mounted}, unmounted=${mountStatus.unmounted}`
           );
 
-          if (mountStatus.unmounted > 0) {
+          if (commandDataItems.length > 0 && mountStatus.unmounted === 0) {
+            Logger.info(
+              `Found ${commandDataItems.length} disc(s) immediately. All drives are ready, proceeding with ripping.`
+            );
+          } else if (mountStatus.unmounted > 0) {
             Logger.info(
               `Found ${commandDataItems.length} disc(s) immediately and ${mountStatus.unmounted} drive(s) still mounting. Waiting for additional drives...`
             );
@@ -136,8 +140,10 @@ export class DiscService {
       const command = `${makeMKVExecutable} -r info disc:index`;
 
       exec(command, (err, stdout, stderr) => {
-        if (stderr) {
-          reject(stderr);
+        // Only fail if we have no stdout data
+        if (!stdout || stdout.trim() === "") {
+          Logger.error("No output from MakeMKV command");
+          reject(new Error("No output from MakeMKV command"));
           return;
         }
 
@@ -230,8 +236,10 @@ export class DiscService {
       const command = `${makeMKVExecutable} -r info disc:${driveInfo.driveNumber}`;
 
       exec(command, (err, stdout, stderr) => {
-        if (stderr) {
-          reject(stderr);
+        // Only fail if we have no stdout data
+        if (!stdout || stdout.trim() === "") {
+          Logger.error("No output from MakeMKV command");
+          reject(new Error("No output from MakeMKV command"));
           return;
         }
 
