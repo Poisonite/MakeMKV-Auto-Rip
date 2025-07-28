@@ -130,7 +130,21 @@ export class AppConfig {
   static get mountWaitTimeout() {
     const config = this.#loadConfig();
     const timeout = config.mount_detection?.wait_timeout;
-    return typeof timeout === "number" && timeout >= 0 ? timeout : 10;
+    const result = typeof timeout === "number" && timeout >= 0 ? timeout : 10;
+
+    // Debug logging to understand config loading
+    console.log(
+      `Debug - Config mount_detection section:`,
+      config.mount_detection
+    );
+    console.log(
+      `Debug - Raw timeout value:`,
+      timeout,
+      `(type: ${typeof timeout})`
+    );
+    console.log(`Debug - Final mountWaitTimeout:`, result);
+
+    return result;
   }
 
   static get mountPollInterval() {

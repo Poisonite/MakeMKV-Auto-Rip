@@ -22,6 +22,12 @@ export class DiscService {
         // First attempt to get available discs
         let commandDataItems = await this.getAvailableDiscsInternal();
 
+        // Debug: Check mount detection configuration
+        const mountWaitTimeout = AppConfig.mountWaitTimeout;
+        Logger.info(
+          `Debug - Mount detection timeout configured: ${mountWaitTimeout} seconds`
+        );
+
         // Always check mount status if mount detection is enabled
         if (AppConfig.mountWaitTimeout > 0) {
           const mountStatus = await DriveService.getDriveMountStatus();
@@ -53,6 +59,10 @@ export class DiscService {
               `Found ${mountStatus.total} optical drive(s) but no media is currently mounted.`
             );
           }
+        } else {
+          Logger.info(
+            "Mount detection is disabled (timeout = 0) or configuration not loaded properly."
+          );
         }
 
         resolve(commandDataItems);
