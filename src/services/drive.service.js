@@ -101,11 +101,9 @@ export class DriveService {
       // Get MakeMKV executable path
       const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
       if (!makeMKVExecutable) {
-        Logger.error("MakeMKV executable not found");
         return { total: 0, mounted: 0, unmounted: 0 };
       }
 
-      Logger.info(`Running MakeMKV: ${makeMKVExecutable} -r info disc:index`);
       const command = `${makeMKVExecutable} -r info disc:index`;
 
       return new Promise((resolve) => {
@@ -119,7 +117,6 @@ export class DriveService {
           }
 
           try {
-            Logger.info(`MakeMKV output: ${stdout}`);
             const lines = stdout.split("\n");
 
             // Filter for actual optical drives (exclude virtual slots with state 256)
@@ -153,23 +150,6 @@ export class DriveService {
             const total = realDriveLines.length;
             const mounted = mountedDriveLines.length;
             const unmounted = total - mounted;
-
-            // Debug logging to understand drive states
-            if (realDriveLines.length > 0) {
-              Logger.info("Debug - Drive states:");
-              realDriveLines.forEach((line) => {
-                const lineArray = line.split(",");
-                const driveNumber = lineArray[0].substring(4);
-                const driveState = parseInt(lineArray[1]);
-                const mediaTitle = lineArray[5] || "";
-                const devicePath = lineArray[6] || "";
-                Logger.info(
-                  `  Drive ${driveNumber}: state=${driveState}, title="${mediaTitle}", device="${devicePath}"`
-                );
-              });
-            } else {
-              Logger.info("Debug - No real drives found in MakeMKV output");
-            }
 
             Logger.info(
               `Drive status: ${total} drives, ${mounted} with mounted media, ${unmounted} available for mounting`

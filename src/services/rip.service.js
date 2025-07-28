@@ -29,13 +29,7 @@ export class RipService {
       }
 
       Logger.info("Beginning AutoRip... Please Wait.");
-      console.log("DEBUG: About to call DiscService.getAvailableDiscs()");
       const commandDataItems = await DiscService.getAvailableDiscs();
-      console.log(
-        "DEBUG: DiscService.getAvailableDiscs() returned:",
-        commandDataItems.length,
-        "items"
-      );
 
       // Check if any discs were found
       if (commandDataItems.length === 0) {

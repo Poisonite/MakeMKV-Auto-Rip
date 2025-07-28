@@ -11,76 +11,59 @@ import { DriveService } from "./drive.service.js";
  */
 export class DiscService {
   /**
-   * Get information about all available drives with discs
-   * @returns {Promise<Array>} - Array of drive information objects
+   * Main method: Get all available discs with mount detection and complete title processing
+   * @returns {Promise<Array>} - Array of complete drive information objects
    */
   static async getAvailableDiscs() {
-    console.log("DEBUG: getAvailableDiscs() method called");
     return new Promise(async (resolve, reject) => {
-      console.log("DEBUG: Inside getAvailableDiscs Promise");
       Logger.info("Getting info for all discs...");
 
       try {
-        console.log("DEBUG: Starting getAvailableDiscsInternal()");
-        // First attempt to get available discs
-        let commandDataItems = await this.getAvailableDiscsInternal();
-        console.log(
-          "DEBUG: getAvailableDiscsInternal() returned:",
-          commandDataItems.length,
-          "items"
-        );
-        console.log("DEBUG: commandDataItems:", commandDataItems);
+        // First: Detect any immediately available discs (without processing)
+        let detectedDiscs = await this.detectAvailableDiscs();
 
-        // Debug: Check mount detection configuration
-        const mountWaitTimeout = AppConfig.mountWaitTimeout;
-        console.log(
-          "DEBUG: About to check mount detection, timeout =",
-          mountWaitTimeout
-        );
-        Logger.info(
-          `Debug - Mount detection timeout configured: ${mountWaitTimeout} seconds`
-        );
-
-        console.log("DEBUG: About to enter mount detection if block");
-        // Always check mount status if mount detection is enabled
+        // Check for additional drives if mount detection is enabled
         if (AppConfig.mountWaitTimeout > 0) {
-          console.log("DEBUG: Inside mount detection if block");
           const mountStatus = await DriveService.getDriveMountStatus();
-          Logger.info(
-            `Debug - Mount status: total=${mountStatus.total}, mounted=${mountStatus.mounted}, unmounted=${mountStatus.unmounted}`
-          );
 
-          if (commandDataItems.length > 0 && mountStatus.unmounted === 0) {
+          if (detectedDiscs.length > 0 && mountStatus.unmounted === 0) {
             Logger.info(
-              `Found ${commandDataItems.length} disc(s) immediately. All drives are ready, proceeding with ripping.`
+              `Found ${detectedDiscs.length} disc(s) immediately. All drives are ready, proceeding with ripping.`
             );
           } else if (mountStatus.unmounted > 0) {
             Logger.info(
-              `Found ${commandDataItems.length} disc(s) immediately and ${mountStatus.unmounted} drive(s) still mounting. Waiting for additional drives...`
+              `Found ${detectedDiscs.length} disc(s) immediately and ${mountStatus.unmounted} drive(s) still mounting. Waiting for additional drives...`
             );
             const additionalDiscs = await this.waitForDriveMount();
 
             // Merge any newly detected discs with existing ones
             if (additionalDiscs.length > 0) {
-              commandDataItems = [...commandDataItems, ...additionalDiscs];
+              detectedDiscs = [...detectedDiscs, ...additionalDiscs];
               Logger.info(
-                `Total discs found after waiting: ${commandDataItems.length}`
+                `Total discs found after waiting: ${detectedDiscs.length}`
               );
             }
-          } else if (commandDataItems.length === 0 && mountStatus.total === 0) {
+          } else if (detectedDiscs.length === 0 && mountStatus.total === 0) {
             Logger.info("No discs detected and no optical drives found.");
-          } else if (commandDataItems.length === 0 && mountStatus.total > 0) {
+          } else if (detectedDiscs.length === 0 && mountStatus.total > 0) {
             Logger.info(
               `Found ${mountStatus.total} optical drive(s) but no media is currently mounted.`
             );
           }
-        } else {
-          Logger.info(
-            "Mount detection is disabled (timeout = 0) or configuration not loaded properly."
-          );
         }
 
-        resolve(commandDataItems);
+        // Finally: Process complete disc information for ALL discovered discs
+        if (detectedDiscs.length > 0) {
+          Logger.info(
+            `Processing complete disc information for ${detectedDiscs.length} disc(s)...`
+          );
+          const completeDiscInfo = await this.getCompleteDiscInfo(
+            detectedDiscs
+          );
+          resolve(completeDiscInfo);
+        } else {
+          resolve([]);
+        }
       } catch (error) {
         reject(error);
       }
@@ -88,84 +71,10 @@ export class DiscService {
   }
 
   /**
-   * Wait for drives to mount media and retry detection
-   * @returns {Promise<Array>} - Array of NEW drive information objects found during wait
+   * Detect available discs without processing file information (fast)
+   * @returns {Promise<Array>} - Array of basic disc information objects
    */
-  static async waitForDriveMount() {
-    const waitTimeout = AppConfig.mountWaitTimeout;
-    const pollInterval = AppConfig.mountPollInterval;
-    const maxAttempts = Math.ceil(waitTimeout / pollInterval);
-
-    Logger.info(
-      `Waiting up to ${waitTimeout} seconds for additional drives to mount media...`
-    );
-
-    let initialDiscCount = 0;
-
-    // Poll for mounted drives
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      Logger.info(
-        `Polling attempt ${attempt}/${maxAttempts} for newly mounted drives...`
-      );
-
-      try {
-        const allCurrentDiscs = await this.getAvailableDiscsInternal();
-        const mountStatus = await DriveService.getDriveMountStatus();
-
-        // Set initial count on first attempt
-        if (attempt === 1) {
-          initialDiscCount = allCurrentDiscs.length;
-        }
-
-        const newDiscsFound = allCurrentDiscs.length - initialDiscCount;
-
-        if (newDiscsFound > 0) {
-          Logger.info(
-            `Found ${newDiscsFound} additional disc(s) during polling.`
-          );
-        }
-
-        Logger.info(
-          `Current status: ${allCurrentDiscs.length} discs ready, ${mountStatus.unmounted} drives still mounting`
-        );
-
-        // Only exit early if there are no more unmounted drives to wait for
-        if (mountStatus.unmounted === 0) {
-          Logger.info(
-            "All optical drives have been checked. No more drives to wait for."
-          );
-          return allCurrentDiscs.slice(initialDiscCount); // Return only the newly found discs
-        }
-
-        // Wait before next attempt (unless this is the last attempt)
-        if (attempt < maxAttempts) {
-          await this.sleep(pollInterval * 1000);
-        }
-      } catch (error) {
-        Logger.warning(
-          `Error during polling attempt ${attempt}: ${error.message}`
-        );
-      }
-    }
-
-    Logger.info(
-      `Finished waiting ${waitTimeout} seconds for additional drives.`
-    );
-
-    // Return any newly found discs after timeout
-    try {
-      const finalDiscs = await this.getAvailableDiscsInternal();
-      return finalDiscs.slice(initialDiscCount);
-    } catch (error) {
-      return [];
-    }
-  }
-
-  /**
-   * Internal method to get available discs without waiting logic
-   * @returns {Promise<Array>} - Array of drive information objects
-   */
-  static async getAvailableDiscsInternal() {
+  static async detectAvailableDiscs() {
     return new Promise(async (resolve, reject) => {
       // Get MakeMKV executable path with cross-platform detection
       const makeMKVExecutable = await AppConfig.getMakeMKVExecutable();
@@ -190,37 +99,105 @@ export class DiscService {
 
         try {
           const driveInfo = this.parseDriveInfo(stdout);
-          console.log(
-            "DEBUG: parseDriveInfo returned",
-            driveInfo.length,
-            "drives"
-          );
-
-          // Get file numbers for each valid disc
-          const drivePromises = driveInfo.map((drive) =>
-            this.getDiscFileInfo(drive)
-          );
-          console.log(
-            "DEBUG: About to wait for",
-            drivePromises.length,
-            "drive file info promises"
-          );
-
-          Promise.all(drivePromises)
-            .then((result) => {
-              console.log(
-                "DEBUG: All drive file info promises completed, returning",
-                result.length,
-                "items"
-              );
-              resolve(result);
-            })
-            .catch(reject);
+          resolve(driveInfo);
         } catch (error) {
           reject(error);
         }
       });
     });
+  }
+
+  /**
+   * Get complete disc information including file numbers for all discs
+   * @param {Array} detectedDiscs - Array of basic disc information
+   * @returns {Promise<Array>} - Array of complete disc information with file numbers
+   */
+  static async getCompleteDiscInfo(detectedDiscs) {
+    // Get file numbers for each detected disc
+    const drivePromises = detectedDiscs.map((drive) =>
+      this.getDiscFileInfo(drive)
+    );
+
+    return Promise.all(drivePromises);
+  }
+
+  /**
+   * Wait for drives to mount media and retry detection
+   * @returns {Promise<Array>} - Array of basic disc information for newly found discs
+   */
+  static async waitForDriveMount() {
+    const waitTimeout = AppConfig.mountWaitTimeout;
+    const pollInterval = AppConfig.mountPollInterval;
+    const maxAttempts = Math.ceil(waitTimeout / pollInterval);
+
+    Logger.info(
+      `Waiting up to ${waitTimeout} seconds for additional drives to mount media...`
+    );
+
+    let initialDiscCount = 0;
+
+    // Poll for mounted drives
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      Logger.info(
+        `Polling attempt ${attempt}/${maxAttempts} for newly mounted drives...`
+      );
+
+      try {
+        // Use fast detection during polling (no file processing)
+        const allCurrentDiscs = await this.detectAvailableDiscs();
+        const mountStatus = await DriveService.getDriveMountStatus();
+
+        // Set initial count on first attempt
+        if (attempt === 1) {
+          initialDiscCount = allCurrentDiscs.length;
+        }
+
+        const newDiscsFound = allCurrentDiscs.length - initialDiscCount;
+
+        if (newDiscsFound > 0) {
+          Logger.info(
+            `Found ${newDiscsFound} additional disc(s) during polling.`
+          );
+        }
+
+        Logger.info(
+          `Current status: ${allCurrentDiscs.length} discs ready, ${mountStatus.unmounted} drives still mounting`
+        );
+
+        // Only exit when there are no more unmounted drives to wait for
+        if (mountStatus.unmounted === 0) {
+          Logger.info(
+            "All optical drives have been checked. No more drives to wait for."
+          );
+
+          // Return just the newly found basic disc info (processing happens later)
+          const newDiscs = allCurrentDiscs.slice(initialDiscCount);
+          return newDiscs;
+        }
+
+        // Wait before next attempt (unless this is the last attempt)
+        if (attempt < maxAttempts) {
+          await this.sleep(pollInterval * 1000);
+        }
+      } catch (error) {
+        Logger.warning(
+          `Error during polling attempt ${attempt}: ${error.message}`
+        );
+      }
+    }
+
+    Logger.info(
+      `Finished waiting ${waitTimeout} seconds for additional drives.`
+    );
+
+    // Return any newly found discs after timeout
+    try {
+      const finalDiscs = await this.detectAvailableDiscs();
+      const newDiscs = finalDiscs.slice(initialDiscCount);
+      return newDiscs;
+    } catch (error) {
+      return [];
+    }
   }
 
   /**
