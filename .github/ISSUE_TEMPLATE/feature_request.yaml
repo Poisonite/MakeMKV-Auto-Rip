@@ -34,6 +34,19 @@ body:
       placeholder: Other approaches could be...
 
   - type: dropdown
+    id: interface-scope
+    attributes:
+      label: Interface Scope
+      description: Which interface(s) would this feature affect?
+      options:
+        - CLI only
+        - Web UI only
+        - Both CLI and Web UI
+        - Not applicable
+    validations:
+      required: true
+
+  - type: dropdown
     id: priority
     attributes:
       label: Priority

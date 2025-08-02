@@ -5,10 +5,28 @@ All notable changes to MakeMKV Auto Rip will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-07-21
+## [1.0.0] - 2025-08-02
 
 ### Added
 
+- **Modern Web UI** - Complete graphical interface with real-time updates and responsive design
+  - Interface accessible at `http://localhost:3000`
+  - Real-time status updates via WebSocket connections
+  - Live activity logs with auto-scrolling
+  - Responsive design that works on desktop, tablet, and mobile
+- **Interactive Operation Control** - Stop running operations from web UI
+  - Dynamic button states that change from "Start" to "Stop" during operations
+  - Graceful process termination with SIGTERM → SIGKILL fallback
+  - Real-time status tracking with `canStop` property
+  - Visual feedback with color-coded buttons on web UI
+- **CLI Integration for Web UI** - Web UI uses actual CLI commands for reliability
+  - All operations execute real CLI commands (`npm run start`, `npm run load`, `npm run eject`)
+  - Future-proof: web UI automatically benefits from CLI updates
+  - Real program output streaming to web interface
+- **Advanced CLI Flags** - New command line options for automation
+  - `--no-confirm` flag to bypass "Rip or Dip?" prompt for automated ripping
+  - `--quiet` flag to reduce verbose startup messages for cleaner output
+  - Perfect for web UI context, automated scripts, docker or headless deployments, etc
 - **MakeMKV version checking and validation** - The application now automatically checks MakeMKV version compatibility and provides user-friendly error messages when the installed version is too old MakeMKV to allow ripping. It also reports the installed version and warns about available updates.
 - **Automatic MakeMKV path detection** - The application now automatically detects the MakeMKV installation path across Windows, macOS, and Linux, greatly simplifying setup for users.
 - **Refactored configuration loading and validation** - Configuration loading and validation now handles missing or invalid custom MakeMKV paths gracefully, falling back to automatic detection when necessary (an install path for MakeMKV is no longer required).

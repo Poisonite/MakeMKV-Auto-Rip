@@ -11,6 +11,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 ## ✨ Features
 
 - **🖥️ Interactive CLI** - Simple menu-driven interface
+- **🌐 Modern Web UI** - Beautiful graphical interface with real-time updates
 - **💿 Multi-format support** - DVDs and Blu-ray discs
 - **🔍 Smart title detection** - Automatically finds the main movie
 - **📁 Unique folders** - No file conflicts with automatic folder naming
@@ -219,17 +220,26 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
 
 ## 🎯 Usage
 
-### Main Application (Ripping)
+### Web Interface
+
+```bash
+npm run web        # Start web UI at http://localhost:3000
+```
+
+### Command Line Interface
 
 ```bash
 npm start          # Interactive ripping interface
+npm run load       # ONLY Load/close all drives
+npm run eject      # ONLY Eject all drives
 ```
 
-### Drive Management Only
+### Advanced CLI Options
 
 ```bash
-npm run load       # Load/close all drives
-npm run eject      # Eject all drives
+npm start -- --no-confirm --quiet    # Skip prompts, reduce output
+npm run load -- --quiet              # ONLY Load drives, and with minimal output
+npm run eject -- --quiet             # ONLY Eject drives, and with minimal output
 ```
 
 ## 🔧 Troubleshooting
@@ -265,9 +275,23 @@ npm run eject      # Eject all drives
    - Manually close drives that don't auto-close within the 5-second waiting period
 
 6. **Ripping failures**
+
    - Check disc condition (scratches, damage)
    - Try ripping manually with MakeMKV GUI
    - Increase retry count in MakeMKV settings
+
+7. **Web UI connection issues**
+
+   - Ensure port 3000 is not blocked by firewall
+   - Try accessing `http://localhost:3000` in your browser
+   - Check browser console for WebSocket connection errors
+   - Restart web server: `npm run web`
+
+8. **Web UI operations not responding**
+
+   - Check that the web server is running: `npm run web`
+   - Verify MakeMKV is properly installed and configured
+   - Try using the CLI interface as a fallback: `npm start`
 
 ## 📄 License
 

@@ -32,6 +32,12 @@ We welcome contributions of all kinds:
 - **Windows 10+** (for testing drive operations)
 - **Administrator privileges** (for testing drive control)
 
+**For Web UI Development:**
+
+- **Any Platform** - Windows, macOS, or Linux
+- **Modern Browser** - For testing web interface
+- **No build tools required** - Uses pre-built native components
+
 **For Other Features:**
 
 - **Any Platform** - Windows, macOS, or Linux
@@ -52,6 +58,11 @@ We welcome contributions of all kinds:
 4. **Create a feature branch:**
    ```bash
    git checkout -b feature/your-feature-name
+   ```
+5. **Test both interfaces:**
+   ```bash
+   npm start          # Test CLI interface
+   npm run web        # Test web interface at http://localhost:3000
    ```
 
 ### Building Native Components (Windows Development Only)
@@ -92,7 +103,11 @@ We follow these conventions:
 
 ```
 src/
-├── cli/          # User interface and command handling
+├── cli/          # Command-line interface and command handling
+├── web/          # Web interface components
+│   ├── routes/   # API endpoints
+│   ├── middleware/ # WebSocket handling
+│   └── static/   # Frontend assets (CSS, JS)
 ├── services/     # Business logic and external integrations
 ├── utils/        # Reusable utility functions
 ├── config/       # Configuration management
@@ -104,8 +119,9 @@ src/
 1. **Services** - Add business logic to appropriate service modules
 2. **Utilities** - Create reusable functions in utils/
 3. **CLI** - Update interface for user-facing changes
-4. **Config** - Add new configuration options if needed
-5. **Documentation** - Update README and relevant docs
+4. **Web UI** - Update API routes and frontend for web interface changes
+5. **Config** - Add new configuration options if needed
+6. **Documentation** - Update README and relevant docs
 
 ## 🐛 Bug Reports
 
@@ -160,7 +176,8 @@ git commit -m "Update stuff"
 2. **Test your changes:**
 
    ```bash
-   npm start  # Test main functionality
+   npm start  # Test CLI functionality
+   npm run web  # Test web interface
    npm run load  # Test drive loading
    npm run eject  # Test drive ejection
    ```
@@ -181,6 +198,9 @@ When you create a pull request, GitHub will automatically populate it with our p
 - **Test with multiple drives** when possible
 - **Test error scenarios** (missing discs, invalid YAML config)
 - **Test all npm (usage) commands** (`start`, `load`, `eject`)
+- **Test web interface** - Verify all operations work through web UI
+- **Test responsive design** - Check web UI on different screen sizes
+- **Test real-time features** - Verify WebSocket connections and live updates
 
 ### Future: Automated Testing
 
