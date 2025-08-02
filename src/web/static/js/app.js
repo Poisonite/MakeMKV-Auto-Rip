@@ -88,7 +88,7 @@ class MakeMKVWebUI {
         break;
 
       case "status_update":
-        this.updateStatus(data.status, data.operation);
+        this.updateStatus(data.status, data.operation, data.canStop);
         break;
 
       case "log":
@@ -214,7 +214,7 @@ class MakeMKVWebUI {
     try {
       const response = await fetch("/api/status");
       const data = await response.json();
-      this.updateStatus(data.status, data.operation);
+      this.updateStatus(data.status, data.operation, data.canStop);
     } catch (error) {
       console.error("Failed to fetch status:", error);
     }
@@ -223,9 +223,10 @@ class MakeMKVWebUI {
   /**
    * Update status display
    */
-  updateStatus(status, operation) {
+  updateStatus(status, operation, canStop = false) {
     this.currentStatus = status;
     this.currentOperation = operation;
+    this.canStop = canStop;
 
     const statusElement = document.getElementById("currentStatus");
     const operationElement = document.getElementById("currentOperation");
@@ -237,25 +238,68 @@ class MakeMKVWebUI {
     operationElement.textContent = operation || "None";
 
     // Update button states
-    this.updateButtonStates(status);
+    this.updateButtonStates(status, canStop);
   }
 
   /**
    * Update button states based on current status
    */
-  updateButtonStates(status) {
+  updateButtonStates(status, canStop = false) {
     const isOperationInProgress = status !== "idle";
 
-    document.getElementById("loadDrivesBtn").disabled = isOperationInProgress;
-    document.getElementById("ejectDrivesBtn").disabled = isOperationInProgress;
-    document.getElementById("startRippingBtn").disabled = isOperationInProgress;
+    // Get button elements
+    const loadBtn = document.getElementById("loadDrivesBtn");
+    const ejectBtn = document.getElementById("ejectDrivesBtn");
+    const ripBtn = document.getElementById("startRippingBtn");
+
+    if (isOperationInProgress && canStop) {
+      // Show stop buttons when operations are running
+      if (status === "loading") {
+        loadBtn.innerHTML = "⏹️ Stop Loading";
+        loadBtn.className = "btn btn-warning";
+        loadBtn.disabled = false;
+        ejectBtn.disabled = true;
+        ripBtn.disabled = true;
+      } else if (status === "ejecting") {
+        ejectBtn.innerHTML = "⏹️ Stop Ejecting";
+        ejectBtn.className = "btn btn-warning";
+        ejectBtn.disabled = false;
+        loadBtn.disabled = true;
+        ripBtn.disabled = true;
+      } else if (status === "ripping") {
+        ripBtn.innerHTML = "⏹️ Stop Ripping";
+        ripBtn.className = "btn btn-warning";
+        ripBtn.disabled = false;
+        loadBtn.disabled = true;
+        ejectBtn.disabled = true;
+      }
+    } else {
+      // Show normal buttons when idle
+      loadBtn.innerHTML = "📥 Load All Drives";
+      loadBtn.className = "btn btn-primary";
+      loadBtn.disabled = isOperationInProgress;
+
+      ejectBtn.innerHTML = "📤 Eject All Drives";
+      ejectBtn.className = "btn btn-secondary";
+      ejectBtn.disabled = isOperationInProgress;
+
+      ripBtn.innerHTML = "▶️ Start Ripping";
+      ripBtn.className = "btn btn-success";
+      ripBtn.disabled = isOperationInProgress;
+    }
   }
 
   /**
-   * Perform drive operation (load/eject)
+   * Perform drive operation (load/eject) or stop current operation
    */
   async performDriveOperation(operation) {
     try {
+      // Check if this is a stop operation
+      if (this.canStop && this.currentStatus !== "idle") {
+        await this.stopCurrentOperation();
+        return;
+      }
+
       this.addLog(
         "info",
         `${operation === "load" ? "Loading" : "Ejecting"} drives...`
@@ -281,10 +325,16 @@ class MakeMKVWebUI {
   }
 
   /**
-   * Start the ripping process
+   * Start the ripping process or stop current operation
    */
   async startRipping() {
     try {
+      // Check if this is a stop operation
+      if (this.canStop && this.currentStatus === "ripping") {
+        await this.stopCurrentOperation();
+        return;
+      }
+
       this.addLog("info", "Starting ripping process...");
 
       const response = await fetch("/api/rip/start", {
@@ -303,6 +353,32 @@ class MakeMKVWebUI {
       }
     } catch (error) {
       this.addLog("error", `Failed to start ripping: ${error.message}`);
+    }
+  }
+
+  /**
+   * Stop the current operation
+   */
+  async stopCurrentOperation() {
+    try {
+      this.addLog("warn", "Stopping current operation...");
+
+      const response = await fetch("/api/stop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        this.addLog("warn", data.message);
+      } else {
+        this.addLog("error", data.error || "Failed to stop operation");
+      }
+    } catch (error) {
+      this.addLog("error", `Failed to stop operation: ${error.message}`);
     }
   }
 

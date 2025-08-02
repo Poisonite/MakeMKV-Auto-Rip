@@ -36,7 +36,7 @@ body {
 
 /* Layout */
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
@@ -47,6 +47,29 @@ body {
 .main {
   flex: 1;
   margin: 20px 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* Wide screen layout - side by side */
+@media (min-width: 1024px) {
+  .main {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .operations-section {
+    grid-column: 1;
+  }
+
+  .logs-section {
+    grid-column: 2;
+  }
+
+  .config-editor {
+    grid-column: 1 / -1; /* Span full width when shown */
+  }
 }
 
 /* Header */
@@ -312,8 +335,15 @@ section h2 {
   border: 1px solid #ddd;
   border-radius: var(--border-radius);
   background-color: #1e1e1e;
-  max-height: 300px;
+  height: 400px;
   overflow-y: auto;
+}
+
+/* Adjust logs height for side-by-side layout */
+@media (min-width: 1024px) {
+  .logs-container {
+    height: 500px;
+  }
 }
 
 .logs-content {

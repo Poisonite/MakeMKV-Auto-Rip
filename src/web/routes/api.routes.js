@@ -19,6 +19,7 @@ const router = Router();
 // Status tracking
 let currentOperation = null;
 let operationStatus = "idle"; // idle, loading, ejecting, ripping
+let currentProcess = null; // Store reference to current running process
 
 /**
  * Execute a CLI command and capture its output
@@ -32,6 +33,9 @@ function executeCliCommand(command, args = []) {
       cwd: path.resolve(process.cwd()),
       shell: true,
     });
+
+    // Store reference to current process for potential termination
+    currentProcess = childProcess;
 
     let output = "";
     let error = "";
@@ -51,6 +55,7 @@ function executeCliCommand(command, args = []) {
     });
 
     childProcess.on("close", (code) => {
+      currentProcess = null; // Clear the process reference
       resolve({
         success: code === 0,
         output: output.trim(),
@@ -59,6 +64,7 @@ function executeCliCommand(command, args = []) {
     });
 
     childProcess.on("error", (err) => {
+      currentProcess = null; // Clear the process reference
       resolve({
         success: false,
         output: "",
@@ -76,11 +82,46 @@ router.get("/status", async (req, res) => {
     res.json({
       operation: currentOperation,
       status: operationStatus,
+      canStop: currentProcess !== null,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     Logger.error("Failed to get status", error.message);
     res.status(500).json({ error: "Failed to get status" });
+  }
+});
+
+/**
+ * Stop current operation
+ */
+router.post("/stop", async (req, res) => {
+  try {
+    if (currentProcess) {
+      currentProcess.kill("SIGTERM");
+
+      // Wait a moment, then force kill if still running
+      setTimeout(() => {
+        if (currentProcess && !currentProcess.killed) {
+          currentProcess.kill("SIGKILL");
+        }
+      }, 3000);
+
+      operationStatus = "idle";
+      currentOperation = null;
+      currentProcess = null;
+
+      broadcastStatusUpdate("idle", null);
+      broadcastLogMessage("warn", "Operation stopped by user");
+
+      res.json({ success: true, message: "Operation stopped" });
+    } else {
+      res.status(400).json({ error: "No operation is currently running" });
+    }
+  } catch (error) {
+    Logger.error("Failed to stop operation", error.message);
+    res
+      .status(500)
+      .json({ error: "Failed to stop operation: " + error.message });
   }
 });
 
@@ -99,7 +140,13 @@ router.post("/drives/load", async (req, res) => {
     currentOperation = "Loading drives...";
     broadcastStatusUpdate("loading", "Loading drives...");
 
-    const result = await executeCliCommand("npm", ["run", "load"]);
+    const result = await executeCliCommand("npm", [
+      "run",
+      "load",
+      "--silent",
+      "--",
+      "--quiet",
+    ]);
 
     operationStatus = "idle";
     currentOperation = null;
@@ -134,7 +181,13 @@ router.post("/drives/eject", async (req, res) => {
     currentOperation = "Ejecting drives...";
     broadcastStatusUpdate("ejecting", "Ejecting drives...");
 
-    const result = await executeCliCommand("npm", ["run", "eject"]);
+    const result = await executeCliCommand("npm", [
+      "run",
+      "eject",
+      "--silent",
+      "--",
+      "--quiet",
+    ]);
 
     operationStatus = "idle";
     currentOperation = null;
@@ -229,7 +282,14 @@ router.post("/rip/start", async (req, res) => {
     // Start the ripping process in the background using CLI
     setImmediate(async () => {
       try {
-        const result = await executeCliCommand("npm", ["run", "start"]);
+        const result = await executeCliCommand("npm", [
+          "run",
+          "start",
+          "--silent",
+          "--",
+          "--no-confirm",
+          "--quiet",
+        ]);
 
         operationStatus = "idle";
         currentOperation = null;

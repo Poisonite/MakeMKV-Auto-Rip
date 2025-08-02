@@ -20,15 +20,23 @@ function displayHeader() {
 
 /**
  * Load all drives command
+ * @param {Object} flags - Command flags
+ * @param {boolean} flags.quiet - Reduce verbose output
  */
-export async function loadDrives() {
+export async function loadDrives(flags = {}) {
   try {
-    displayHeader();
+    if (!flags.quiet) {
+      displayHeader();
+    }
     AppConfig.validate();
 
-    Logger.info("Loading all drives...");
+    if (!flags.quiet) {
+      Logger.info("Loading all drives...");
+    }
     await DriveService.loadDrivesWithWait();
-    Logger.info("Load operation completed.");
+    if (!flags.quiet) {
+      Logger.info("Load operation completed.");
+    }
     safeExit(0, "Load operation completed");
   } catch (error) {
     Logger.error("Failed to load drives", error.message);
@@ -38,15 +46,23 @@ export async function loadDrives() {
 
 /**
  * Eject all drives command
+ * @param {Object} flags - Command flags
+ * @param {boolean} flags.quiet - Reduce verbose output
  */
-export async function ejectDrives() {
+export async function ejectDrives(flags = {}) {
   try {
-    displayHeader();
+    if (!flags.quiet) {
+      displayHeader();
+    }
     AppConfig.validate();
 
-    Logger.info("Ejecting all drives...");
+    if (!flags.quiet) {
+      Logger.info("Ejecting all drives...");
+    }
     await DriveService.ejectAllDrives();
-    Logger.info("Eject operation completed.");
+    if (!flags.quiet) {
+      Logger.info("Eject operation completed.");
+    }
     safeExit(0, "Eject operation completed");
   } catch (error) {
     Logger.error("Failed to eject drives", error.message);
@@ -54,15 +70,19 @@ export async function ejectDrives() {
   }
 }
 
-// Handle command line arguments
-const command = process.argv[2];
+// Parse command line arguments
+const args = process.argv.slice(2);
+const command = args[0];
+const flags = {
+  quiet: args.includes("--quiet"),
+};
 
 switch (command) {
   case "load":
-    loadDrives();
+    loadDrives(flags);
     break;
   case "eject":
-    ejectDrives();
+    ejectDrives(flags);
     break;
   default:
     Logger.error("Invalid command. Use 'load' or 'eject'");
