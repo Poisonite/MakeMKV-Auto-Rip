@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MakeMKV Auto Rip - Web UI</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+             <header class="header">
+         <div class="header-top">
+           <h1>🎬 MakeMKV Auto Rip</h1>
+           <div class="connection-status" id="connectionStatus">
+             <span class="status-indicator" id="statusIndicator">●</span>
+             <span class="status-text" id="statusText">Connecting...</span>
+           </div>
+         </div>
+         <p class="subtitle">Web Interface for Automatic Disc Ripping</p>
+         
+         <!-- Current Status integrated into header -->
+         <div class="status-card">
+           <div class="status-info">
+             <span class="status-label">Status:</span>
+             <span class="status-value" id="currentStatus">Idle</span>
+           </div>
+           <div class="operation-info">
+             <span class="operation-label">Operation:</span>
+             <span class="operation-value" id="currentOperation">None</span>
+           </div>
+         </div>
+       </header>
+
+       <main class="main">
+         <!-- All Operations Section -->
+         <section class="operations-section">
+           <h2>🎛️ Operations</h2>
+           <div class="operations-grid">
+             <!-- Drive Operations -->
+             <div class="operation-group">
+               <h3>💿 Drive Operations</h3>
+               <div class="button-group">
+                 <button class="btn btn-primary" id="loadDrivesBtn">
+                   📥 Load All Drives
+                 </button>
+                 <button class="btn btn-secondary" id="ejectDrivesBtn">
+                   📤 Eject All Drives
+                 </button>
+               </div>
+             </div>
+
+             <!-- Ripping Operations -->
+             <div class="operation-group">
+               <h3>🎯 Ripping</h3>
+               <div class="button-group">
+                 <button class="btn btn-success" id="startRippingBtn">
+                   ▶️ Start Ripping
+                 </button>
+               </div>
+               <p class="help-text">
+                 Automatically detect and rip all inserted discs
+               </p>
+             </div>
+
+             <!-- Configuration -->
+             <div class="operation-group">
+               <h3>⚙️ Configuration</h3>
+               <div class="button-group">
+                 <button class="btn btn-info" id="editConfigBtn">
+                   ✏️ Edit Configuration
+                 </button>
+                 <button
+                   class="btn btn-warning"
+                   id="restartAppBtn"
+                   style="display: none"
+                 >
+                   🔄 Restart Application
+                 </button>
+               </div>
+             </div>
+           </div>
+         </section>
+
+          <!-- Config Editor (hidden by default) -->
+          <div class="config-editor" id="configEditor" style="display: none">
+            <h3>Configuration Editor</h3>
+            <textarea
+              id="configContent"
+              placeholder="Loading configuration..."
+            ></textarea>
+            <div class="config-actions">
+              <button class="btn btn-success" id="saveConfigBtn">
+                💾 Save Configuration
+              </button>
+              <button class="btn btn-secondary" id="cancelConfigBtn">
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Logs Section -->
+        <section class="logs-section">
+          <h2>📋 Activity Logs</h2>
+          <div class="logs-container">
+            <div class="logs-content" id="logsContent">
+              <div class="log-entry info">
+                <span class="log-time">Ready</span>
+                <span class="log-message">Web UI loaded successfully</span>
+              </div>
+            </div>
+          </div>
+          <div class="logs-controls">
+            <button class="btn btn-small" id="clearLogsBtn">
+              🗑️ Clear Logs
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>
+          MakeMKV Auto Rip v1.0.0 |
+          <a
+            href="https://github.com/Poisonite/MakeMKV-Auto-Rip"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </p>
+      </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

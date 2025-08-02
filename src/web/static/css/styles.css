@@ -1,0 +1,458 @@
+/**
+ * MakeMKV Auto Rip - Web UI Styles
+ * Simple, clean styling for the web interface
+ */
+
+/* Root Variables */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-color);
+  background-color: var(--light-color);
+  font-size: 16px;
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  margin: 20px 0;
+}
+
+/* Header */
+.header {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--secondary-color);
+  margin: 10px 0 20px 0;
+  text-align: center;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--light-color);
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.status-text {
+  display: inline;
+}
+
+.status-indicator {
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+
+.status-indicator.connected {
+  color: var(--success-color);
+}
+
+.status-indicator.disconnected {
+  color: var(--danger-color);
+}
+
+.status-indicator.connecting {
+  color: var(--warning-color);
+}
+
+/* Sections */
+section {
+  background: white;
+  margin-bottom: 20px;
+  padding: 25px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: var(--dark-color);
+  border-bottom: 2px solid var(--light-color);
+  padding-bottom: 10px;
+}
+
+/* Status Section */
+.status-card {
+  background-color: var(--light-color);
+  padding: 15px 20px;
+  border-radius: var(--border-radius);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+/* Operations Grid */
+.operations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.operation-group {
+  background-color: var(--light-color);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid #e9ecef;
+}
+
+.operation-group h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  color: var(--dark-color);
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+.status-info,
+.operation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.status-label,
+.operation-label {
+  font-weight: 600;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+}
+
+.status-value,
+.operation-value {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+.status-value.idle {
+  color: var(--success-color);
+}
+
+.status-value.loading,
+.status-value.ejecting {
+  color: var(--warning-color);
+}
+
+.status-value.ripping {
+  color: var(--info-color);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  background: none;
+  min-height: 44px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: var(--dark-color);
+}
+
+.btn-info {
+  background-color: var(--info-color);
+  color: white;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Configuration Section */
+.config-controls {
+  margin-bottom: 20px;
+}
+
+.config-editor {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: var(--light-color);
+  border-radius: var(--border-radius);
+}
+
+.config-editor h3 {
+  margin-bottom: 15px;
+  color: var(--dark-color);
+}
+
+#configContent {
+  width: 100%;
+  min-height: 300px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.config-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Help Text */
+.help-text {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  font-style: italic;
+}
+
+/* Logs Section */
+.logs-container {
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: #1e1e1e;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.logs-content {
+  padding: 15px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.log-entry {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+  padding: 5px 0;
+}
+
+.log-time {
+  color: #888;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.log-message {
+  color: #fff;
+  flex: 1;
+}
+
+.log-entry.info .log-message {
+  color: #17a2b8;
+}
+
+.log-entry.warn .log-message {
+  color: #ffc107;
+}
+
+.log-entry.error .log-message {
+  color: #dc3545;
+}
+
+.log-entry.success .log-message {
+  color: #28a745;
+}
+
+.logs-controls {
+  margin-top: 10px;
+  text-align: right;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+  border-top: 1px solid #ddd;
+  margin-top: 40px;
+}
+
+.footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .header-top {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .status-text {
+    display: none;
+  }
+
+  .status-card {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .operations-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  section {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-top {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .connection-status {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  .status-text {
+    display: none;
+  }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}

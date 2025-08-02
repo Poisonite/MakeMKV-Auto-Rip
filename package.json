@@ -9,14 +9,16 @@
     },
     "scripts": {
         "start": "node index.js",
+        "web": "node web.js",
+        "web:dev": "node web.js",
         "load": "node src/cli/commands.js load",
         "eject": "node src/cli/commands.js eject",
         "test": "vitest",
         "test:watch": "vitest --watch",
         "test:ui": "vitest --ui",
-        "build": "node-gyp rebuild",
-        "build:debug": "node-gyp rebuild --debug",
-        "clean": "node-gyp clean",
+        "build:windows-addons": "node-gyp rebuild",
+        "build:debug:windows-addons": "node-gyp rebuild --debug",
+        "clean:windows-addons": "node-gyp clean",
         "postinstall": "node -e \"console.log('MakeMKV Auto Rip installed successfully!'); if (process.platform === 'win32' && !require('fs').existsSync('./build/Release/optical_drive_native.node')) { console.warn('WARNING: Native Windows addon missing - optical drive operations may not work'); }\""
     },
     "repository": {
@@ -54,12 +56,16 @@
     "dependencies": {
         "chalk": "^5.4.1",
         "date-fns": "^4.1.0",
+        "express": "^5.1.0",
+        "multer": "^2.0.2",
+        "ws": "^8.18.3",
         "yaml": "^2.8.0"
     },
     "devDependencies": {
         "@vitest/ui": "^3.2.2",
         "node-addon-api": "^8.0.0",
         "node-gyp": "^10.0.0",
+        "vite": "^7.0.6",
         "vitest": "^3.2.2"
     }
 }
