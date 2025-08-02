@@ -37,6 +37,8 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │   │   └── index.js              # Centralized config handling
 │   └── constants/                # Application constants
 │       └── index.js              # Shared constants and enums
+├── scripts/                      # Build and utility scripts
+│   └── postinstall.js            # Post-installation verification script
 ├── public/                       # Web UI static files
 │   └── index.html                # Main web interface
 ├── config.yaml                   # YAML configuration file for application settings

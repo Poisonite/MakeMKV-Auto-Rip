@@ -19,7 +19,7 @@
         "build:windows-addons": "node-gyp rebuild",
         "build:debug:windows-addons": "node-gyp rebuild --debug",
         "clean:windows-addons": "node-gyp clean",
-        "postinstall": "node -e \"console.log('MakeMKV Auto Rip installed successfully!'); if (process.platform === 'win32' && !require('fs').existsSync('./build/Release/optical_drive_native.node')) { console.warn('WARNING: Native Windows addon missing - optical drive operations may not work'); }\""
+        "postinstall": "node scripts/postinstall.js"
     },
     "repository": {
         "type": "git",
