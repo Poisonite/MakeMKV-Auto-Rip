@@ -55,7 +55,7 @@ DeviceIoControl(hDevice, IOCTL_STORAGE_LOAD_MEDIA, ...);
 
 ## Compatibility
 
-- **Windows 8/Server 2012** and later
+- **Windows 8/Server 2012** and later (officially supported)
 - All versions include the required DeviceIoControl API
 - Works with all optical drive types (CD, DVD, Blu-ray)
 
@@ -64,9 +64,9 @@ DeviceIoControl(hDevice, IOCTL_STORAGE_LOAD_MEDIA, ...);
 The addon is built automatically during `npm install` using node-gyp:
 
 ```bash
-npm run build          # Build release version
-npm run build:debug    # Build debug version
-npm run clean          # Clean build artifacts
+npm run windows-addons:build          # Build release version
+npm run windows-addons:build:debug    # Build debug version
+npm run windows-addons:clean          # Clean build artifacts
 ```
 
 ## Dependencies

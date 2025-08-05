@@ -18,14 +18,14 @@
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --watch",
         "test:ui": "vitest --ui",
-        "build:windows-addons": "node-gyp rebuild",
-        "build:debug:windows-addons": "node-gyp rebuild --debug",
-        "clean:windows-addons": "node-gyp clean",
+        "windows-addons:build": "node-gyp rebuild",
+        "windows-addons:build:debug": "node-gyp rebuild --debug",
+        "windows-addons:clean": "node-gyp clean",
         "docker:build": "docker build -t makemkv-auto-rip .",
         "docker:run": "docker-compose up -d",
         "docker:stop": "docker-compose down",
         "docker:logs": "docker-compose logs -f",
-        "prepublishOnly": "npm run test:run"
+        "prepublishOnly": "npm run test:run",
         "postinstall": "node scripts/postinstall.js"
     },
     "repository": {

@@ -71,13 +71,13 @@ If you're developing Windows optical drive interaction functionality, you may ne
 
 ```bash
 # Build the native addon (requires Visual Studio + Python)
-npm run build
+npm run windows-addons:build
 
 # Build debug version for development
-npm run build:debug
+npm run windows-addons:build:debug
 
 # Clean build artifacts
-npm run clean
+npm run windows-addons:clean
 ```
 
 **Note:** Most contributors won't need to build native components since:
@@ -173,13 +173,14 @@ git commit -m "Update stuff"
    git rebase upstream/master
    ```
 
-2. **Test your changes:**
+2. **Test your changes: _(Pick those which apply)_**
 
    ```bash
    npm start  # Test CLI functionality
    npm run web  # Test web interface
    npm run load  # Test drive loading
    npm run eject  # Test drive ejection
+   npm run windows-addons:build # Test Windows drive load/eject addon
    npm run docker:build  # Test Docker build
    npm run docker:run  # Test Docker deployment
    ```
@@ -217,8 +218,8 @@ We're planning to add:
 Cross-platform support now available!
 
 - **Windows** - Full native support with drive loading/ejecting
-- **Linux** - Dockerized support with all ripping functionality
-- **macOS** - Planned support (contributions welcome!)
+- **Linux** - Full functionality tested on Ubuntu based Linux
+- **macOS** - _Theoretical_ support (testing & platform fix contributions welcome!)
 - **Docker containers** - Complete containerization with volume management
 
 ### Docker Development

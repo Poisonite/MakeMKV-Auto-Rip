@@ -46,7 +46,7 @@ Please describe the tests that you ran to verify your changes:
 
 ### Windows Native Development (if applicable)
 
-- [ ] Rebuilt native addon (`npm run build`)
+- [ ] Rebuilt native addon (`npm run windows-addons:build`)
 - [ ] Tested as administrator
 - [ ] Tested as regular user (expected failures)
 - [ ] Verified pre-built binary still works

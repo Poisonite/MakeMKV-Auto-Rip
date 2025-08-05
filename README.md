@@ -277,7 +277,7 @@ npm run eject -- --quiet             # ONLY Eject drives, and with minimal outpu
 2. **"(Windows) Native optical drive addon failed to load" error**
 
    - This indicates a corrupted installation or missing native components
-   - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run build`
+   - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run windows-addons:build`
    - Ensure you're running on a supported Windows version (Windows 10/11 officially tested - _theoretically_ compatible back to ~Windows 2000)
 
 3. **Drive eject/load operations fail**
