@@ -169,23 +169,6 @@ class MakeMKVWebUI {
       this.startRipping();
     });
 
-    // Configuration management
-    document.getElementById("editConfigBtn").addEventListener("click", () => {
-      this.showConfigEditor();
-    });
-
-    document.getElementById("saveConfigBtn").addEventListener("click", () => {
-      this.saveConfiguration();
-    });
-
-    document.getElementById("cancelConfigBtn").addEventListener("click", () => {
-      this.hideConfigEditor();
-    });
-
-    document.getElementById("restartAppBtn").addEventListener("click", () => {
-      this.restartApplication();
-    });
-
     // Logs
     document.getElementById("clearLogsBtn").addEventListener("click", () => {
       this.clearLogs();
@@ -379,89 +362,6 @@ class MakeMKVWebUI {
       }
     } catch (error) {
       this.addLog("error", `Failed to stop operation: ${error.message}`);
-    }
-  }
-
-  /**
-   * Show configuration editor
-   */
-  async showConfigEditor() {
-    try {
-      const response = await fetch("/api/config");
-      const data = await response.json();
-
-      if (data.config) {
-        document.getElementById("configContent").value = data.config;
-        document.getElementById("configEditor").style.display = "block";
-        document.getElementById("editConfigBtn").style.display = "none";
-      } else {
-        this.addLog("error", "Failed to load configuration");
-      }
-    } catch (error) {
-      this.addLog("error", `Failed to load config: ${error.message}`);
-    }
-  }
-
-  /**
-   * Hide configuration editor
-   */
-  hideConfigEditor() {
-    document.getElementById("configEditor").style.display = "none";
-    document.getElementById("editConfigBtn").style.display = "inline-flex";
-    document.getElementById("restartAppBtn").style.display = "none";
-  }
-
-  /**
-   * Save configuration
-   */
-  async saveConfiguration() {
-    try {
-      const configContent = document.getElementById("configContent").value;
-
-      const response = await fetch("/api/config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ config: configContent }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        this.addLog("success", "Configuration saved successfully");
-        this.hideConfigEditor();
-        document.getElementById("restartAppBtn").style.display = "inline-flex";
-      } else {
-        this.addLog("error", data.error || "Failed to save configuration");
-      }
-    } catch (error) {
-      this.addLog("error", `Failed to save config: ${error.message}`);
-    }
-  }
-
-  /**
-   * Restart the application
-   */
-  async restartApplication() {
-    try {
-      this.addLog("info", "Restarting application...");
-
-      const response = await fetch("/api/restart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        this.addLog("info", "Application restart initiated");
-        // The connection will be lost and reconnection will happen automatically
-      }
-    } catch (error) {
-      this.addLog("error", `Failed to restart: ${error.message}`);
     }
   }
 

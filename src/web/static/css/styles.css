@@ -66,10 +66,6 @@ body {
   .logs-section {
     grid-column: 2;
   }
-
-  .config-editor {
-    grid-column: 1 / -1; /* Span full width when shown */
-  }
 }
 
 /* Header */
@@ -285,41 +281,6 @@ section h2 {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
-}
-
-/* Configuration Section */
-.config-controls {
-  margin-bottom: 20px;
-}
-
-.config-editor {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: var(--light-color);
-  border-radius: var(--border-radius);
-}
-
-.config-editor h3 {
-  margin-bottom: 15px;
-  color: var(--dark-color);
-}
-
-#configContent {
-  width: 100%;
-  min-height: 300px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: var(--border-radius);
-  font-family: "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.4;
-  resize: vertical;
-}
-
-.config-actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
 }
 
 /* Help Text */

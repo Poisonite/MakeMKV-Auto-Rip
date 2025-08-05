@@ -216,7 +216,7 @@ interface:
 **Important Notes:**
 
 - Recommended: Create dedicated folders for movie rips and logs
-- **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance. For SSDs, `"async"` will yield much better overall performance
+- **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance. For SSDs, `"async"` will yield much better overall performance.
 - **Mount detection**: The mount detection feature prevents drives from being skipped due to slow OS media detection, especially beneficial on older hardware. Set `wait_timeout: 0` to disable this feature.
 
 ### MakeMKV GUI Configuration
@@ -320,7 +320,7 @@ npm run eject -- --quiet             # ONLY Eject drives, and with minimal outpu
 
 This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. Please read the [LICENSE.md](LICENSE.md) file for more info.
 
-**MakeMKV Auto Rip is not linked in any way to MakeMKV**. As such isn't "official", and the two are not developed by the same people.
+**MakeMKV Auto Rip is not linked in any way to MakeMKV**. As such, it isn't "official" and the two are not developed by the same people.
 
 ## 🤝 Contributing
 

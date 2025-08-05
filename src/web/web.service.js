@@ -9,9 +9,6 @@ import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Logger } from "../utils/logger.js";
-import { AppConfig } from "../config/index.js";
-import { DriveService } from "../services/drive.service.js";
-import { RipService } from "../services/rip.service.js";
 import { apiRoutes } from "./routes/api.routes.js";
 import { webSocketHandler } from "./middleware/websocket.middleware.js";
 
@@ -70,6 +67,16 @@ export class WebService {
     // Serve main page
     this.app.get("/", (req, res) => {
       res.sendFile(path.join(process.cwd(), "public", "index.html"));
+    });
+
+    // Serve configuration page
+    this.app.get("/config.html", (req, res) => {
+      res.sendFile(path.join(process.cwd(), "public", "config.html"));
+    });
+
+    // Serve configuration page with clean URL
+    this.app.get("/config", (req, res) => {
+      res.sendFile(path.join(process.cwd(), "public", "config.html"));
     });
 
     Logger.info("Express server configured");
