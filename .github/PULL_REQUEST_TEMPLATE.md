@@ -34,6 +34,16 @@ Please describe the tests that you ran to verify your changes:
 - [ ] Tested error scenarios (missing discs, invalid YAML config, etc.)
 - [ ] Tested with multiple drives (if available)
 
+### Web UI Testing (if applicable)
+
+- [ ] Tested web interface (`npm run web`)
+- [ ] Verified all operations work through web UI (load, eject, rip)
+- [ ] Tested responsive design on different screen sizes
+- [ ] Verified WebSocket connections and real-time updates
+- [ ] Tested browser compatibility (Chrome, Firefox, Safari, Edge)
+- [ ] Verified stop functionality works correctly
+- [ ] Tested configuration editing through web UI
+
 ### Windows Native Development (if applicable)
 
 - [ ] Rebuilt native addon (`npm run build`)
@@ -56,10 +66,14 @@ Please describe the tests that you ran to verify your changes:
 - [ ] Updated YAML configuration documentation if needed
 - [ ] Updated CHANGELOG.md
 - [ ] Updated PROJECT-INFO.md if architecture changed
+- [ ] Updated web UI documentation if applicable
+- [ ] Updated CONTRIBUTING.md if development guidelines changed
 
 ## Screenshots/Logs
 
 If applicable, add screenshots or relevant log output to help explain your changes.
+
+**For Web UI changes:** Please include screenshots showing the interface changes and any relevant browser console output.
 
 ## Checklist
 

@@ -75,7 +75,19 @@ body:
     attributes:
       label: MakeMKV Version
       description: What version of MakeMKV do you have installed?
-      placeholder: "1.17.x"
+      placeholder: "1.18.x"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Interface Used
+      description: Which interface were you using when the bug occurred?
+      options:
+        - CLI (Command Line Interface)
+        - Web UI (Browser interface)
+        - Both
     validations:
       required: true
 
@@ -96,24 +108,25 @@ body:
     attributes:
       label: Configuration
       description: Relevant parts of your config.yaml (remove sensitive paths)
-      render: json
+      render: yaml
       placeholder: |
-        {
-          "Path": {
-            "mkvDir": {
-              "Dir": "C:\\Program Files (x86)\\MakeMKV"
-            },
-            "movieRips": {
-              "Dir": "C:\\Your\\Path"
-            }
-          }
-        }
+        paths:
+          movie_rips_dir: "C:/Your/Movie/Rips"
+          logging:
+            enabled: true
+            dir: "C:/Your/Log/Directory"
+        drives:
+          auto_load: true
+          auto_eject: true
+        ripping:
+          rip_all_titles: false
+          mode: "async"
 
   - type: textarea
     id: logs
     attributes:
       label: Error Messages/Logs
-      description: Any error messages or relevant output
+      description: Any error messages or relevant output (include browser console errors for web UI issues)
       render: shell
       placeholder: Paste any error messages or relevant output here...
 
@@ -121,5 +134,5 @@ body:
     id: context
     attributes:
       label: Additional Context
-      description: Add any other context about the problem here.
+      description: Add any other context about the problem here. For web UI issues, include browser type/version and any console errors.
       placeholder: Any additional information that might help...
