@@ -13,6 +13,17 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │   ├── cli/                      # Command-line interface modules
 │   │   ├── interface.js          # Main interactive interface
 │   │   └── commands.js           # Standalone drive commands
+│   ├── web/                      # Web interface components
+│   │   ├── web.service.js        # Express server and WebSocket management
+│   │   ├── routes/
+│   │   │   └── api.routes.js     # REST API endpoints
+│   │   ├── middleware/
+│   │   │   └── websocket.middleware.js  # Real-time communication
+│   │   └── static/               # Frontend assets
+│   │       ├── css/
+│   │       │   └── styles.css    # Responsive styling
+│   │       └── js/
+│   │           └── app.js        # Frontend JavaScript
 │   ├── services/                 # Business logic services
 │   │   ├── disc.service.js       # Disc detection and analysis
 │   │   ├── rip.service.js        # Ripping operations management
@@ -26,16 +37,21 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 │   │   └── index.js              # Centralized config handling
 │   └── constants/                # Application constants
 │       └── index.js              # Shared constants and enums
+├── scripts/                      # Build and utility scripts
+│   └── postinstall.js            # Post-installation verification script
+├── public/                       # Web UI static files
+│   └── index.html                # Main web interface
 ├── config.yaml                   # YAML configuration file for application settings
 ├── docker/                       # Docker deployment files
 │   ├── Dockerfile                # Multi-stage Docker build
 │   ├── docker-compose.yml        # Container orchestration
 │   └── .dockerignore             # Docker build exclusions
+├── web.js                        # Web UI entry point
 ├── .github/                      # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/           # Issue templates
 │   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
 ├── package.json                  # Project metadata and dependencies
-├── index.js                      # Application entry point
+├── index.js                      # CLI application entry point
 ├── README.md                     # Main documentation
 ├── PROJECT-INFO.md               # Technical architecture details
 ├── CONTRIBUTING.md               # Contributing guidelines
@@ -176,6 +192,14 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **chalk** - Terminal styling and colors
 - **date-fns** - Modern date/time formatting (replaced moment.js)
 - **yaml** - YAML configuration file parsing and management
+
+### Web UI Dependencies
+
+- **Express** - Web server framework for API and static file serving
+- **WebSocket (ws)** - Real-time bidirectional communication
+- **Multer** - File upload handling for configuration management
+- **Vite** - Lightning-fast frontend build tool and dev server
+- **Vanilla JavaScript** - No frontend framework dependencies for maximum performance
 
 ### Native Components
 
@@ -341,6 +365,28 @@ MakeMKV output follows a structured format that the application parses:
 - **Reliability**: Better error handling and recovery
 - **Performance**: Parallel processing and optimized resource usage
 
+## 🌐 Web UI Architecture
+
+### Dual Interface Design
+
+The application supports both CLI and Web UI interfaces:
+
+- **CLI Interface**: Traditional command-line experience with interactive prompts & detailed logging
+- **Web UI**: Modern graphical interface with real-time updates and responsive design
+
+### Web UI Features
+
+- **Real-time Communication**: WebSocket-based status updates and log streaming
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Interactive Control**: Dynamic buttons that change from "Start" to "Stop" during operations
+- **Clean Integration**: Uses actual CLI commands for reliability and future-proofing
+
+### Technology Choices
+
+- **Vite + Express + WebSocket**: Vite is used for lightning-fast frontend development and hot module reloading, while Express and WebSocket provide a lightweight, performant backend with real-time capabilities.
+- **Vanilla JavaScript**: No frontend framework dependencies for maximum performance and simplicity.
+- **CLI Integration**: Web UI executes real CLI commands for reliability.
+
 ## 🐳 Docker Architecture
 
 ### Container Design
@@ -391,49 +437,6 @@ static get isDockerEnvironment() {
   return process.env.DOCKER_CONTAINER === "true" || 
          (process.env.NODE_ENV === "production" && 
           process.env.DOCKER_CONTAINER !== "false");
-}
-```
-
-## 🌐 Cross-Platform Compatibility
-
-### Environment-Specific Behavior
-
-| Feature | Windows | Docker/Linux | Notes |
-|---------|---------|--------------|-------|
-| Drive Loading | ✅ Full | ❌ Disabled | Windows-specific win-eject dependency |
-| Drive Ejection | ✅ Full | ❌ Disabled | Hardware control not available |
-| MakeMKV Path | Registry/Config | System PATH | Automatic detection |
-| File Paths | Backslashes | Forward slashes | Platform-appropriate separators |
-
-### Conditional Module Loading
-
-```javascript
-// Dynamic import based on environment
-let winEject;
-if (!AppConfig.isDockerEnvironment) {
-  try {
-    winEject = (await import("win-eject")).default;
-  } catch (error) {
-    Logger.warning("win-eject module not available");
-  }
-}
-```
-
-### NPM Package Distribution
-
-The package is configured for cross-platform distribution:
-
-```json
-{
-  "bin": {
-    "makemkv-auto-rip": "./index.js"
-  },
-  "optionalDependencies": {
-    "win-eject": "^1.0.2"
-  },
-  "files": [
-    "src/", "config/", "index.js"
-  ]
 }
 ```
 

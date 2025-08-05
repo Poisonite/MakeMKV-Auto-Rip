@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configuration Editor - MakeMKV Auto Rip</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link rel="stylesheet" href="/static/css/config.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="header-top">
+          <h1>⚙️ Configuration Editor</h1>
+          <div class="header-actions">
+            <a href="/" class="btn btn-secondary">← Back to Home</a>
+          </div>
+        </div>
+        <p class="subtitle">Configure MakeMKV Auto Rip Settings</p>
+      </header>
+
+      <main class="config-main">
+        <div class="config-layout">
+          <!-- Navigation Sidebar -->
+          <nav class="config-nav">
+            <h3>Categories</h3>
+            <ul class="nav-menu" id="configNav">
+              <li class="nav-item">
+                <button
+                  class="nav-button active"
+                  data-section="paths"
+                  type="button"
+                >
+                  📁 Paths & Directories
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-button" data-section="drives" type="button">
+                  💿 Drive Operations
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-button"
+                  data-section="mount-detection"
+                  type="button"
+                >
+                  🔍 Mount Detection
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-button" data-section="ripping" type="button">
+                  🎯 Ripping Behavior
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-button"
+                  data-section="interface"
+                  type="button"
+                >
+                  🖥️ Interface Behavior
+                </button>
+              </li>
+            </ul>
+          </nav>
+
+          <!-- Configuration Content -->
+          <div class="config-content">
+            <form id="configForm" class="config-form">
+              <!-- Paths Section -->
+              <section class="config-section active" data-section="paths">
+                <h2>📁 Paths and Directories</h2>
+
+                <div class="form-group">
+                  <div class="checkbox-group">
+                    <label class="checkbox-option">
+                      <input type="checkbox" id="override_makemkv_dir" />
+                      <span class="checkbox-label"
+                        >Override MakeMKV Installation Directory</span
+                      >
+                    </label>
+                    <small class="help-text">
+                      Enable to specify a custom MakeMKV installation path
+                      (normally auto-detected)
+                    </small>
+                  </div>
+                  <div class="conditional-field" id="makemkv_dir_field">
+                    <label for="makemkv_dir"
+                      >MakeMKV Installation Directory</label
+                    >
+                    <input
+                      type="text"
+                      id="makemkv_dir"
+                      name="paths.makemkv_dir"
+                      placeholder="e.g., C:/Program Files/MakeMKV"
+                      class="form-control"
+                    />
+                    <small class="help-text">
+                      Only set this if MakeMKV is installed in a non-standard
+                      location
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="movie_rips_dir">
+                    Movie Rips Directory <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="movie_rips_dir"
+                    name="paths.movie_rips_dir"
+                    placeholder="e.g., C:/Movies or ./media"
+                    class="form-control"
+                    required
+                  />
+                  <small class="help-text">
+                    Directory where ripped movies will be saved
+                  </small>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="logging_enabled">Enable File Logging</label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input
+                          type="radio"
+                          name="paths.logging.enabled"
+                          value="true"
+                        />
+                        <span class="radio-label">Enabled</span>
+                      </label>
+                      <label class="radio-option">
+                        <input
+                          type="radio"
+                          name="paths.logging.enabled"
+                          value="false"
+                        />
+                        <span class="radio-label">Disabled</span>
+                      </label>
+                    </div>
+                    <small class="help-text">
+                      Whether to save operation logs to files
+                    </small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="time_format">Log Time Format</label>
+                    <select
+                      id="time_format"
+                      name="paths.logging.time_format"
+                      class="form-control"
+                    >
+                      <option value="12hr">
+                        12-hour format (e.g., 2:30 PM)
+                      </option>
+                      <option value="24hr">24-hour format (e.g., 14:30)</option>
+                    </select>
+                    <small class="help-text">
+                      Time format for console and log timestamps
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group" id="logging_dir_group">
+                  <label for="logging_dir">
+                    Log Directory <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="logging_dir"
+                    name="paths.logging.dir"
+                    placeholder="e.g., C:/Logs or ./logs"
+                    class="form-control"
+                  />
+                  <small class="help-text">
+                    Directory where log files will be saved
+                  </small>
+                </div>
+              </section>
+
+              <!-- Drive Operations Section -->
+              <section class="config-section" data-section="drives">
+                <h2>💿 Drive Operations</h2>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="auto_load">Automatically Load Drives</label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input
+                          type="radio"
+                          name="drives.auto_load"
+                          value="true"
+                        />
+                        <span class="radio-label">Enabled</span>
+                      </label>
+                      <label class="radio-option">
+                        <input
+                          type="radio"
+                          name="drives.auto_load"
+                          value="false"
+                        />
+                        <span class="radio-label">Disabled</span>
+                      </label>
+                    </div>
+                    <small class="help-text">
+                      Automatically load/close optical drives before ripping
+                    </small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="auto_eject">Automatically Eject Drives</label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input
+                          type="radio"
+                          name="drives.auto_eject"
+                          value="true"
+                        />
+                        <span class="radio-label">Enabled</span>
+                      </label>
+                      <label class="radio-option">
+                        <input
+                          type="radio"
+                          name="drives.auto_eject"
+                          value="false"
+                        />
+                        <span class="radio-label">Disabled</span>
+                      </label>
+                    </div>
+                    <small class="help-text">
+                      Automatically eject drives after ripping completion
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="load_delay">Drive Load Delay (seconds)</label>
+                  <input
+                    type="number"
+                    id="load_delay"
+                    name="drives.load_delay"
+                    min="0"
+                    max="60"
+                    placeholder="0"
+                    class="form-control"
+                  />
+                  <small class="help-text">
+                    Delay time when loading drives to allow for manual drive
+                    closing (0 to disable)
+                  </small>
+                </div>
+              </section>
+
+              <!-- Mount Detection Section -->
+              <section class="config-section" data-section="mount-detection">
+                <h2>🔍 Mount Detection</h2>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="wait_timeout"
+                      >Mount Wait Timeout (seconds)</label
+                    >
+                    <input
+                      type="number"
+                      id="wait_timeout"
+                      name="mount_detection.wait_timeout"
+                      min="0"
+                      max="300"
+                      placeholder="10"
+                      class="form-control"
+                    />
+                    <small class="help-text">
+                      Maximum time to wait for drives to mount media before
+                      starting rip (0 to disable)
+                    </small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="poll_interval"
+                      >Polling Interval (seconds)</label
+                    >
+                    <input
+                      type="number"
+                      id="poll_interval"
+                      name="mount_detection.poll_interval"
+                      min="0.1"
+                      max="10"
+                      step="0.1"
+                      placeholder="1"
+                      class="form-control"
+                    />
+                    <small class="help-text">
+                      Polling interval to check for newly mounted drives
+                    </small>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Ripping Behavior Section -->
+              <section class="config-section" data-section="ripping">
+                <h2>🎯 Ripping Behavior</h2>
+
+                <div class="form-group">
+                  <label for="rip_all_titles">Rip All Titles</label>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="ripping.rip_all_titles"
+                        value="true"
+                      />
+                      <span class="radio-label"
+                        >All titles above minimum length</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="ripping.rip_all_titles"
+                        value="false"
+                      />
+                      <span class="radio-label">Longest title only</span>
+                    </label>
+                  </div>
+                  <small class="help-text">
+                    Whether to rip all titles from disc or just the main/longest
+                    title
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label for="ripping_mode">Ripping Mode</label>
+                  <select
+                    id="ripping_mode"
+                    name="ripping.mode"
+                    class="form-control"
+                  >
+                    <option value="async">Parallel Processing</option>
+                    <option value="sync">Sequential Processing</option>
+                  </select>
+                  <small class="help-text">
+                    Parallel processing is faster for destination SSDs,
+                    Sequential processing is better for HDDs
+                  </small>
+                </div>
+              </section>
+
+              <!-- Interface Behavior Section -->
+              <section class="config-section" data-section="interface">
+                <h2>🖥️ Interface Behavior</h2>
+
+                <div class="form-group">
+                  <label for="repeat_mode">Repeat Mode</label>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="interface.repeat_mode"
+                        value="true"
+                      />
+                      <span class="radio-label">Enabled</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="interface.repeat_mode"
+                        value="false"
+                      />
+                      <span class="radio-label">Disabled</span>
+                    </label>
+                  </div>
+                  <small class="help-text">
+                    After ripping, prompt again for another round instead of
+                    exiting
+                  </small>
+                </div>
+              </section>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sticky Save Banner -->
+        <div id="saveBanner" class="save-banner">
+          <div class="save-banner-content">
+            <div class="save-banner-text">
+              <span>Ready to save your changes?</span>
+            </div>
+            <div class="save-banner-actions">
+              <button
+                type="button"
+                class="btn btn-light btn-small"
+                id="resetForm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="configForm"
+                class="btn btn-success btn-small"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Saving configuration...</p>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <p>
+          MakeMKV Auto Rip v1.0.0 |
+          <a
+            href="https://github.com/Poisonite/MakeMKV-Auto-Rip"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </p>
+      </footer>
+    </div>
+
+    <script src="/static/js/config.js"></script>
+  </body>
+</html>

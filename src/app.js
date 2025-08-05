@@ -10,14 +10,17 @@ import { safeExit, isProcessExitError } from "./utils/process.js";
 
 /**
  * Main application function
+ * @param {Object} flags - Command line flags
+ * @param {boolean} flags.noConfirm - Skip confirmation prompt
+ * @param {boolean} flags.quiet - Reduce verbose output
  */
-export async function main() {
+export async function main(flags = {}) {
   try {
     // Validate configuration before starting
     await AppConfig.validate();
 
-    // Start the CLI interface
-    const cli = new CLIInterface();
+    // Start the CLI interface with flags
+    const cli = new CLIInterface(flags);
     await cli.start();
   } catch (error) {
     // Check if this is a controlled exit from a service

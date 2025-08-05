@@ -73,15 +73,6 @@ Enhancing automated workflows for large-scale disc processing.
 
 ### 🔄 Lower Priority
 
-#### Clean Up postinstall Script Output
-
-- **Description**: Refine the `postinstall` script in `package.json` for cleaner console output
-- **Benefits**: Improves user experience during installation
-- **Contribution Difficulty**: 🟢 Beginner-Friendly
-- **Details**:
-  - Make the output less verbose and more user-friendly
-  - No change to functionality, just improved UX
-
 ---
 
 ## 🤝 How to Contribute

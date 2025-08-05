@@ -7,16 +7,25 @@ import { safeExit, isTestEnvironment } from "../utils/process.js";
  * Command-line interface for user interaction
  */
 export class CLIInterface {
-  constructor() {
+  constructor(flags = {}) {
     this.ripService = new RipService();
+    this.flags = flags;
   }
 
   /**
    * Start the application
    */
   async start() {
-    this.displayWelcome();
-    await this.promptUser();
+    if (!this.flags.quiet) {
+      this.displayWelcome();
+    }
+
+    if (this.flags.noConfirm) {
+      // Skip prompting and go directly to ripping
+      await this.handleUserChoice(MENU_OPTIONS.RIP);
+    } else {
+      await this.promptUser();
+    }
   }
 
   /**
