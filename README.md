@@ -59,9 +59,13 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 
 ### Essential Software
 
-1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations (Each new version of Auto Rip is only tested with the most recent MakeMKV version)
-2. **[Node.js](https://nodejs.org/)** - Runtime environment (only >= v22 officially tested)
-3. **Cross-platform OS support** - Works on Windows, macOS, and Linux (only (officially) tested on Windows 10+ & Debian/Ubuntu Linux)
+1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations
+   - Each new version of Auto Rip is only tested with the most recent MakeMKV version
+2. **[Node.js](https://nodejs.org/)** - Runtime environment
+   - Latest LTS recommended
+     - Only >= v22 officially tested -others are likely to work back to (at least) v16
+3. **Cross-platform OS support** - Works on Windows, macOS, and Linux
+   - Only (officially) tested on Windows 10/11 & Debian/Ubuntu Linux
 
 ### Cross-Platform Support
 
@@ -72,9 +76,9 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 - **Manual Override** - Configure custom MakeMKV path in `config.yaml` if needed
 - **Optical Drive Management** - Drive load/eject operations work on Windows, macOS, and Linux
 - **Windows implementation** - Uses native C++ addon for reliable Windows DeviceIoControl API access
-- **Pre-built native components** - No compilation required, native addon included in repository
-- **Administrator privileges required on Windows** - Run terminal as administrator for drive operations
-- **No Python or build tools required** - Ready to use out of the box
+  - No compilation required, native addon included in repository
+  - Run terminal as administrator for drive operations (Windows only)
+- **No Python or other build tools required** - Ready to use out of the box (just `npm install`)
 
 ### Recommended Software
 
@@ -92,7 +96,7 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 4. **Configure the application** (see Configuration section below)
 5. **Configure MakeMKV GUI** (see MakeMKV Configuration section below)
 
-### Linux Drive Management Setup (Optional)
+### Linux Drive Management Setup _(Optional)_
 
 **Note: Only required for Linux users who want to use automatic drive ejecting**
 
@@ -212,7 +216,7 @@ interface:
 **Important Notes:**
 
 - Recommended: Create dedicated folders for movie rips and logs
-- **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance... for SSDs, `"async"` will yield much better overall performance
+- **Performance tip**: Use `"sync"` ripping mode for HDD destinations where concurrent writes impact performance. For SSDs, `"async"` will yield much better overall performance
 - **Mount detection**: The mount detection feature prevents drives from being skipped due to slow OS media detection, especially beneficial on older hardware. Set `wait_timeout: 0` to disable this feature.
 
 ### MakeMKV GUI Configuration
@@ -233,7 +237,7 @@ Before using MakeMKV Auto Rip, configure the MakeMKV GUI:
    - Set interface and preferred languages for subtitles/audio
    - Select "auto" and "none" to include all audio and subtitle tracks
 
-4. **For Blu-ray discs:**
+4. **Troubleshooting Blu-ray discs:**
    - Run at least one Blu-ray through the MakeMKV GUI first
    - Enter a valid key (beta key works - but please support the MakeMKV team if you find their software useful or time-saving!) before using Auto Rip
 
@@ -249,14 +253,14 @@ npm run web        # Start web UI at http://localhost:3000
 
 ```bash
 npm start          # Interactive ripping interface
-npm run load       # ONLY Load/close all drives
-npm run eject      # ONLY Eject all drives
+npm run load       # ONLY load/close all drives
+npm run eject      # ONLY eject/open all drives
 ```
 
 ### Advanced CLI Options
 
 ```bash
-npm start -- --no-confirm --quiet    # Skip prompts, reduce output
+npm start -- --no-confirm --quiet    # Skip prompts, reduce logging output
 npm run load -- --quiet              # ONLY Load drives, and with minimal output
 npm run eject -- --quiet             # ONLY Eject drives, and with minimal output
 ```
@@ -267,14 +271,14 @@ npm run eject -- --quiet             # ONLY Eject drives, and with minimal outpu
 
 1. **"Failed to start application" error**
 
-   - Check that all paths in `config.yaml` exist and use forward slashes (/) for cross-platform compatibility
-   - Ensure MakeMKV is properly installed
+   - Check that all paths in `config.yaml` exist and ALWAYS use forward slashes (/)
+   - Ensure MakeMKV is properly installed (try running a disc with the GUI to confirm)
 
 2. **"(Windows) Native optical drive addon failed to load" error**
 
    - This indicates a corrupted installation or missing native components
    - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run build`
-   - Ensure you're running on a supported Windows version (Windows 10+ officially tested - theoretically compatible back to ~Windows 2000)
+   - Ensure you're running on a supported Windows version (Windows 10/11 officially tested - _theoretically_ compatible back to ~Windows 2000)
 
 3. **Drive eject/load operations fail**
 
@@ -316,7 +320,7 @@ npm run eject -- --quiet             # ONLY Eject drives, and with minimal outpu
 
 This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. Please read the [LICENSE.md](LICENSE.md) file for more info.
 
-**MakeMKV Auto Rip is not linked in any way to MakeMKV** and as such isn't "official" and the two are not developed by the same people.
+**MakeMKV Auto Rip is not linked in any way to MakeMKV**. As such isn't "official", and the two are not developed by the same people.
 
 ## 🤝 Contributing
 
