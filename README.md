@@ -2,12 +2,6 @@
 
 Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves them to unique folders.
 
-## ⚠️ Disclaimer
-
-This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. Please read the [LICENSE.md](LICENSE.md) file for more info.
-
-**MakeMKV Auto Rip is not linked in any way to MakeMKV** and as such isn't "official" and the two are not developed by the same people.
-
 ## ✨ Features
 
 - **🖥️ Interactive CLI** - Simple menu-driven interface
@@ -22,6 +16,8 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 ## 🚀 Quick Start
 
+### Web Interface
+
 1. **Install dependencies:**
 
    ```bash
@@ -31,7 +27,30 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 2. **Configure the application:**
    Edit `config.yaml` with your paths
 
-3. **Start ripping:**
+3. **Start the web UI:**
+
+   ```bash
+   npm run web
+   ```
+
+4. **Open your browser and go to:**  
+   [http://localhost:3000](http://localhost:3000)
+
+---
+
+### Command Line Interface (CLI)
+
+1. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+2. **Configure the application:**
+   Edit `config.yaml` with your paths
+
+3. **Start the CLI interface:**
+
    ```bash
    npm start
    ```
@@ -293,13 +312,19 @@ npm run eject -- --quiet             # ONLY Eject drives, and with minimal outpu
    - Verify MakeMKV is properly installed and configured
    - Try using the CLI interface as a fallback: `npm start`
 
-## 📄 License
+## ⚠️ Disclaimer
 
-GPL-3.0-or-later - See [LICENSE.md](LICENSE.md) for details.
+This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. Please read the [LICENSE.md](LICENSE.md) file for more info.
+
+**MakeMKV Auto Rip is not linked in any way to MakeMKV** and as such isn't "official" and the two are not developed by the same people.
 
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
+
+## 📄 License
+
+GPL-3.0-or-later - See [LICENSE.md](LICENSE.md) for details.
 
 ## 📚 Additional Documentation
 
