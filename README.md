@@ -16,7 +16,36 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 
 ## 🚀 Quick Start
 
-### Web Interface
+### Recommended: Docker (Web UI)
+
+Run with Docker for the simplest, fully self-contained setup.
+
+1. Install Docker & Docker Compose
+2. Create output directories:
+
+   ```bash
+   mkdir -p media logs
+   ```
+
+3. Start the container (using docker-compose.yaml in this repo):
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. Open the Web UI:
+
+   [http://localhost:3000](http://localhost:3000)
+
+Notes:
+
+- Edit `config.yaml` locally; it’s bind-mounted into the container and can be edited from the Web UI.
+- Map your optical drives under `devices:` (e.g., `/dev/sr0:/dev/sr0:ro`).
+- See the full Docker guide: [README-DOCKER.md](README-DOCKER.md)
+
+---
+
+### Web Interface (Standard Install)
 
 1. **Install dependencies:**
 
@@ -61,6 +90,7 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 
 1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations
    - Each new version of Auto Rip is only tested with the most recent MakeMKV version
+   - MakeMKV is bundled in our docker image, but it must be downloaded and installed separately for all other systems and install methods
 2. **[Node.js](https://nodejs.org/)** - Runtime environment
    - Latest LTS recommended
      - Only >= v22 officially tested -others are likely to work back to (at least) v16
@@ -335,3 +365,4 @@ GPL-3.0-or-later - See [LICENSE.md](LICENSE.md) for details.
 - [Project Information](PROJECT-INFO.md) - Architecture and technical details
 - [Changelog](CHANGELOG.md) - Complete version history
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
+- [Docker Setup Guide](README-DOCKER.md) - Run via Docker & the Web UI

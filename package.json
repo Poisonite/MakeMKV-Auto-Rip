@@ -1,7 +1,7 @@
 {
     "name": "makemkv-auto-rip",
     "version": "1.0.0",
-    "description": "Automatically rips DVDs & Blu-rays using the MakeMKV console, then saves them to unique folders.",
+    "description": "Automatically rips DVDs & Blu-rays using the MakeMKV console, then saves them to unique folders. It can be used from the command line or via a web interface, and is cross-platform. It is also containerized, so it can be run on any system with Docker installed.",
     "main": "index.js",
     "type": "module",
     "engines": {
@@ -22,9 +22,9 @@
         "windows-addons:build:debug": "node-gyp rebuild --debug",
         "windows-addons:clean": "node-gyp clean",
         "docker:build": "docker build -t makemkv-auto-rip .",
-        "docker:run": "docker-compose up -d",
-        "docker:stop": "docker-compose down",
-        "docker:logs": "docker-compose logs -f",
+        "docker:run": "docker compose up -d",
+        "docker:stop": "docker compose down",
+        "docker:logs": "docker compose logs -f",
         "prepublishOnly": "npm run test:run",
         "postinstall": "node scripts/postinstall.js"
     },
@@ -33,8 +33,6 @@
         "url": "git+https://github.com/Poisonite/MakeMKV-Auto-Rip.git"
     },
     "keywords": [
-        "Poisonite",
-        "Poisonite101",
         "MakeMKV",
         "Auto",
         "Rip",
@@ -56,10 +54,17 @@
         "Container",
         "CLI",
         "Console",
-        "Cross-platform"
+        "Web",
+        "Web UI",
+        "Web Interface",
+        "Web App",
+        "Cross-platform",
+        "Poisonite",
+        "Poisonite101"
     ],
     "bin": {
-        "makemkv-auto-rip": "./index.js"
+        "makemkv-auto-rip": "./index.js",
+        "makemkv-auto-rip-web": "./web.js"
     },
     "preferGlobal": true,
     "author": "Zac Ingoglia",
@@ -77,13 +82,14 @@
         "ws": "^8.18.3",
         "yaml": "^2.8.0"
     },
-    "optionalDependencies": {
-        "win-eject": "^1.0.2"
-    },
     "files": [
         "src/",
-        "config/",
+        "public/",
+        "scripts/",
         "index.js",
+        "web.js",
+        "config.yaml",
+        "build/Release/optical_drive_native.node",
         "README.md",
         "LICENSE.md",
         "CHANGELOG.md"

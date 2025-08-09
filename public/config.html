@@ -419,7 +419,7 @@
 
       <footer class="footer">
         <p>
-          MakeMKV Auto Rip v1.0.0 |
+          MakeMKV Auto Rip <span id="appVersion"></span> |
           <a
             href="https://github.com/Poisonite/MakeMKV-Auto-Rip"
             target="_blank"
@@ -431,5 +431,19 @@
     </div>
 
     <script src="/static/js/config.js"></script>
+    <script>
+      // Fetch app version and update footer text
+      fetch("/api/info")
+        .then((r) => r.json())
+        .then((info) => {
+          const el = document.getElementById("appVersion");
+          if (el && info && info.version) {
+            el.textContent = `v${info.version}`;
+          }
+        })
+        .catch(() => {
+          /* ignore */
+        });
+    </script>
   </body>
 </html>

@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  # Recommended: use the pre-built Docker Hub image
+  makemkv-auto-rip:
+    image: poisonite/makemkv-auto-rip:latest
+    container_name: makemkv-auto-rip
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount media output directory
+      - ./media:/app/media
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Persist and allow editing of application configuration
+      - ./config.yaml:/app/config.yaml
+    devices:
+      # Grant access to optical drives (adjust device paths as needed)
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+    privileged: true # Required for optical drive access
+    stdin_open: false
+    tty: false
+
+  # Optional: build locally from source (for development/testing)
+  makemkv-auto-rip-build:
+    build:
+      context: .
+      args:
+        MAKEMKV_VERSION: 1.18.1 # Keep in sync with latest MakeMKV releases
+    container_name: makemkv-auto-rip-build
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+    devices:
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+    privileged: true
+    stdin_open: false
+    tty: false
+    profiles:
+      - build # Only run when 'build' profile is specified

@@ -40,16 +40,18 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 ├── scripts/                      # Build and utility scripts
 │   └── postinstall.js            # Post-installation verification script
 ├── public/                       # Web UI static files
-│   └── index.html                # Main web interface
+│   ├── index.html                # Main web interface
+│   └── config.html               # Configuration UI
 ├── config.yaml                   # YAML configuration file for application settings
-├── docker/                       # Docker deployment files
-│   ├── Dockerfile                # Multi-stage Docker build
-│   ├── docker-compose.yml        # Container orchestration
-│   └── .dockerignore             # Docker build exclusions
+├── Dockerfile                    # Docker image definition
+├── docker-compose.yaml           # Docker Compose deployment
+├── .dockerignore                 # Docker build exclusions
 ├── web.js                        # Web UI entry point
 ├── .github/                      # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/           # Issue templates
 │   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
+│   └── workflows/
+│       └── docker.yaml           # CI to build and publish Docker images
 ├── package.json                  # Project metadata and dependencies
 ├── index.js                      # CLI application entry point
 ├── README.md                     # Main documentation
@@ -208,10 +210,10 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
   - Requires administrator privileges for optimal functionality
   - Included as pre-built binary (no compilation required)
   - Cross-platform support for macOS/Linux using system utilities
-  
+
 ### Container Technology
 
-- **Docker** - Application containerization with Alpine Linux base
+- **Docker** - Application containerization with Debian (bookworm) base
 - **Docker Compose** - Multi-container application orchestration
 - **Health Checks** - Container monitoring and recovery
 - **Volume Mounting** - Persistent data and media storage
@@ -281,16 +283,19 @@ for (const disc of discs) {
 The application interfaces with MakeMKV through its command-line tool (`makemkvcon.exe` / `makemkvcon`):
 
 **Windows:**
+
 ```javascript
-"C:\Program Files (x86)\MakeMKV\makemkvcon.exe"
+"C:\Program Files (x86)\MakeMKV\makemkvcon64.exe";
 ```
 
-**Docker/Linux:**
+**Docker/Linux/macOS:**
+
 ```javascript
-makemkvcon  // Available in PATH within container
+makemkvcon; // Available in PATH within container
 ```
 
 **Common Commands:**
+
 ```javascript
 // Drive detection
 makemkvcon -r info disc:index
@@ -345,7 +350,7 @@ MakeMKV output follows a structured format that the application parses:
 
 ### Breaking Changes
 
-1. **Entry Point**: `AutoRip.js` → `index.js`
+1. **Entry Point**: `AutoRip.js` → `index.js` (or `web.js`, to run `index.js` via a graphical browser instead)
 2. **Execution**: Batch files → npm scripts
 3. **Structure**: Monolithic → Modular
 4. **Imports**: CommonJS → ES Modules
@@ -394,8 +399,8 @@ The application supports both CLI and Web UI interfaces:
 The Docker implementation follows best practices for Node.js containerization:
 
 ```dockerfile
-# Multi-stage build with Alpine Linux base
-FROM node:22-alpine
+# Multi-stage build with Linux base
+FROM node:22-bookworm
 
 # Security: Non-root user execution
 USER makemkv (uid: 1001)
@@ -420,24 +425,19 @@ HEALTHCHECK --interval=30s --timeout=10s
 ```yaml
 services:
   makemkv-auto-rip:
-    build: .
+    build:
+      context: .
+      args:
+        MAKEMKV_VERSION: 1.18.1
+    ports:
+      - "3000:3000"
+    devices:
+      - /dev/sr0:/dev/sr0:ro
     volumes:
-      - /dev/sr0:/dev/sr0:ro  # Optical drive access
-      - ./media:/app/media    # Media output
-      - ./logs:/app/logs      # Log storage
-    privileged: true          # Required for hardware access
-```
-
-### Platform Detection
-
-The application automatically detects containerized environments:
-
-```javascript
-static get isDockerEnvironment() {
-  return process.env.DOCKER_CONTAINER === "true" || 
-         (process.env.NODE_ENV === "production" && 
-          process.env.DOCKER_CONTAINER !== "false");
-}
+      - ./media:/app/media
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+    privileged: true
 ```
 
 ## 🔮 Future Considerations

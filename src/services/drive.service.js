@@ -2,17 +2,6 @@ import { OpticalDriveUtil } from "../utils/optical-drive.js";
 import { Logger } from "../utils/logger.js";
 import { VALIDATION_CONSTANTS } from "../constants/index.js";
 import { MakeMKVMessages } from "../utils/makemkv-messages.js";
-import { AppConfig } from "../config/index.js";
-
-// Conditionally import win-eject only if not in Docker
-let winEject;
-if (!AppConfig.isDockerEnvironment) {
-  try {
-    winEject = (await import("win-eject")).default;
-  } catch (error) {
-    Logger.warning("win-eject module not available (likely non-Windows environment)");
-  }
-}
 
 /**
  * Service for handling drive operations (loading and ejecting)

@@ -13,10 +13,13 @@ RUN apt-get update && apt-get install -y \
     qtbase5-dev \
     zlib1g-dev \
     wget \
+    udisks2 \
+    eject \
+    udev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set MakeMKV version - update this when new versions are released
-ARG MAKEMKV_VERSION=1.17.5
+ARG MAKEMKV_VERSION=1.18.1
 
 # Download and compile MakeMKV from official sources
 RUN cd /tmp && \
@@ -50,13 +53,17 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy application source (excluding tests and development files)
 COPY src/ ./src/
-COPY config/ ./config/
 COPY index.js ./
+COPY web.js ./
+COPY public/ ./public/
+COPY config.yaml ./
 
 # Create directories and non-root user for security
 RUN mkdir -p /app/media /app/logs /home/makemkv/.MakeMKV && \
     addgroup --gid 1001 makemkv && \
     adduser --system --uid 1001 --gid 1001 makemkv && \
+    (addgroup --gid 24 cdrom || true) && \
+    (adduser makemkv cdrom || true) && \
     chown -R makemkv:makemkv /app /home/makemkv
 
 # Configure MakeMKV settings
@@ -75,9 +82,12 @@ ENV DOCKER_CONTAINER=true
 # Expose volumes for media and logs
 VOLUME ["/app/media", "/app/logs"]
 
+# Expose web UI port
+EXPOSE 3000
+
 # Health check - verify MakeMKV is properly installed
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD makemkvcon --version > /dev/null 2>&1 || exit 1
 
-# Default command
-CMD ["npm", "start"]
+# Default command starts the Web UI
+CMD ["npm", "run", "web"]

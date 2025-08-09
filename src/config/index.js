@@ -151,14 +151,6 @@ export class AppConfig {
   }
 
   /**
-   * Check if running in Docker environment
-   * @returns {boolean}
-   */
-  static get isDockerEnvironment() {
-    return process.env.DOCKER_CONTAINER === "true";
-  }
-
-  /**
    * Get MakeMKV executable path with automatic detection
    * @returns {Promise<string|null>} - Full path to makemkvcon executable
    */
