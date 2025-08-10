@@ -417,7 +417,7 @@ HEALTHCHECK --interval=30s --timeout=10s
 - **MakeMKV Integration** - Pre-installed MakeMKV console tools
 - **Volume Management** - Persistent media and log storage
 - **Device Access** - Optical drive mounting with proper permissions
-- **Environment Variables** - Configuration through Docker environment
+- **Environment Variables** - Configuration through Docker environment (entrypoint writes `settings.conf`)
 - **Health Monitoring** - Built-in container health checks
 
 ### Docker Compose Configuration
@@ -429,6 +429,10 @@ services:
       context: .
       args:
         MAKEMKV_VERSION: 1.18.1
+    environment:
+      - MAKEMKV_APP_KEY=${MAKEMKV_APP_KEY:-}
+      - MAKEMKV_MIN_TITLE_LENGTH=${MAKEMKV_MIN_TITLE_LENGTH:-1000}
+      - MAKEMKV_IO_ERROR_RETRY_COUNT=${MAKEMKV_IO_ERROR_RETRY_COUNT:-10}
     ports:
       - "3000:3000"
     devices:
@@ -437,8 +441,15 @@ services:
       - ./media:/app/media
       - ./logs:/app/logs
       - ./config.yaml:/app/config.yaml
+      # - ./makemkv_key.txt:/run/secrets/makemkv_key:ro # with MAKEMKV_APP_KEY_FILE set
     privileged: true
 ```
+
+Entry-point mapping to MakeMKV settings:
+
+- `MAKEMKV_APP_KEY` → `app_Key = "..."`
+- `MAKEMKV_MIN_TITLE_LENGTH` (default `1000`) → `dvd_MinimumTitleLength = "..."`
+- `MAKEMKV_IO_ERROR_RETRY_COUNT` (default `10`) → `io_ErrorRetryCount = "..."`
 
 ## 🔮 Future Considerations
 

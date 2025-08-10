@@ -3,6 +3,11 @@ FROM node:22-bookworm
 
 # Install MakeMKV build dependencies and runtime requirements
 RUN apt-get update && apt-get install -y \
+    less \
+    wget \
+    udisks2 \
+    eject \
+    udev \
     build-essential \
     pkg-config \
     libc6-dev \
@@ -12,17 +17,13 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-dev \
     qtbase5-dev \
     zlib1g-dev \
-    wget \
-    udisks2 \
-    eject \
-    udev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set MakeMKV version - update this when new versions are released
-ARG MAKEMKV_VERSION=1.18.1
+# MakeMKV version is provided via build args / docker compose
+ARG MAKEMKV_VERSION
 
 # Download and compile MakeMKV from official sources
-RUN cd /tmp && \
+RUN : "${MAKEMKV_VERSION:?MAKEMKV_VERSION build-arg is required}" && cd /tmp && \
     # Download both OSS and binary packages
     wget "https://www.makemkv.com/download/makemkv-bin-${MAKEMKV_VERSION}.tar.gz" && \
     wget "https://www.makemkv.com/download/makemkv-oss-${MAKEMKV_VERSION}.tar.gz" && \
@@ -47,16 +48,19 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY scripts/ ./scripts/
 
-# Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy application source (excluding tests and development files)
+# Copy application source (excluding tests, development files, etc)
 COPY src/ ./src/
+COPY public/ ./public/
 COPY index.js ./
 COPY web.js ./
-COPY public/ ./public/
 COPY config.yaml ./
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Install production dependencies only
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Create directories and non-root user for security
 RUN mkdir -p /app/media /app/logs /home/makemkv/.MakeMKV && \
@@ -89,5 +93,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD makemkvcon --version > /dev/null 2>&1 || exit 1
 
-# Default command starts the Web UI
+# Default command starts the Web UI, with entrypoint to configure MakeMKV key at runtime
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["npm", "run", "web"]

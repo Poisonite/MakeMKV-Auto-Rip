@@ -43,6 +43,30 @@ Notes:
 - Map your optical drives under `devices:` (e.g., `/dev/sr0:/dev/sr0:ro`).
 - See the full Docker guide: [README-DOCKER.md](README-DOCKER.md)
 
+### Docker: MakeMKV License & Settings
+
+You can run in trial mode (no key) or provide your key via environment variables. The container entrypoint writes values to `~/.MakeMKV/settings.conf`.
+
+- Put values in a `.env` next to `docker-compose.yaml`:
+
+  ```env
+  MAKEMKV_APP_KEY=AAAA-BBBB-CCCC-DDDD-EEEE-FFFF
+  # Optional tunables (defaults shown)
+  MAKEMKV_MIN_TITLE_LENGTH=1000
+  MAKEMKV_IO_ERROR_RETRY_COUNT=10
+  ```
+
+- Or use a key file:
+
+  ```yaml
+  environment:
+    MAKEMKV_APP_KEY_FILE: /run/secrets/makemkv_key
+  volumes:
+    - ./makemkv_key.txt:/run/secrets/makemkv_key:ro
+  ```
+
+If you omit both, trial mode is used automatically.
+
 ---
 
 ### Web Interface (Standard Install)

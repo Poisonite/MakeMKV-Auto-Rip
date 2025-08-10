@@ -86,25 +86,49 @@ services:
 
 Open the web UI and navigate to the Config page to edit settings. The edits are written back to your host `config.yaml`.
 
-## 🔑 MakeMKV License
+## 🔑 MakeMKV License & Settings
 
-**Free Trial:** MakeMKV works for 30 days without a license (standard evaluation period).
+**Free Trial:** MakeMKV works for 30 days without a license.
 
-**For Continued Use:**
+**For Continued Use:** Purchase a license from [makemkv.com](https://makemkv.com/buy/). A monthly beta key is typically posted on the forum.
 
-1. **Purchase a license from [makemkv.com](https://makemkv.com/buy/)**
-   - You can usually find a new trial (beta) key each month on the MakeMKV forum.
-   - However, if you find MakeMKV useful or it saves you time, please consider supporting the project and its creators by purchasing a license!
-2. Put your license key into the settings file and mount it:
+You can provide the key at runtime without editing files in the image. The entrypoint writes your values to `~/.MakeMKV/settings.conf` on startup.
 
-```bash
-echo 'app_Key = "your-license-key"' > makemkv-settings.conf
+### Option A: Use a `.env` file (recommended)
 
-# docker-compose.yaml
+Create a `.env` next to `docker-compose.yaml`:
+
+```env
+MAKEMKV_APP_KEY=AAAA-BBBB-CCCC-DDDD-EEEE-FFFF
+# Optional tunables (defaults shown)
+MAKEMKV_MIN_TITLE_LENGTH=1000
+MAKEMKV_IO_ERROR_RETRY_COUNT=10
+```
+
+Ensure your compose service has these environment entries (already included in this repo):
+
+```yaml
 services:
   makemkv-auto-rip:
+    environment:
+      - MAKEMKV_APP_KEY=${MAKEMKV_APP_KEY:-}
+      - MAKEMKV_MIN_TITLE_LENGTH=${MAKEMKV_MIN_TITLE_LENGTH:-1000}
+      - MAKEMKV_IO_ERROR_RETRY_COUNT=${MAKEMKV_IO_ERROR_RETRY_COUNT:-10}
+```
+
+### Option B: Use a key file
+
+```bash
+echo -n 'AAAA-BBBB-CCCC-DDDD-EEEE-FFFF' > makemkv_key.txt
+```
+
+```yaml
+services:
+  makemkv-auto-rip:
+    environment:
+      MAKEMKV_APP_KEY_FILE: /run/secrets/makemkv_key
     volumes:
-      - ./makemkv-settings.conf:/home/makemkv/.MakeMKV/settings.conf:ro
+      - ./makemkv_key.txt:/run/secrets/makemkv_key:ro
 ```
 
 ## 📊 Monitoring Your Rips
