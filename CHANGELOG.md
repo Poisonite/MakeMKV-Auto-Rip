@@ -28,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `--quiet` flag to reduce verbose startup messages for cleaner output
   - Perfect for web UI context, automated scripts, docker or headless deployments, etc
 - **MakeMKV version checking and validation** - The application now automatically checks MakeMKV version compatibility and provides user-friendly error messages when the installed version is too old MakeMKV to allow ripping. It also reports the installed version and warns about available updates.
+- **Fake Date Support** - Override system date for MakeMKV operations to bypass date-based restrictions
+  - Configure via web UI with intuitive date/time picker interface
+  - Support for date-only (`2024-01-15`) or date-time (`2024-01-15 14:30:00`) formats
+  - Linux/macOS support using libfaketime environment variables
+  - Windows displays warning to manually change system date
+  - One-click "Clear Date" button for easy reset to real system date when using the web config editor
 - **Automatic MakeMKV path detection** - The application now automatically detects the MakeMKV installation path across Windows, macOS, and Linux, greatly simplifying setup for users.
 - **Refactored configuration loading and validation** - Configuration loading and validation now handles missing or invalid custom MakeMKV paths gracefully, falling back to automatic detection when necessary (an install path for MakeMKV is no longer required).
 - **Documentation updates** - Documentation has been updated to reflect changes to configuration, including troubleshooting steps related to MakeMKV installation.

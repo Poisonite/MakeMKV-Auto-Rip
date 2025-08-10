@@ -346,6 +346,59 @@ MakeMKV output follows a structured format that the application parses:
 - **Completion Status**: `MSG:5036` or "Copy complete" indicators
 - **Version Messages**: `MSG:1005`, `MSG:5021`, `MSG:5075` for version-related information
 
+### Fake Date System
+
+The application supports overriding system date for MakeMKV operations to bypass date-based restrictions.
+
+#### Implementation
+
+**Configuration**:
+
+```yaml
+makemkv:
+  fake_date: "2024-01-15 14:30:00" # Date with time
+  # fake_date: "2024-01-15"         # Date only
+  # fake_date: ""                   # Use real system date
+```
+
+**Cross-Platform Support**:
+
+- **Linux/macOS**: Uses `libfaketime` environment variables:
+
+  ```javascript
+  env.FAKETIME = "2024-01-15 14:30:00";
+  env.LD_PRELOAD = "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1";
+  ```
+
+- **Windows**: Displays warning message directing users to manually change system date or use third-party tools
+
+**Process Isolation**:
+
+- Only affects `makemkvcon` processes, not other system operations
+- Environment variables set per-process execution
+- Real system date remains unchanged for logging and other operations
+
+#### Web UI Integration
+
+- **Date/Time Picker**: Intuitive interface for setting fake dates
+- **Clear Button**: One-click reset to real system date
+- **Format Support**: Handles both date-only and date-time formats
+- **Real-time Validation**: Parses and validates date strings dynamically
+
+#### Implementation Details
+
+```javascript
+// Process execution with fake date
+const env = { ...process.env, ...createDateEnvironment(fakeDate) };
+exec(makemkvCommand, { env }, callback);
+
+// Date parsing and validation
+function parseFakeDate(fakeDateStr) {
+  const date = new Date(fakeDateStr);
+  return isNaN(date.getTime()) ? null : date;
+}
+```
+
 ## 🎯 Migration from v0.6.0
 
 ### Breaking Changes

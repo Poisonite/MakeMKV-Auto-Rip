@@ -22,3 +22,6 @@ ripping:
 
 interface:
   repeat_mode: true
+
+makemkv:
+  fake_date: "2023-12-25 10:00:00"

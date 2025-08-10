@@ -258,4 +258,46 @@ describe("AppConfig", () => {
       }
     });
   });
+
+  describe("makeMKVFakeDate", () => {
+    test("should return null when fake_date is not set", async () => {
+      mockConfig.makemkv = {};
+
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      expect(AppConfig.makeMKVFakeDate).toBeNull();
+    });
+
+    test("should return null when fake_date is empty string", async () => {
+      mockConfig.makemkv = { fake_date: "" };
+
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      expect(AppConfig.makeMKVFakeDate).toBeNull();
+    });
+
+    test("should return null when fake_date is only whitespace", async () => {
+      mockConfig.makemkv = { fake_date: "   " };
+
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      expect(AppConfig.makeMKVFakeDate).toBeNull();
+    });
+
+    test("should return trimmed date string when fake_date is set", async () => {
+      mockConfig.makemkv = { fake_date: "  2024-01-15 14:30:00  " };
+
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      expect(AppConfig.makeMKVFakeDate).toBe("2024-01-15 14:30:00");
+    });
+
+    test("should return date string when fake_date is date only", async () => {
+      mockConfig.makemkv = { fake_date: "2024-01-15" };
+
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      expect(AppConfig.makeMKVFakeDate).toBe("2024-01-15");
+    });
+  });
 });

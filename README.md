@@ -247,6 +247,14 @@ mount_detection:
 interface:
   # Enable repeat mode - after ripping, prompt again for another round (true/false)
   repeat_mode: true
+
+# MakeMKV behavior settings
+makemkv:
+  # Set a fake system date for MakeMKV operations (leave blank to use real system date)
+  # Supports date only: "2024-01-15" or date with time: "2024-01-15 14:30:00"
+  # This only affects makemkvcon processes, not other system operations
+  # NOTE: This feature only works on Linux/macOS systems. On Windows, change your system date instead.
+  fake_date: ""
 ```
 
 #### Configuration Options
@@ -266,6 +274,10 @@ interface:
 - **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media before starting rip (`0` to disable, default: `10`)
 - **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives (default: `1`)
 - **`interface.repeat_mode`** - Enable repeat mode to prompt again after ripping (`true` or `false`, default: `true`)
+- **`makemkv.fake_date`** - Override system date for MakeMKV operations only (Linux/macOS only)
+  - Format: `"2024-01-15"` (date only) or `"2024-01-15 14:30:00"` (date with time)
+  - Leave blank (`""`) to use real system date
+  - ⚠️ **Windows**: Not supported - manually change system date or use third-party tools
 
 **Important Notes:**
 

@@ -62,6 +62,11 @@
                   🖥️ Interface Behavior
                 </button>
               </li>
+              <li class="nav-item">
+                <button class="nav-button" data-section="makemkv" type="button">
+                  🎬 MakeMKV Settings
+                </button>
+              </li>
             </ul>
           </nav>
 
@@ -376,6 +381,59 @@
                   <small class="help-text">
                     After ripping, prompt again for another round instead of
                     exiting
+                  </small>
+                </div>
+              </section>
+
+              <!-- MakeMKV Settings Section -->
+              <section class="config-section" data-section="makemkv">
+                <h2>🎬 MakeMKV Settings</h2>
+
+                <div class="form-group">
+                  <label for="fake_date">Fake System Date</label>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <input
+                        type="date"
+                        id="fake_date_date"
+                        class="form-control"
+                        placeholder="YYYY-MM-DD"
+                      />
+                      <small class="help-text"
+                        >Date (leave blank for real date)</small
+                      >
+                    </div>
+                    <div class="form-group">
+                      <input
+                        type="time"
+                        id="fake_date_time"
+                        class="form-control"
+                        placeholder="HH:MM"
+                      />
+                      <small class="help-text">Time (optional)</small>
+                    </div>
+                    <div class="form-group">
+                      <button
+                        type="button"
+                        id="clear_fake_date"
+                        class="btn btn-secondary btn-small"
+                      >
+                        Clear Date
+                      </button>
+                    </div>
+                  </div>
+                  <input
+                    type="hidden"
+                    id="fake_date"
+                    name="makemkv.fake_date"
+                  />
+                  <small class="help-text">
+                    Override system date for MakeMKV operations only. Leave
+                    blank to use real system date.
+                    <br />
+                    <strong>Note:</strong> This feature only works on
+                    Linux/macOS systems. On Windows, you'll need to change your
+                    full system date manually, or use a third party utility.
                   </small>
                 </div>
               </section>

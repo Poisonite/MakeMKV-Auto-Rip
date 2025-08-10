@@ -54,3 +54,7 @@ pids
 # Temporary folders
 tmp/
 temp/
+
+# Environment files
+.env
+.env*

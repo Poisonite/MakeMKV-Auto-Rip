@@ -7,6 +7,8 @@ import {
   safeExit,
   isProcessExitError,
   isTestEnvironment,
+  parseFakeDate,
+  createDateEnvironment,
 } from "../../src/utils/process.js";
 
 describe("Process Utilities", () => {
@@ -102,6 +104,104 @@ describe("Process Utilities", () => {
     it("should return false for null/undefined", () => {
       expect(isProcessExitError(null)).toBe(false);
       expect(isProcessExitError(undefined)).toBe(false);
+    });
+  });
+
+  describe("parseFakeDate", () => {
+    it("should return null for null input", () => {
+      expect(parseFakeDate(null)).toBeNull();
+    });
+
+    it("should return null for empty string", () => {
+      expect(parseFakeDate("")).toBeNull();
+    });
+
+    it("should return null for whitespace-only string", () => {
+      expect(parseFakeDate("   ")).toBeNull();
+    });
+
+    it("should return null for invalid date string", () => {
+      expect(parseFakeDate("invalid-date")).toBeNull();
+    });
+
+    it("should parse valid date string", () => {
+      const result = parseFakeDate("2024-01-15");
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(0); // 0-indexed
+      expect(result.getDate()).toBe(15);
+    });
+
+    it("should parse valid date-time string", () => {
+      const result = parseFakeDate("2024-01-15 14:30:00");
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(0);
+      expect(result.getDate()).toBe(15);
+    });
+  });
+
+  describe("createDateEnvironment", () => {
+    let originalPlatform;
+
+    beforeEach(() => {
+      originalPlatform = process.platform;
+    });
+
+    afterEach(() => {
+      Object.defineProperty(process, "platform", {
+        value: originalPlatform,
+        writable: true,
+      });
+    });
+
+    it("should return empty object for null input", () => {
+      expect(createDateEnvironment(null)).toEqual({});
+    });
+
+    it("should return empty object for empty string", () => {
+      expect(createDateEnvironment("")).toEqual({});
+    });
+
+    it("should return empty object for invalid date", () => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const result = createDateEnvironment("invalid-date");
+      expect(result).toEqual({});
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Invalid fake date format: invalid-date. Using real system date."
+      );
+      consoleSpy.mockRestore();
+    });
+
+    it("should create Linux/macOS environment variables", () => {
+      Object.defineProperty(process, "platform", {
+        value: "linux",
+        writable: true,
+      });
+
+      const result = createDateEnvironment("2024-01-15 14:30:00");
+      expect(result).toHaveProperty("FAKETIME");
+      expect(result).toHaveProperty("LD_PRELOAD");
+      expect(result.FAKETIME).toMatch(/2024-01-15 \d{2}:\d{2}:\d{2}/);
+    });
+
+    it("should show warning and return empty object for Windows", () => {
+      Object.defineProperty(process, "platform", {
+        value: "win32",
+        writable: true,
+      });
+
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const result = createDateEnvironment("2024-01-15 14:30:00");
+
+      expect(result).toEqual({});
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "WARNING: Fake date feature is not supported on Windows systems. " +
+          "The configured fake date '2024-01-15 14:30:00' will be ignored. " +
+          "To use a different date, please change your system date and try again."
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 });

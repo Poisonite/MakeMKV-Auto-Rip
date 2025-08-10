@@ -5,7 +5,7 @@ import { FileSystemUtils } from "../utils/filesystem.js";
 import { ValidationUtils } from "../utils/validation.js";
 import { DiscService } from "./disc.service.js";
 import { DriveService } from "./drive.service.js";
-import { safeExit } from "../utils/process.js";
+import { safeExit, createDateEnvironment } from "../utils/process.js";
 import { MakeMKVMessages } from "../utils/makemkv-messages.js";
 
 /**
@@ -124,7 +124,11 @@ export class RipService {
 
       const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
 
-      exec(makeMKVCommand, async (err, stdout, stderr) => {
+      // Create environment with fake date if configured
+      const fakeDate = AppConfig.makeMKVFakeDate;
+      const env = { ...process.env, ...createDateEnvironment(fakeDate) };
+
+      exec(makeMKVCommand, { env }, async (err, stdout, stderr) => {
         // Check for critical MakeMKV messages (not first call, so only check for errors)
         const shouldContinue = MakeMKVMessages.checkOutput(
           stdout + (stderr || ""),

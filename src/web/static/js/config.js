@@ -113,6 +113,52 @@ class ConfigEditor {
         }
       });
     }
+
+    // Handle fake date fields
+    const fakeDateDateInput = document.getElementById("fake_date_date");
+    const fakeDateTimeInput = document.getElementById("fake_date_time");
+    const clearFakeDateButton = document.getElementById("clear_fake_date");
+
+    if (fakeDateDateInput && fakeDateTimeInput) {
+      fakeDateDateInput.addEventListener("change", () => {
+        this.updateFakeDateValue();
+      });
+
+      fakeDateTimeInput.addEventListener("change", () => {
+        this.updateFakeDateValue();
+      });
+    }
+
+    if (clearFakeDateButton) {
+      clearFakeDateButton.addEventListener("click", () => {
+        if (fakeDateDateInput) fakeDateDateInput.value = "";
+        if (fakeDateTimeInput) fakeDateTimeInput.value = "";
+        this.updateFakeDateValue();
+        this.checkForChanges();
+      });
+    }
+  }
+
+  /**
+   * Update the hidden fake_date field based on date and time inputs
+   */
+  updateFakeDateValue() {
+    const fakeDateDateInput = document.getElementById("fake_date_date");
+    const fakeDateTimeInput = document.getElementById("fake_date_time");
+    const fakeDateHidden = document.getElementById("fake_date");
+
+    if (!fakeDateHidden) return;
+
+    const dateValue = fakeDateDateInput?.value || "";
+    const timeValue = fakeDateTimeInput?.value || "";
+
+    if (dateValue && timeValue) {
+      fakeDateHidden.value = `${dateValue} ${timeValue}:00`;
+    } else if (dateValue) {
+      fakeDateHidden.value = dateValue;
+    } else {
+      fakeDateHidden.value = "";
+    }
   }
 
   /**
@@ -283,6 +329,29 @@ class ConfigEditor {
       config.interface?.repeat_mode ?? true
     );
 
+    // MakeMKV section
+    const fakeDate = config.makemkv?.fake_date || "";
+    const fakeDateDateInput = document.getElementById("fake_date_date");
+    const fakeDateTimeInput = document.getElementById("fake_date_time");
+
+    this.setFieldValue("makemkv.fake_date", fakeDate);
+
+    if (fakeDate && fakeDateDateInput && fakeDateTimeInput) {
+      // Parse the fake date to populate date and time inputs
+      const dateTimeMatch = fakeDate.match(
+        /^(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?/
+      );
+      if (dateTimeMatch) {
+        fakeDateDateInput.value = dateTimeMatch[1];
+        if (dateTimeMatch[2]) {
+          fakeDateTimeInput.value = dateTimeMatch[2];
+        }
+      }
+    } else if (fakeDateDateInput && fakeDateTimeInput) {
+      fakeDateDateInput.value = "";
+      fakeDateTimeInput.value = "";
+    }
+
     // Trigger conditional field visibility
     const loggingEnabledEvent = new Event("change");
     const loggingEnabledRadio = document.querySelector(
@@ -342,7 +411,7 @@ class ConfigEditor {
       if (value === "true") value = true;
       else if (value === "false") value = false;
       else if (!isNaN(value) && value !== "") value = Number(value);
-      else if (value === "") value = undefined; // Remove empty strings
+      else if (value === "" && path !== "makemkv.fake_date") value = undefined; // Remove empty strings except for fake_date
 
       if (value !== undefined) {
         target[lastKey] = value;
