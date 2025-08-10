@@ -67,6 +67,7 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           IS_PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
           TAGS="poisonite/makemkv-auto-rip:${VERSION}"
+          TAGS+=$'\npoisonite/makemkv-auto-rip:edge'
           if [[ "$IS_PRERELEASE" == "true" ]]; then
             TAGS+=$'\npoisonite/makemkv-auto-rip:next'
           else

@@ -44,5 +44,3 @@ set_quoted_setting "dvd_MinimumTitleLength" "${MIN_TITLE_LENGTH}"
 set_quoted_setting "io_ErrorRetryCount" "${IO_ERROR_RETRY_COUNT}"
 
 exec "$@"
-
-

@@ -53,5 +53,5 @@ makemkv:
   # Set a fake system date for MakeMKV operations (leave blank to use real system date)
   # Supports date only: "2024-01-15" or date with time: "2024-01-15 14:30:00"
   # This only affects makemkvcon processes, not other system operations
-  # NOTE: This feature only works on Linux/macOS systems. On Windows, change your system date instead.
+  # NOTE: This feature only works on Linux/macOS systems (install libfaketime). On Windows, change your system date instead.
   fake_date: ""

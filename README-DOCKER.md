@@ -25,18 +25,55 @@ cd MakeMKV-Auto-Rip
 # Create output directories (if they don't already exist, or if you need custom destination locations)
 mkdir -p media logs
 
-# Start the container
+# Start the container (using pre-built Docker Hub image)
 docker compose up -d
+
+# OR for local development, build and run locally:
+npm run docker:build
+npm run docker:run
 
 # Open the web UI
 open http://localhost:3000  # macOS
 xdg-open http://localhost:3000 || true  # Linux
 
 # Watch logs (optional)
-docker compose logs -f
+npm run docker:logs
 ```
 
 That's it! Use the web UI to load/eject drives, start ripping, and edit configuration.
+
+## 🔧 Docker Commands
+
+### Production (Recommended)
+
+Use the pre-built Docker Hub image for most users:
+
+```bash
+docker compose up -d        # Start with pre-built image
+docker compose down         # Stop containers
+docker compose logs -f      # View logs
+docker compose pull         # Update to latest image
+```
+
+### Local Development
+
+For developers or when building from source:
+
+```bash
+npm run docker:build        # Build fresh image from source (no cache)
+npm run docker:run          # Start locally built container
+npm run docker:stop         # Stop containers
+npm run docker:logs         # View logs
+npm run docker:clean        # Complete cleanup (containers, volumes, orphans)
+npm run docker:rebuild      # Full rebuild from scratch (clean + build + run)
+```
+
+**Note**: Local development commands target the `makemkv-auto-rip-build` service specifically to avoid conflicts with the production service.
+
+**When to use each approach:**
+
+- **Production**: Use pre-built images for stability and faster startup
+- **Local Development**: Use local build when modifying source code or testing changes
 
 ## 📁 File Organization
 
@@ -137,7 +174,7 @@ services:
 
 ```bash
 # Live logs
-docker-compose logs -f
+npm run docker:logs
 
 # Just the latest
 docker logs makemkv-auto-rip --tail 50
@@ -201,11 +238,11 @@ docker compose logs
 ### Automation
 
 ```bash
-# Auto-start on boot
-docker-compose up -d --restart unless-stopped
+# Auto-start on boot (using pre-built image)
+docker compose up -d --restart unless-stopped
 
-# Auto-cleanup logs
-docker system prune -f --volumes
+# Complete cleanup (local development)
+npm run docker:clean
 ```
 
 ## 🔄 Maintenance
@@ -215,8 +252,13 @@ docker system prune -f --volumes
 ```bash
 # Get latest version
 git pull
-docker compose build --no-cache
+
+# For pre-built image (recommended):
+docker compose pull
 docker compose up -d
+
+# For local development:
+npm run docker:rebuild
 ```
 
 ### Cleanup

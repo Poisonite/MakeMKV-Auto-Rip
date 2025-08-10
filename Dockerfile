@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     udisks2 \
     eject \
+    faketime \
     udev \
     build-essential \
     pkg-config \
@@ -57,7 +58,7 @@ COPY index.js ./
 COPY web.js ./
 COPY config.yaml ./
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Install production dependencies only
 RUN npm ci --omit=dev && npm cache clean --force
@@ -69,12 +70,6 @@ RUN mkdir -p /app/media /app/logs /home/makemkv/.MakeMKV && \
     (addgroup --gid 24 cdrom || true) && \
     (adduser makemkv cdrom || true) && \
     chown -R makemkv:makemkv /app /home/makemkv
-
-# Configure MakeMKV settings
-RUN echo 'app_Key = ""' > /home/makemkv/.MakeMKV/settings.conf && \
-    echo '# Add your MakeMKV registration key above if you have one' >> /home/makemkv/.MakeMKV/settings.conf && \
-    echo '# For evaluation purposes, MakeMKV will work for 30 days without a key' >> /home/makemkv/.MakeMKV/settings.conf && \
-    chown -R makemkv:makemkv /home/makemkv/.MakeMKV
 
 # Switch to non-root user
 USER makemkv

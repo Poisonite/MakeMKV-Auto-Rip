@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal SSD or HDD performance
 - **Enhanced logging** - Configurable 12hr/24hr time format options for console timestamps (defaults to 12hr)
 - **Standalone drive commands** - `npm run load` and `npm run eject` for drive operations without ripping
-- **Docker management commands** - `npm run docker:build`, `docker:run`, `docker:stop`, and `docker:logs`
+- **Docker management commands** - Complete docker-compose workflow commands including `npm run docker:build`, `docker:run`, `docker:stop`, `docker:logs`, `docker:clean`, and `docker:rebuild` for clean-slate development
 - **CI/CD automation**
   - GitHub Actions edge pipeline builds multi-arch Docker image on pushes to `master` and tags as `:edge`
   - Release pipeline on tags publishes npm (stable → `latest`, pre-release → `next`), Docker (stable → `latest`, pre-release → `next`), and creates GitHub Releases
