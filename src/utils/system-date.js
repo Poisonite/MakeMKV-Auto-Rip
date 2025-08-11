@@ -18,6 +18,45 @@ export class SystemDateManager {
   }
 
   /**
+   * Determine if the current process has root privileges
+   * @returns {boolean}
+   */
+  isRunningAsRoot() {
+    try {
+      return typeof process.getuid === "function" && process.getuid() === 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Prefix a command with sudo when not running as root
+   * Allows interactive password prompt if required
+   * @param {string} command - Command to run
+   * @returns {string}
+   */
+  withSudo(command) {
+    if (this.isRunningAsRoot()) return command;
+    return `sudo ${command}`;
+  }
+
+  /**
+   * Format a date as local time string acceptable by timedatectl/date
+   * Example: 2025-07-17 00:00:00
+   * @param {Date} targetDate
+   * @returns {string}
+   */
+  formatLocalDateTime(targetDate) {
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, "0");
+    const day = String(targetDate.getDate()).padStart(2, "0");
+    const hour = String(targetDate.getHours()).padStart(2, "0");
+    const minute = String(targetDate.getMinutes()).padStart(2, "0");
+    const second = String(targetDate.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  }
+
+  /**
    * Get platform-specific commands for setting system date
    * @param {Date} targetDate - The date to set
    * @returns {Object} Commands for setting and restoring date
@@ -91,12 +130,31 @@ export class SystemDateManager {
    * @returns {Object} Linux commands
    */
   getLinuxCommands(targetDate) {
-    const dateStr = targetDate.toISOString().slice(0, 19).replace("T", " ");
+    // Use local time for Linux commands. timedatectl expects local time by default.
+    const localDateStr = this.formatLocalDateTime(targetDate);
+
+    // Prefer systemd's timedatectl when available. Fallback to date -s.
+    // We also explicitly disable NTP before setting time to prevent immediate resync.
+    const setUsingTimedatectl = `${this.withSudo(
+      "timedatectl"
+    )} set-ntp false && ${this.withSudo(
+      "timedatectl"
+    )} set-time "${localDateStr}"`;
+    const setUsingDate = `${this.withSudo("date")} -s "${localDateStr}"`;
+
+    const setDate = `if command -v timedatectl >/dev/null 2>&1; then ${setUsingTimedatectl}; else ${setUsingDate}; fi`;
+
+    const restoreUsingTimedatectl = `${this.withSudo(
+      "timedatectl"
+    )} set-ntp true`;
+    const restoreFallback = `${this.withSudo(
+      "ntpdate"
+    )} -s time.nist.gov || ${this.withSudo("hwclock")} -s`;
+    const restoreDate = `if command -v timedatectl >/dev/null 2>&1; then ${restoreUsingTimedatectl}; else ${restoreFallback}; fi`;
 
     return {
-      setDate: `sudo date -s "${dateStr}"`,
-      restoreDate:
-        "sudo timedatectl set-ntp true || sudo ntpdate -s time.nist.gov",
+      setDate,
+      restoreDate,
       requiresAdmin: true,
     };
   }
@@ -130,17 +188,19 @@ export class SystemDateManager {
 
       Logger.info(`Changing system date to: ${targetDate.toISOString()}`);
 
-      if (commands.requiresAdmin) {
-        Logger.warning(
-          `Administrative privileges required to change system date on ${process.platform}. ` +
-            `Ensure you run this application with appropriate permissions.`
-        );
-      }
-
       const { stdout, stderr } = await execAsync(commands.setDate);
 
-      if (stderr && !stderr.includes("successfully")) {
+      if (stderr && stderr.trim().length > 0) {
         Logger.warning(`Date change stderr: ${stderr}`);
+      }
+
+      // Validate that the system time actually changed (allow small drift)
+      const currentAfter = new Date();
+      const deltaMs = Math.abs(currentAfter.getTime() - targetDate.getTime());
+      if (deltaMs > 5000) {
+        throw new Error(
+          `Verification failed: system time (${currentAfter.toISOString()}) does not match target (${targetDate.toISOString()}).`
+        );
       }
 
       this.isDateChanged = true;

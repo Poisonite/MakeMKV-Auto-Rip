@@ -60,8 +60,20 @@ export function parseFakeDate(fakeDateStr) {
     return null;
   }
 
-  // Try parsing the date string
-  const date = new Date(trimmed);
+  // If only a date is provided (YYYY-MM-DD), interpret it as local midnight
+  const dateOnlyMatch = /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
+  let date;
+  if (dateOnlyMatch) {
+    const [yearStr, monthStr, dayStr] = trimmed.split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr) - 1; // zero-based
+    const day = Number(dayStr);
+    date = new Date(year, month, day, 0, 0, 0);
+  } else {
+    // Try parsing the date string as provided
+    // "YYYY-MM-DD HH:mm:ss" will be treated as local time by Date
+    date = new Date(trimmed);
+  }
 
   // Check if the date is valid
   if (isNaN(date.getTime())) {
