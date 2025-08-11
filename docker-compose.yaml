@@ -1,0 +1,72 @@
+# Docker Compose Configuration for MakeMKV Auto Rip
+#
+# Production (Recommended): docker compose up -d
+# Local Development: npm run docker:build && npm run docker:run
+#
+services:
+  # Production (Recommended): Use the pre-built Docker Hub image
+  makemkv-auto-rip:
+    image: poisonite/makemkv-auto-rip:latest
+    container_name: makemkv-auto-rip
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+      # MakeMKV registration key configuration
+      # - Easiest: put MAKEMKV_APP_KEY in a .env file next to this compose file
+      # - Or set via environment when running compose
+      # - Or provide a file path via MAKEMKV_APP_KEY_FILE (remove MAKEMKV_APP_KEY and use MAKEMKV_APP_KEY_FILE instead)
+      - MAKEMKV_APP_KEY=${MAKEMKV_APP_KEY:-}
+
+      # Minimum title length in seconds (MakeMKV: dvd_MinimumTitleLength), default 1000
+      - MAKEMKV_MIN_TITLE_LENGTH=${MAKEMKV_MIN_TITLE_LENGTH:-1000}
+      # Number of I/O retry attempts (MakeMKV: io_ErrorRetryCount), default 10
+      - MAKEMKV_IO_ERROR_RETRY_COUNT=${MAKEMKV_IO_ERROR_RETRY_COUNT:-10}
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount media output directory
+      - ./media:/app/media
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Persist and allow editing of application configuration
+      - ./config.yaml:/app/config.yaml
+      # Optional: if using a key file, mount it read-only and set MAKEMKV_APP_KEY_FILE above
+      # - ./makemkv_key.txt:/run/secrets/makemkv_key:ro
+    devices:
+      # Grant access to optical drives (adjust device paths as needed)
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+    privileged: true # Required for optical drive access
+    stdin_open: false
+    tty: false
+
+  # Local development: Build from source (use with --profile build)
+  # Use npm scripts for clean builds: npm run docker:build, npm run docker:run, etc
+  makemkv-auto-rip-build:
+    build:
+      context: .
+      args:
+        MAKEMKV_VERSION: 1.18.1 # Keep in sync with latest MakeMKV releases
+    container_name: makemkv-auto-rip-build
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+      - MAKEMKV_APP_KEY=${MAKEMKV_APP_KEY:-}
+      - MAKEMKV_MIN_TITLE_LENGTH=${MAKEMKV_MIN_TITLE_LENGTH:-1000}
+      - MAKEMKV_IO_ERROR_RETRY_COUNT=${MAKEMKV_IO_ERROR_RETRY_COUNT:-10}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+    devices:
+      - /dev/sr0:/dev/sr0:ro
+      - /dev/sr1:/dev/sr1:ro
+    privileged: true
+    stdin_open: false
+    tty: false
+    profiles:
+      - build # Only run when 'build' profile is specified

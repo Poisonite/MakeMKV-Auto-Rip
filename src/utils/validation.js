@@ -16,13 +16,13 @@ export class ValidationUtils {
 
     const lines = data.split("\n").filter((line) => line.trim().length > 0);
     if (lines.length === 0) {
-      return "Invalid MakeMKV output format";
+      return "Invalid MakeMKV output format, the received content was empty";
     }
 
     // Check if at least one line contains valid TINFO data
     const hasTInfoLine = lines.some((line) => line.startsWith("TINFO:"));
     if (!hasTInfoLine) {
-      return "Invalid MakeMKV output format";
+      return "Invalid MakeMKV output format, it may not have identified any titles";
     }
 
     return null;

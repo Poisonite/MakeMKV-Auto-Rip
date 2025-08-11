@@ -47,3 +47,12 @@ ripping:
 interface:
   # Enable repeat mode - after ripping, prompt again for another round (true/false)
   repeat_mode: true
+
+# MakeMKV behavior settings
+makemkv:
+  # Temporarily change system date for MakeMKV operations (leave blank to use real system date)
+  # Supports date only: "2024-01-15" or date with time: "2024-01-15 14:30:00"
+  # System date is automatically restored after ripping operations complete
+  # NOTE: Requires administrative privileges (Run as Administrator on Windows, sudo on Linux/macOS)
+  # WARNING: Not supported in Docker containers - change host system date manually if needed
+  fake_date: ""

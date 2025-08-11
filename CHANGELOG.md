@@ -5,7 +5,7 @@ All notable changes to MakeMKV Auto Rip will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-08-02
+## [1.0.0] - 2025-08-08
 
 ### Added
 
@@ -28,16 +28,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `--quiet` flag to reduce verbose startup messages for cleaner output
   - Perfect for web UI context, automated scripts, docker or headless deployments, etc
 - **MakeMKV version checking and validation** - The application now automatically checks MakeMKV version compatibility and provides user-friendly error messages when the installed version is too old MakeMKV to allow ripping. It also reports the installed version and warns about available updates.
+- **System Date Management** - Temporarily change system date for MakeMKV operations (restored to network time after program finishes)
+  - Configure via web UI with intuitive date/time picker interface
+  - Support for date-only (`2024-01-15`) or date-time (`2024-01-15 14:30:00`) formats
+  - Cross-platform support: Windows, macOS, and Linux with native system commands
+  - Automatic date restoration after ripping operations complete
+  - Administrative privileges required for reliable system date modification
+  - One-click "Clear Date" button for easy reset to real system date when using the web config editor
 - **Automatic MakeMKV path detection** - The application now automatically detects the MakeMKV installation path across Windows, macOS, and Linux, greatly simplifying setup for users.
 - **Refactored configuration loading and validation** - Configuration loading and validation now handles missing or invalid custom MakeMKV paths gracefully, falling back to automatic detection when necessary (an install path for MakeMKV is no longer required).
 - **Documentation updates** - Documentation has been updated to reflect changes to configuration, including troubleshooting steps related to MakeMKV installation.
 - **Complete project refactor** with proper Node.js project structure
 - **Modular architecture** with clear separation of concerns into services, utilities, and CLI modules
+- **Docker support** - Full Docker containerization with multi-platform compatibility
+  - Dockerfile builds MakeMKV from source (v1.18.1) on Debian bookworm
+  - Includes required Linux tools for optical drives (`udisks2`, `eject`, `udev`)
+  - Runs Web UI by default, exposes port 3000, uses a non-root user (added to the cdrom group)
+  - Volumes for media/logs, health checks, and proper permissions
+  - Docker Compose with bind-mounted `config.yaml` and device mappings
+  - Default compose service now uses the pre-built Docker Hub image; local build available via `build` profile
+- **NPM package publishing** - Ready for npm registry distribution
+  - Binary executable support (`makemkv-auto-rip` command)
+  - Added Web UI binary (`makemkv-auto-rip-web`) for local installs
+  - Proper package.json configuration for global installation
+  - Development files excluded from published package
+  - Optional dependencies for cross-platform compatibility
+- **Cross-platform compatibility**
+  - Docker environment detection
+  - Comprehensive test coverage for Docker functionality and cross-platform behavior
+  - Linux-compatible MakeMKV executable paths
 - **Advanced drive management** - Separate configuration options for loading and ejecting drives
 - **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal SSD or HDD performance
 - **Enhanced logging** - Configurable 12hr/24hr time format options for console timestamps (defaults to 12hr)
 - **Standalone drive commands** - `npm run load` and `npm run eject` for drive operations without ripping
-- **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @ThreeHats and @Adam8234)
+- **Docker management commands** - Complete docker-compose workflow commands including `npm run docker:build`, `docker:run`, `docker:stop`, `docker:logs`, `docker:clean`, and `docker:rebuild` for clean-slate development
+- **CI/CD automation**
+  - GitHub Actions edge pipeline builds multi-arch Docker image on pushes to `master` and tags as `:edge`
+  - Release pipeline on tags publishes npm (stable → `latest`, pre-release → `next`), Docker (stable → `latest`, pre-release → `next`), and creates GitHub Releases
+  - Release notes are sourced from the matching section in `CHANGELOG.md`
+  - Docker Hub repository README is kept in sync from this project's `README.md`
+- **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @Adam8234 and @ThreeHats --- Thank you!!!)
 - **Enhanced error handling** - Comprehensive error handling throughout the application
 - **Improved logging** - Structured logging with consistent formatting and colors
 - **Configuration validation** - Automatic validation of required configuration settings
@@ -50,55 +80,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Documentation** - Main `README.md` now highlights Docker as the recommended path; `README-DOCKER.md` contains expanded details
+- **Packaging** - `package.json` updated to include web assets and scripts in published package
 - **Configuration format** - Migrated from JSON (`config/Default.json`) to YAML (`config.yaml`) for improved readability and easier editing
-- **Configuration structure** - Reorganized into logical sections: `paths`, `drives`, and `ripping` for better organization
+- **Configuration structure** - Reorganized into logical sections: `paths`, `drives`, `ripping`, etc for better organization
 - **Path handling** - Cross-platform path normalization with support for forward slashes on all platforms (no more escaped backslashes!)
 - **Configuration validation** - Enhanced validation with clearer error messages referencing `config.yaml`
 - **Configuration drive options** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
 - **Ripping behavior options** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
-- **Logging system options** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
+- **Logging system options** - Restructured the config options to a `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
+- **Cross-platform executable paths** - MakeMKV executable path now adapts to Windows vs Linux vs macOS environments
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
-- **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work in theory, but are not officially supported)
-- **Eliminated all batch files** - Replaced with simple npm commands
+- **Remove `config`** - Replaced with `yaml` to fit the new configuration style
+- **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work, but are not officially supported)
+- **Eliminated all batch files** - Replaced with comprehensive npm commands
 - **Project structure** - Code organized into logical modules under `src/` directory
 - **Entry point** - Now uses `index.js` as main entry point instead of `AutoRip.js`
 - **Import system** - Updated to ES6 modules throughout
-- **Configuration management** - Centralized YAML configuration handling with validation and caching
+- **Configuration management** - Centralized YAML configuration handling with validation
 - **User interface** - Improved CLI with better prompts and messaging
 
 ### Removed
 
 - All `.bat` files (AutoRip.bat, DriveLoader.bat, Install-Node-Packages.bat)
 - Monolithic `AutoRip.js` file (replaced with modular structure)
-- **`win-eject` dependency** - Replaced with custom cross-platform optical drive utility
+- **`win-eject` dependency** - Replaced with optical drive commands and custom Windows addon for cross-platform support
 
 ### Migration Notes
 
 **Configuration Updates Required:**
 
 - **Migrate from JSON to YAML:** Replace `config/Default.json` with `config.yaml`
-- **New YAML format example:**
+- **New YAML format example can be found in the included `config.yaml` file AND in the README.MD**
 
-  ```yaml
-  paths:
-    makemkv_dir: "C:/Program Files (x86)/MakeMKV"
-    movie_rips_dir: "./media"
-    logging:
-      enabled: true
-      dir: "./logs"
-      time_format: "12hr"
+- **Path format:** Use forward slashes (/) instead of escaped backslashes (\\) for all paths, regardless of system or platform
 
-  drives:
-    auto_load: true
-    auto_eject: true
-
-  ripping:
-    rip_all_titles: false
-    mode: "async"
-  ```
-
-- **Path format:** Use forward slashes (/) instead of escaped backslashes (\\) for all paths
+- **Docker:** We highly recommend running in a containerized environment for most use cases, consider migrating today! Our docker image maintains full feature parity _(except for faking the system time)_ with the standard program, defaults to the new Web UI, and helps manage MakeMKV itself on a deeper level.
 
 ---
 

@@ -92,6 +92,21 @@ router.get("/status", async (req, res) => {
 });
 
 /**
+ * Get application info (name, version)
+ */
+router.get("/info", async (req, res) => {
+  try {
+    const packagePath = path.join(process.cwd(), "package.json");
+    const packageContent = await fs.readFile(packagePath, "utf8");
+    const pkg = JSON.parse(packageContent);
+    res.json({ name: pkg.name, version: pkg.version });
+  } catch (error) {
+    Logger.error("Failed to read package.json for app info", error.message);
+    res.status(500).json({ error: "Failed to get application info" });
+  }
+});
+
+/**
  * Stop current operation
  */
 router.post("/stop", async (req, res) => {

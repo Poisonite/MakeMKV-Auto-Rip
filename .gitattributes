@@ -1,0 +1,35 @@
+# Git line ending configuration for MakeMKV Auto Rip
+# Ensures consistent line endings across platforms
+
+# Default behavior: normalize line endings to LF on checkin, 
+# convert to native line endings on checkout
+* text=auto
+
+# Force LF line endings for shell scripts (critical for Docker)
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
+
+# Force LF for configuration files
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+
+# Force LF for source code files
+*.js text eol=lf
+*.ts text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+
+# Force LF for Docker files
+Dockerfile text eol=lf
+docker-compose.yaml text eol=lf
+.dockerignore text eol=lf
+
+# Binary files (don't normalize)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.node binary

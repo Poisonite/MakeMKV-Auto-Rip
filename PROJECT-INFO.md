@@ -40,12 +40,18 @@ MakeMKV Auto Rip v1.0.0 represents a complete architectural overhaul from the or
 ├── scripts/                      # Build and utility scripts
 │   └── postinstall.js            # Post-installation verification script
 ├── public/                       # Web UI static files
-│   └── index.html                # Main web interface
+│   ├── index.html                # Main web interface
+│   └── config.html               # Configuration UI
 ├── config.yaml                   # YAML configuration file for application settings
+├── Dockerfile                    # Docker image definition
+├── docker-compose.yaml           # Docker Compose deployment
+├── .dockerignore                 # Docker build exclusions
 ├── web.js                        # Web UI entry point
 ├── .github/                      # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/           # Issue templates
 │   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
+│   └── workflows/
+│       └── docker.yaml           # CI to build and publish Docker images
 ├── package.json                  # Project metadata and dependencies
 ├── index.js                      # CLI application entry point
 ├── README.md                     # Main documentation
@@ -203,7 +209,21 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
   - Uses Windows DeviceIoControl API for direct hardware access
   - Requires administrator privileges for optimal functionality
   - Included as pre-built binary (no compilation required)
-  - Cross-platform fallback for macOS/Linux using system utilities
+  - Cross-platform support for macOS/Linux using system utilities
+
+### Container Technology
+
+- **Docker** - Application containerization with Debian (bookworm) base
+- **Docker Compose** - Multi-container application orchestration
+- **Health Checks** - Container monitoring and recovery
+- **Volume Mounting** - Persistent data and media storage
+
+### Cross-Platform Support
+
+- **Environment Detection** - Automatic platform-specific behavior
+- **Conditional Imports** - Dynamic loading of platform-specific modules
+- **Path Adaptation** - Cross-platform file system handling
+- **Executable Resolution** - Platform-appropriate binary paths
 
 ### Development Principles
 
@@ -211,13 +231,14 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 - **Async/Await** - Promise-based asynchronous operations
 - **Functional Programming** - Pure functions where possible
 - **Immutable Patterns** - Avoiding side effects in utilities
+- **Platform Agnostic** - Cross-platform compatibility by design
 
 ## 📊 Performance Considerations
 
 ### Configurable Processing Modes
 
 We support both parallel and sequential processing for multiple disc operations:
-(Thanks to the contributions of @ThreeHats and @Adam8234 for the original parallel processing logic)
+(Thanks to the contributions of @Adam8234 and @ThreeHats for the original parallel processing logic)
 
 ### Mount Detection Configuration
 
@@ -260,6 +281,20 @@ for (const disc of discs) {
 ### Command Interface
 
 The application interfaces with MakeMKV through its command-line tool (`makemkvcon.exe` / `makemkvcon`):
+
+**Windows:**
+
+```javascript
+"C:\Program Files (x86)\MakeMKV\makemkvcon64.exe";
+```
+
+**Docker/Linux/macOS:**
+
+```javascript
+makemkvcon; // Available in PATH within container
+```
+
+**Common Commands:**
 
 ```javascript
 // Drive detection
@@ -311,11 +346,77 @@ MakeMKV output follows a structured format that the application parses:
 - **Completion Status**: `MSG:5036` or "Copy complete" indicators
 - **Version Messages**: `MSG:1005`, `MSG:5021`, `MSG:5075` for version-related information
 
+### System Date Management
+
+The application supports temporarily changing the system date for MakeMKV operations to bypass date-based restrictions.
+
+#### Implementation
+
+**Configuration**:
+
+```yaml
+makemkv:
+  fake_date: "2024-01-15 14:30:00" # Date with time
+  # fake_date: "2024-01-15"         # Date only
+  # fake_date: ""                   # Use real system date
+```
+
+**Cross-Platform Support**:
+
+- **Windows**: Uses `date` and `time` commands with `w32tm /resync` for restoration
+- **macOS**: Uses `sudo date -u` with `sudo sntp -sS time.apple.com` for restoration
+- **Linux**: Uses `sudo date -s` with `sudo timedatectl set-ntp true` for restoration
+
+**Process Flow**:
+
+1. **Pre-Ripping**: System date temporarily changed to configured fake_date
+2. **Ripping Operations**: All makemkvcon processes see the modified system date
+3. **Post-Ripping**: System date automatically restored to network time
+
+**Administrative Requirements**:
+
+- Requires administrative/root privileges to modify system date
+- Automatic restoration ensures system time returns to normal after operations
+- System-wide date change affects all processes temporarily
+- Graceful error handling with manual restoration guidance if needed
+
+**Docker Limitation**:
+
+- System date management is not supported in Docker containers
+- Feature automatically disabled when `DOCKER_CONTAINER=true` environment variable is detected
+- Users must change host system date manually if needed for containerized deployments
+
+#### Web UI Integration
+
+- **Date/Time Picker**: Intuitive interface for setting fake dates
+- **Clear Button**: One-click reset to real system date
+- **Format Support**: Handles both date-only and date-time formats
+- **Real-time Validation**: Parses and validates date strings dynamically
+
+#### Implementation Details
+
+```javascript
+// System date management utilities
+import { systemDateManager } from "./system-date.js";
+
+// Execute operations with temporary system date
+await systemDateManager.withTemporaryDate(targetDate, async () => {
+  // All makemkvcon commands now see the modified system date
+  exec(makemkvCommand, callback);
+});
+
+// Date parsing and validation
+function parseFakeDate(fakeDateStr) {
+  const date = new Date(fakeDateStr);
+  return isNaN(date.getTime()) ? null : date;
+}
+```
+
 ## 🎯 Migration from v0.6.0
 
 ### Breaking Changes
 
-1. **Entry Point**: `AutoRip.js` → `index.js`
+1. **Entry Point**: `AutoRip.js` → `index.js` (or `web.js`, to run `index.js` via a graphical browser instead)
 2. **Execution**: Batch files → npm scripts
 3. **Structure**: Monolithic → Modular
 4. **Imports**: CommonJS → ES Modules
@@ -357,19 +458,78 @@ The application supports both CLI and Web UI interfaces:
 - **Vanilla JavaScript**: No frontend framework dependencies for maximum performance and simplicity.
 - **CLI Integration**: Web UI executes real CLI commands for reliability.
 
+## 🐳 Docker Architecture
+
+### Container Design
+
+The Docker implementation follows best practices for Node.js containerization:
+
+```dockerfile
+# Multi-stage build with Linux base
+FROM node:22-bookworm
+
+# Security: Non-root user execution
+USER makemkv (uid: 1001)
+
+# Volumes: Separate data from application
+VOLUME ["/app/media", "/app/logs"]
+
+# Health checks: Container monitoring
+HEALTHCHECK --interval=30s --timeout=10s
+```
+
+### Container Features
+
+- **MakeMKV Integration** - Pre-installed MakeMKV console tools
+- **Volume Management** - Persistent media and log storage
+- **Device Access** - Optical drive mounting with proper permissions
+- **Environment Variables** - Configuration through Docker environment (entrypoint writes `settings.conf`)
+- **Health Monitoring** - Built-in container health checks
+
+### Docker Compose Configuration
+
+```yaml
+services:
+  makemkv-auto-rip:
+    build:
+      context: .
+      args:
+        MAKEMKV_VERSION: 1.18.1
+    environment:
+      - MAKEMKV_APP_KEY=${MAKEMKV_APP_KEY:-}
+      - MAKEMKV_MIN_TITLE_LENGTH=${MAKEMKV_MIN_TITLE_LENGTH:-1000}
+      - MAKEMKV_IO_ERROR_RETRY_COUNT=${MAKEMKV_IO_ERROR_RETRY_COUNT:-10}
+    ports:
+      - "3000:3000"
+    devices:
+      - /dev/sr0:/dev/sr0:ro
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+      # - ./makemkv_key.txt:/run/secrets/makemkv_key:ro # with MAKEMKV_APP_KEY_FILE set
+    privileged: true
+```
+
+Entry-point mapping to MakeMKV settings:
+
+- `MAKEMKV_APP_KEY` → `app_Key = "..."`
+- `MAKEMKV_MIN_TITLE_LENGTH` (default `1000`) → `dvd_MinimumTitleLength = "..."`
+- `MAKEMKV_IO_ERROR_RETRY_COUNT` (default `10`) → `io_ErrorRetryCount = "..."`
+
 ## 🔮 Future Considerations
 
 ### Potential Future Enhancements
 
-1. **Cross-Platform Support** - Linux and macOS compatibility
+1. **macOS Native Support** - Native drive operations for macOS
 2. **Metadata Integration** - Automatic movie information lookup (renaming to match Plex conventions)
+3. **Kubernetes Support** - Scalable container orchestration
    ... TBD
 
 ### Technical Debt
 
-1. **Testing Coverage** - Unit and integration tests needed
-2. **Documentation** - JSDoc coverage for all modules
-3. **Configuration Schema** - YAML schema validation
+1. **Testing Coverage** - Docker-specific integration tests needed
+2. **Documentation** - Container deployment guides
 
 ## 📝 Code Style and Standards
 

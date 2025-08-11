@@ -151,6 +151,16 @@ export class AppConfig {
   }
 
   /**
+   * Get the fake date for MakeMKV operations
+   * @returns {string|null} - Fake date string or null if not set
+   */
+  static get makeMKVFakeDate() {
+    const config = this.#loadConfig();
+    const fakeDate = config.makemkv?.fake_date;
+    return fakeDate && fakeDate.trim() !== "" ? fakeDate.trim() : null;
+  }
+
+  /**
    * Get MakeMKV executable path with automatic detection
    * @returns {Promise<string|null>} - Full path to makemkvcon executable
    */

@@ -38,17 +38,6 @@ Enhancing automated workflows for large-scale disc processing.
   - Add version validation and compatibility checking
   - Implement automatic retry logic for transient failures
 
-#### Docker Support
-
-- **Description**: Provide official Docker images and documentation
-- **Benefits**: Simplifies setup and deployment, especially for headless or server environments
-- **Contribution Difficulty**: 🟡 Intermediate
-- **Details**:
-  - Create and maintain a Dockerfile for the project
-  - Document environment variables and volume mounts for MakeMKV and output directories
-  - Configure a base image which builds MakeMKV for Linux
-  - Ensure platform compatibility within containers
-
 ### 🎵 Medium Priority
 
 #### Audio Notifications
@@ -61,17 +50,9 @@ Enhancing automated workflows for large-scale disc processing.
   - System notification integration
   - Custom sound file support
 
-#### NPM Package Distribution
-
-- **Description**: Package and publish MakeMKV Auto Rip as an npm package
-- **Benefits**: Easier installation and updates for Node.js users
-- **Contribution Difficulty**: 🟡 Intermediate
-- **Details**:
-  - Prepare the codebase for npm packaging
-  - Write documentation for npm installation and usage
-  - Publish to the npm registry
-
 ### 🔄 Lower Priority
+
+#### TBD
 
 ---
 

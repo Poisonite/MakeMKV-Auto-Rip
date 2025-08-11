@@ -1,7 +1,7 @@
 {
     "name": "makemkv-auto-rip",
     "version": "1.0.0",
-    "description": "Automatically rips DVDs & Blu-rays using the MakeMKV console, then saves them to unique folders.",
+    "description": "Automatically rips DVDs & Blu-rays using the MakeMKV console, then saves them to unique folders. It can be used from the command line or via a web interface, and is cross-platform. It is also containerized, so it can be run on any system with Docker installed.",
     "main": "index.js",
     "type": "module",
     "engines": {
@@ -14,11 +14,20 @@
         "load": "node src/cli/commands.js load",
         "eject": "node src/cli/commands.js eject",
         "test": "vitest",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --watch",
         "test:ui": "vitest --ui",
-        "build:windows-addons": "node-gyp rebuild",
-        "build:debug:windows-addons": "node-gyp rebuild --debug",
-        "clean:windows-addons": "node-gyp clean",
+        "windows-addons:build": "node-gyp rebuild",
+        "windows-addons:build:debug": "node-gyp rebuild --debug",
+        "windows-addons:clean": "node-gyp clean",
+        "docker:build": "docker compose --profile build build --no-cache makemkv-auto-rip-build",
+        "docker:run": "docker compose --profile build up -d makemkv-auto-rip-build",
+        "docker:stop": "docker compose --profile build down",
+        "docker:logs": "docker compose --profile build logs -f makemkv-auto-rip-build",
+        "docker:clean": "docker compose --profile build down -v --remove-orphans && docker system prune -f",
+        "docker:rebuild": "npm run docker:clean && npm run docker:build && npm run docker:run",
+        "prepublishOnly": "npm run test:run",
         "postinstall": "node scripts/postinstall.js"
     },
     "repository": {
@@ -26,8 +35,6 @@
         "url": "git+https://github.com/Poisonite/MakeMKV-Auto-Rip.git"
     },
     "keywords": [
-        "Poisonite",
-        "Poisonite101",
         "MakeMKV",
         "Auto",
         "Rip",
@@ -44,8 +51,24 @@
         "Disc",
         "UHD",
         "4K",
-        "BD 100"
+        "BD 100",
+        "Docker",
+        "Container",
+        "CLI",
+        "Console",
+        "Web",
+        "Web UI",
+        "Web Interface",
+        "Web App",
+        "Cross-platform",
+        "Poisonite",
+        "Poisonite101"
     ],
+    "bin": {
+        "makemkv-auto-rip": "./index.js",
+        "makemkv-auto-rip-web": "./web.js"
+    },
+    "preferGlobal": true,
     "author": "Zac Ingoglia",
     "license": "GPL-3.0-or-later",
     "bugs": {
@@ -61,6 +84,18 @@
         "ws": "^8.18.3",
         "yaml": "^2.8.0"
     },
+    "files": [
+        "src/",
+        "public/",
+        "scripts/",
+        "index.js",
+        "web.js",
+        "config.yaml",
+        "build/Release/optical_drive_native.node",
+        "README.md",
+        "LICENSE.md",
+        "CHANGELOG.md"
+    ],
     "devDependencies": {
         "@vitest/ui": "^3.2.2",
         "node-addon-api": "^8.0.0",

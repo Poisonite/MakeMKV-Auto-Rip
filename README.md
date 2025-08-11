@@ -16,7 +16,66 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 
 ## 🚀 Quick Start
 
-### Web Interface
+### Recommended: Docker (Web UI)
+
+Run with Docker for the simplest, fully self-contained setup.
+
+1. Install Docker & Docker Compose
+2. Create output directories:
+
+   ```bash
+   mkdir -p media logs
+   ```
+
+3. Start the container (using docker-compose.yaml in this repo):
+
+   ```bash
+   docker compose up -d
+   ```
+
+   For local development/building from source:
+
+   ```bash
+   npm run docker:build && npm run docker:run
+   ```
+
+4. Open the Web UI:
+
+   [http://localhost:3000](http://localhost:3000)
+
+Notes:
+
+- Edit `config.yaml` locally; it’s bind-mounted into the container and can be edited from the Web UI.
+- Map your optical drives under `devices:` (e.g., `/dev/sr0:/dev/sr0:ro`).
+- See the full Docker guide: [README-DOCKER.md](README-DOCKER.md)
+
+### Docker: MakeMKV License & Settings
+
+You can run in trial mode (no key) or provide your key via environment variables. The container entrypoint writes values to `~/.MakeMKV/settings.conf`.
+
+- Put values in a `.env` next to `docker-compose.yaml`:
+
+  ```env
+  MAKEMKV_APP_KEY=AAAA-BBBB-CCCC-DDDD-EEEE-FFFF
+  # Optional tunables (defaults shown)
+  MAKEMKV_MIN_TITLE_LENGTH=1000
+  MAKEMKV_IO_ERROR_RETRY_COUNT=10
+  ```
+
+- Or use a key file:
+
+  ```yaml
+  environment:
+    MAKEMKV_APP_KEY_FILE: /run/secrets/makemkv_key
+  volumes:
+    - ./makemkv_key.txt:/run/secrets/makemkv_key:ro
+  ```
+
+If you omit both, trial mode is used automatically.
+
+---
+
+### Web Interface (Standard Install)
 
 1. **Install dependencies:**
 
@@ -61,6 +120,7 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 
 1. **[MakeMKV](https://www.makemkv.com/)** - Required for all ripping operations
    - Each new version of Auto Rip is only tested with the most recent MakeMKV version
+   - MakeMKV is bundled in our docker image, but it must be downloaded and installed separately for all other systems and install methods
 2. **[Node.js](https://nodejs.org/)** - Runtime environment
    - Latest LTS recommended
      - Only >= v22 officially tested -others are likely to work back to (at least) v16
@@ -193,6 +253,15 @@ mount_detection:
 interface:
   # Enable repeat mode - after ripping, prompt again for another round (true/false)
   repeat_mode: true
+
+# MakeMKV behavior settings
+makemkv:
+  # Temporarily change system date for MakeMKV operations (leave blank to use real system date)
+  # Supports date only: "2024-01-15" or date with time: "2024-01-15 14:30:00"
+  # System date is automatically restored after ripping operations complete
+  # NOTE: Requires administrative privileges (Run as Administrator on Windows, sudo on Linux/macOS)
+  # WARNING: Not supported in Docker containers - change host system date manually if needed
+  fake_date: ""
 ```
 
 #### Configuration Options
@@ -212,6 +281,15 @@ interface:
 - **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media before starting rip (`0` to disable, default: `10`)
 - **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives (default: `1`)
 - **`interface.repeat_mode`** - Enable repeat mode to prompt again after ripping (`true` or `false`, default: `true`)
+- **`makemkv.fake_date`** - Temporarily change system date for MakeMKV operations
+  - Format: `"2024-01-15"` (date only) or `"2024-01-15 14:30:00"` (date with time)
+  - Leave blank (`""`) to use real system date
+  - ⚠️ **Requirements**: Requires administrative privileges:
+    - **Windows**: Run as Administrator
+    - **Linux/macOS**: Run with sudo or as root
+  - **Cross-Platform Support**: Works on Windows, macOS, and Linux
+  - **Automatic Restoration**: System date automatically restored after ripping operations
+  - ⚠️ **Docker Limitation**: Not supported in Docker containers - change host system date manually if needed
 
 **Important Notes:**
 
@@ -277,7 +355,7 @@ npm run eject -- --quiet             # ONLY Eject drives, and with minimal outpu
 2. **"(Windows) Native optical drive addon failed to load" error**
 
    - This indicates a corrupted installation or missing native components
-   - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run build`
+   - Try reinstalling the application: `npm install` - or building native addon from scratch `npm run windows-addons:build`
    - Ensure you're running on a supported Windows version (Windows 10/11 officially tested - _theoretically_ compatible back to ~Windows 2000)
 
 3. **Drive eject/load operations fail**
@@ -335,3 +413,4 @@ GPL-3.0-or-later - See [LICENSE.md](LICENSE.md) for details.
 - [Project Information](PROJECT-INFO.md) - Architecture and technical details
 - [Changelog](CHANGELOG.md) - Complete version history
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
+- [Docker Setup Guide](README-DOCKER.md) - Run via Docker & the Web UI

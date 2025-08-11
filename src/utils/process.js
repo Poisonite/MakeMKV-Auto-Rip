@@ -2,6 +2,9 @@
  * Process utilities for handling exit scenarios in test-safe way
  */
 
+import { Logger } from "./logger.js";
+import { systemDateManager } from "./system-date.js";
+
 /**
  * Check if the current environment is a test environment
  * @returns {boolean} True if running in test environment
@@ -40,4 +43,104 @@ export function safeExit(code = 0, message = "Process exit called") {
  */
 export function isProcessExitError(error) {
   return Boolean(error && error.isProcessExit === true);
+}
+
+/**
+ * Parse and validate a fake date string
+ * @param {string} fakeDateStr - Date string in format "YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS"
+ * @returns {Date|null} Parsed date object or null if invalid
+ */
+export function parseFakeDate(fakeDateStr) {
+  if (!fakeDateStr || typeof fakeDateStr !== "string") {
+    return null;
+  }
+
+  const trimmed = fakeDateStr.trim();
+  if (trimmed === "") {
+    return null;
+  }
+
+  // If only a date is provided (YYYY-MM-DD), interpret it as local midnight
+  const dateOnlyMatch = /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
+  let date;
+  if (dateOnlyMatch) {
+    const [yearStr, monthStr, dayStr] = trimmed.split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr) - 1; // zero-based
+    const day = Number(dayStr);
+    date = new Date(year, month, day, 0, 0, 0);
+  } else {
+    // Try parsing the date string as provided
+    // "YYYY-MM-DD HH:mm:ss" will be treated as local time by Date
+    date = new Date(trimmed);
+  }
+
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
+}
+
+/**
+ * Apply system date management for MakeMKV operations
+ * @param {string|null} fakeDateStr - Fake date string or null to use real date
+ * @returns {Promise<void>}
+ * @throws {Error} When system date cannot be changed
+ */
+export async function applySystemDate(fakeDateStr) {
+  if (!fakeDateStr) {
+    return;
+  }
+
+  const fakeDate = parseFakeDate(fakeDateStr);
+  if (!fakeDate) {
+    Logger.warning(
+      `Invalid fake date format: ${fakeDateStr}. Using real system date.`
+    );
+    return;
+  }
+
+  try {
+    await systemDateManager.setSystemDate(fakeDate);
+  } catch (error) {
+    Logger.error(`Failed to apply system date: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Restore system date to network time
+ * @returns {Promise<void>}
+ */
+export async function restoreSystemDate() {
+  try {
+    await systemDateManager.restoreSystemDate();
+  } catch (error) {
+    Logger.error(`Failed to restore system date: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Execute an operation with temporary system date
+ * @param {string|null} fakeDateStr - Fake date string or null to use real date
+ * @param {Function} operation - Async operation to execute
+ * @returns {Promise<any>} Result of the operation
+ */
+export async function withSystemDate(fakeDateStr, operation) {
+  if (!fakeDateStr) {
+    return await operation();
+  }
+
+  const fakeDate = parseFakeDate(fakeDateStr);
+  if (!fakeDate) {
+    Logger.warning(
+      `Invalid fake date format: ${fakeDateStr}. Executing operation with real system date.`
+    );
+    return await operation();
+  }
+
+  return await systemDateManager.withTemporaryDate(fakeDate, operation);
 }

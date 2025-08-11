@@ -12,6 +12,6 @@ if (
     "WARNING: Native Windows addon missing - optical drive operations may not work"
   );
   console.warn(
-    "    - You can try to build it manually by running `npm run build:windows-addons`"
+    "    - You can try to build it manually by running `npm run windows-addons:build`"
   );
 }
