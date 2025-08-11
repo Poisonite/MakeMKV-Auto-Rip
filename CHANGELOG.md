@@ -53,10 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Proper package.json configuration for global installation
   - Development files excluded from published package
   - Optional dependencies for cross-platform compatibility
-- **Cross-platform compatibility** - Windows-specific features gracefully disabled on other platforms
+- **Cross-platform compatibility**
   - Docker environment detection
   - Comprehensive test coverage for Docker functionality and cross-platform behavior
-  - Conditional import of Windows-only dependencies
   - Linux-compatible MakeMKV executable paths
 - **Advanced drive management** - Separate configuration options for loading and ejecting drives
 - **Flexible ripping modes** - Choose between async (parallel) or sync (sequential) ripping for optimal SSD or HDD performance
@@ -68,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Release pipeline on tags publishes npm (stable → `latest`, pre-release → `next`), Docker (stable → `latest`, pre-release → `next`), and creates GitHub Releases
   - Release notes are sourced from the matching section in `CHANGELOG.md`
   - Docker Hub repository README is kept in sync from this project's `README.md`
-- **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @ThreeHats and @Adam8234)
+- **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @Adam8234 and @ThreeHats --- Thank you!!!)
 - **Enhanced error handling** - Comprehensive error handling throughout the application
 - **Improved logging** - Structured logging with consistent formatting and colors
 - **Configuration validation** - Automatic validation of required configuration settings
@@ -81,7 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Documentation** - Main `README.md` now highlights Docker as the recommended path; `README-DOCKER.md` updated and expanded
+- **Documentation** - Main `README.md` now highlights Docker as the recommended path; `README-DOCKER.md` contains expanded details
 - **Packaging** - `package.json` updated to include web assets and scripts in published package
 - **Configuration format** - Migrated from JSON (`config/Default.json`) to YAML (`config.yaml`) for improved readability and easier editing
 - **Configuration structure** - Reorganized into logical sections: `paths`, `drives`, `ripping`, etc for better organization
@@ -89,24 +88,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration validation** - Enhanced validation with clearer error messages referencing `config.yaml`
 - **Configuration drive options** - Split `ejectDVDs` into separate `loadDrives` and `ejectDrives` options for granular control
 - **Ripping behavior options** - Added `rippingMode` option to choose between async/sync processing (defaults to async)
-- **Logging system options** - Restructured to `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
+- **Logging system options** - Restructured the config options to a `logging` section with `timeFormat` option for 12hr/24hr console timestamps (defaults to 12hr)
 - **Cross-platform executable paths** - MakeMKV executable path now adapts to Windows vs Linux vs macOS environments
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
 - **Remove `config`** - Replaced with `yaml` to fit the new configuration style
-- **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work in theory, but are not officially supported)
+- **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work, but are not officially supported)
 - **Eliminated all batch files** - Replaced with comprehensive npm commands
 - **Project structure** - Code organized into logical modules under `src/` directory
 - **Entry point** - Now uses `index.js` as main entry point instead of `AutoRip.js`
 - **Import system** - Updated to ES6 modules throughout
-- **Configuration management** - Centralized YAML configuration handling with validation and caching
+- **Configuration management** - Centralized YAML configuration handling with validation
 - **User interface** - Improved CLI with better prompts and messaging
 
 ### Removed
 
 - All `.bat` files (AutoRip.bat, DriveLoader.bat, Install-Node-Packages.bat)
 - Monolithic `AutoRip.js` file (replaced with modular structure)
-- **`win-eject` dependency** - Replaced with custom cross-platform optical drive utility
+- **`win-eject` dependency** - Replaced with optical drive commands and custom Windows addon for cross-platform support
 
 ### Migration Notes
 
@@ -116,6 +115,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New YAML format example can be found in the included `config.yaml` file AND in the README.MD**
 
 - **Path format:** Use forward slashes (/) instead of escaped backslashes (\\) for all paths, regardless of system or platform
+
+- **Docker:** We highly recommend running in a containerized environment for most use cases, consider migrating today! Our docker image maintains full feature parity _(except for faking the system time)_ with the standard program, defaults to the new Web UI, and helps manage MakeMKV itself on a deeper level.
 
 ---
 

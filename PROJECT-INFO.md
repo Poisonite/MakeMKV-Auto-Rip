@@ -238,7 +238,7 @@ npm run eject → commands.js → DriveService.ejectAllDrives()
 ### Configurable Processing Modes
 
 We support both parallel and sequential processing for multiple disc operations:
-(Thanks to the contributions of @ThreeHats and @Adam8234 for the original parallel processing logic)
+(Thanks to the contributions of @Adam8234 and @ThreeHats for the original parallel processing logic)
 
 ### Mount Detection Configuration
 
