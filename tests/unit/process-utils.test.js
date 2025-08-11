@@ -175,7 +175,7 @@ describe("Process Utilities", () => {
       // Mock Logger to avoid actual logging during tests
       const Logger = await import("../../src/utils/logger.js");
       const loggerSpy = vi
-        .spyOn(Logger.Logger, "warn")
+        .spyOn(Logger.Logger, "warning")
         .mockImplementation(() => {});
 
       await expect(applySystemDate("invalid-date")).resolves.toBeUndefined();

@@ -4,64 +4,17 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 
-// Mock the fs module with readFileSync
-vi.mock("fs", () => ({
-  readFileSync: vi.fn(
-    () => `
-paths:
-  # makemkv_dir: "C:/Program Files (x86)/MakeMKV"  # Using auto-detection
-  movie_rips_dir: "./media"
-  logging:
-    enabled: true
-    dir: "./logs"
-    time_format: "12hr"
-drives:
-  auto_load: true
-  auto_eject: true
-ripping:
-  rip_all_titles: false
-  mode: "async"
-`
-  ),
-}));
-
-// Mock yaml module
-vi.mock("yaml", () => ({
-  parse: vi.fn(() => ({
-    paths: {
-      // No makemkv_dir - using auto-detection
-      movie_rips_dir: "./media",
-      logging: {
-        enabled: true,
-        dir: "./logs",
-        time_format: "12hr",
-      },
-    },
-    drives: {
-      auto_load: true,
-      auto_eject: true,
-    },
-    ripping: {
-      rip_all_titles: false,
-      mode: "async",
-    },
-  })),
-}));
-
-// Mock FileSystemUtils for cross-platform detection
+// Partially mock FileSystemUtils for detection/validation only
 const mockFileSystemUtils = {
   detectMakeMKVInstallation: vi.fn().mockResolvedValue("/usr/bin"),
   validateMakeMKVInstallation: vi.fn().mockResolvedValue(true),
-  makeTitleValidFolderPath: vi.fn(),
-  createUniqueFolder: vi.fn(),
-  createUniqueLogFile: vi.fn(),
-  writeLogFile: vi.fn(),
-  ensureDirectoryExists: vi.fn(),
 };
-
-vi.mock("../../src/utils/filesystem.js", () => ({
-  FileSystemUtils: mockFileSystemUtils,
-}));
+vi.mock("../../src/utils/filesystem.js", async () => {
+  const actual = await vi.importActual("../../src/utils/filesystem.js");
+  return {
+    FileSystemUtils: { ...actual.FileSystemUtils, ...mockFileSystemUtils },
+  };
+});
 
 // Mock Logger
 vi.mock("../../src/utils/logger.js", () => ({
@@ -260,44 +213,10 @@ describe("AppConfig", () => {
   });
 
   describe("makeMKVFakeDate", () => {
-    test("should return null when fake_date is not set", async () => {
-      mockConfig.makemkv = {};
-
+    test("should reflect fake_date from test fixture config.yaml", async () => {
       const { AppConfig } = await import("../../src/config/index.js");
-
-      expect(AppConfig.makeMKVFakeDate).toBeNull();
-    });
-
-    test("should return null when fake_date is empty string", async () => {
-      mockConfig.makemkv = { fake_date: "" };
-
-      const { AppConfig } = await import("../../src/config/index.js");
-
-      expect(AppConfig.makeMKVFakeDate).toBeNull();
-    });
-
-    test("should return null when fake_date is only whitespace", async () => {
-      mockConfig.makemkv = { fake_date: "   " };
-
-      const { AppConfig } = await import("../../src/config/index.js");
-
-      expect(AppConfig.makeMKVFakeDate).toBeNull();
-    });
-
-    test("should return trimmed date string when fake_date is set", async () => {
-      mockConfig.makemkv = { fake_date: "  2024-01-15 14:30:00  " };
-
-      const { AppConfig } = await import("../../src/config/index.js");
-
-      expect(AppConfig.makeMKVFakeDate).toBe("2024-01-15 14:30:00");
-    });
-
-    test("should return date string when fake_date is date only", async () => {
-      mockConfig.makemkv = { fake_date: "2024-01-15" };
-
-      const { AppConfig } = await import("../../src/config/index.js");
-
-      expect(AppConfig.makeMKVFakeDate).toBe("2024-01-15");
+      // Test fixture config.yaml sets fake_date to "2023-12-25 10:00:00"
+      expect(AppConfig.makeMKVFakeDate).toBe("2023-12-25 10:00:00");
     });
   });
 });

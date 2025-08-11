@@ -204,7 +204,7 @@ describe("RipService", () => {
       );
     });
 
-    it("should handle ripping errors", async () => {
+    it("should handle ripping errors gracefully without crashing", async () => {
       // Mock exec to simulate ripping failure
       const { exec } = await import("child_process");
       exec.mockImplementation((command, callback) => {
@@ -213,8 +213,7 @@ describe("RipService", () => {
         }, 10);
       });
 
-      // The service should complete and log errors
-      // in our mocked environment - just ensure it doesn't crash
+      // Service should handle per-disc errors internally and complete without throwing
       await expect(ripService.startRipping()).resolves.not.toThrow();
     });
   });

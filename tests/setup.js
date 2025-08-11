@@ -5,6 +5,7 @@
 
 import { vi } from "vitest";
 import fs from "fs";
+import path from "path";
 
 // Mock external dependencies that require system resources
 vi.mock("win-eject", () => ({
@@ -46,6 +47,41 @@ TINFO:2,9,0,"2:15:30"`;
         callback(null, "", "");
       }
     }),
+  };
+});
+
+// Force AppConfig to always read the test fixture config.yaml
+vi.mock("fs", async () => {
+  const actual = await vi.importActual("fs");
+  const fsActual = actual.default || actual;
+  const readFileSync = (filePath, encoding = "utf8", ...rest) => {
+    try {
+      const fileStr = String(filePath);
+      if (fileStr.endsWith("config.yaml")) {
+        const fixturePath = path.resolve("./tests/fixtures/config.yaml");
+        return (actual.readFileSync || fsActual.readFileSync)(
+          fixturePath,
+          encoding,
+          ...rest
+        );
+      }
+      return (actual.readFileSync || fsActual.readFileSync)(
+        filePath,
+        encoding,
+        ...rest
+      );
+    } catch (e) {
+      return (actual.readFileSync || fsActual.readFileSync)(
+        filePath,
+        encoding,
+        ...rest
+      );
+    }
+  };
+  return {
+    ...actual,
+    default: { ...fsActual, readFileSync },
+    readFileSync,
   };
 });
 

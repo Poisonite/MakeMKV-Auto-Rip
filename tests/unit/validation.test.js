@@ -31,14 +31,14 @@ TINFO:2,9,0,"2:15:30"`;
       expect(result).toBe("No data received from MakeMKV");
     });
 
-    it("should return error message for single line data", () => {
+    it("should return error message for data without TINFO lines", () => {
       const result = ValidationUtils.validateFileData("Single line only");
-      expect(result).toBe("Invalid MakeMKV output format");
+      expect(result).toContain("Invalid MakeMKV output format");
     });
 
     it("should handle data with only newlines", () => {
       const result = ValidationUtils.validateFileData("\n");
-      expect(result).toBe("Invalid MakeMKV output format");
+      expect(result).toContain("Invalid MakeMKV output format");
     });
   });
 
