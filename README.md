@@ -129,21 +129,13 @@ If you omit both, trial mode is used automatically.
 
 ### Cross-Platform Support
 
-- **Automatic MakeMKV Detection** - Finds MakeMKV installation automatically on all platforms:
-  - **Windows**: `C:/Program Files/MakeMKV` or `C:/Program Files (x86)/MakeMKV`
-  - **Linux**: `/usr/bin`, `/usr/local/bin`, or `/opt/makemkv/bin`
-  - **macOS**: `/Applications/MakeMKV.app/Contents/MacOS`, `/opt/homebrew/bin`, or `/usr/local/bin`
-- **Manual Override** - Configure custom MakeMKV path in `config.yaml` if needed
+- **Automatic MakeMKV Detection** - Finds MakeMKV installation automatically on Windows, Linux, and macOS
+- **Manual makemkvcon Override** - Configure custom MakeMKV path in `config.yaml` if needed
 - **Optical Drive Management** - Drive load/eject operations work on Windows, macOS, and Linux
 - **Windows implementation** - Uses native C++ addon for reliable Windows DeviceIoControl API access
   - No compilation required, native addon included in repository
   - Run terminal as administrator for drive operations (Windows only)
 - **No Python or other build tools required** - Ready to use out of the box (just `npm install`)
-
-### Recommended Software
-
-- **Java** - Required for certain MakeMKV features
-- **VLC Media Player** - For viewing ripped .mkv files
 
 ## 🛠️ Installation
 
