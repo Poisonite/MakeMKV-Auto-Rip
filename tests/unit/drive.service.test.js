@@ -78,6 +78,193 @@ describe("DriveService", () => {
     });
   });
 
+  describe("loadAllDrives logging branches", () => {
+    it("should log 'all loaded' when no failures", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 3,
+        failed: 0,
+        total: 3,
+      });
+
+      await DriveService.loadAllDrives();
+      expect(Logger.info).toHaveBeenCalledWith(
+        "All optical drives have been loaded/closed."
+      );
+    });
+
+    it("should warn when no drives could be loaded", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 0,
+        failed: 2,
+        total: 2,
+      });
+
+      await DriveService.loadAllDrives();
+      expect(Logger.warning).toHaveBeenCalledWith(
+        "No optical drives could be loaded."
+      );
+    });
+
+    it("should log mixed success message", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 1,
+        failed: 2,
+        total: 3,
+      });
+
+      await DriveService.loadAllDrives();
+      expect(Logger.info).toHaveBeenCalledWith(
+        "1 of 3 optical drives loaded successfully."
+      );
+    });
+  });
+
+  describe("ejectAllDrives logging branches", () => {
+    it("should log 'all ejected' when no failures", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 0,
+        total: 2,
+      });
+
+      await DriveService.ejectAllDrives();
+      expect(Logger.info).toHaveBeenCalledWith(
+        "All optical drives have been ejected."
+      );
+    });
+
+    it("should warn when no drives could be ejected", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue({
+        successful: 0,
+        failed: 3,
+        total: 3,
+      });
+
+      await DriveService.ejectAllDrives();
+      expect(Logger.warning).toHaveBeenCalledWith(
+        "No optical drives could be ejected."
+      );
+    });
+
+    it("should log mixed success message for ejection", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.ejectAllDrives).mockResolvedValue({
+        successful: 2,
+        failed: 1,
+        total: 3,
+      });
+
+      await DriveService.ejectAllDrives();
+      expect(Logger.info).toHaveBeenCalledWith(
+        "2 of 3 optical drives ejected successfully."
+      );
+    });
+  });
+
+  describe("loadDrivesWithWait delay branch", () => {
+    it("should display wait instructions when delay > 0", async () => {
+      // Mock config with delay
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: { driveLoadDelay: 1 },
+      }));
+
+      // Re-import service to bind mocked AppConfig in dynamic import
+      const { DriveService: ReboundDriveService } = await import(
+        "../../src/services/drive.service.js"
+      );
+
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
+        successful: 1,
+        failed: 0,
+        total: 1,
+      });
+
+      // Speed up wait
+      vi.spyOn(global, "setTimeout").mockImplementation((cb) => {
+        cb();
+        // @ts-ignore
+        return 1;
+      });
+
+      await ReboundDriveService.loadDrivesWithWait();
+
+      expect(Logger.warning).toHaveBeenCalledWith("Waiting 1 seconds...");
+      expect(Logger.warning).toHaveBeenCalledWith(
+        "Please manually close any drives that were not automatically closed."
+      );
+      expect(Logger.separator).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("getDriveMountStatus additional branches", () => {
+    it("should return zeros when MakeMKVMessages indicates stop", async () => {
+      vi.resetModules();
+      // Force checkOutput to false
+      vi.doMock("../../src/utils/makemkv-messages.js", () => ({
+        MakeMKVMessages: { checkOutput: () => false },
+      }));
+      vi.doMock("child_process", () => ({
+        exec: vi.fn((_, cb) =>
+          cb(null, 'DRV:0,2,999,1,"BD-ROM","Movie",/dev/sr0', "")
+        ),
+      }));
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue("makemkvcon"),
+        },
+      }));
+
+      const { DriveService: Bound } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await Bound.getDriveMountStatus();
+      expect(result).toEqual({ total: 0, mounted: 0, unmounted: 0 });
+    });
+
+    it("should handle parse errors and resolve zeros", async () => {
+      vi.resetModules();
+      // Craft stdout that passes trim() but fails on split()
+      const badStdout = { trim: () => "ok" };
+      vi.doMock("child_process", () => ({
+        exec: vi.fn((_, cb) => cb(null, badStdout, "")),
+      }));
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue("makemkvcon"),
+        },
+      }));
+
+      const { DriveService: Bound } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await Bound.getDriveMountStatus();
+      expect(result).toEqual({ total: 0, mounted: 0, unmounted: 0 });
+    });
+
+    it("should handle outer catch and return zeros when imports fail", async () => {
+      vi.doMock("child_process", () => {
+        throw new Error("boom");
+      });
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          getMakeMKVExecutable: vi.fn().mockResolvedValue("makemkvcon"),
+        },
+      }));
+
+      const { DriveService: Bound } = await import(
+        "../../src/services/drive.service.js"
+      );
+      const result = await Bound.getDriveMountStatus();
+      expect(result).toEqual({ total: 0, mounted: 0, unmounted: 0 });
+    });
+  });
+
   describe("loadDrivesWithWait", () => {
     it("should load drives and complete successfully", async () => {
       vi.mocked(OpticalDriveUtil.loadAllDrives).mockResolvedValue({
@@ -238,9 +425,17 @@ describe("DriveService", () => {
       vi.doMock("child_process", () => ({
         exec: vi.fn(),
       }));
+      // Default makemkv message checker to continue unless a test overrides it
+      vi.doMock("../../src/utils/makemkv-messages.js", () => ({
+        MakeMKVMessages: { checkOutput: () => true },
+      }));
     });
 
     it("should return mount status for drives with mounted media", async () => {
+      vi.resetModules();
+      vi.doMock("../../src/utils/makemkv-messages.js", () => ({
+        MakeMKVMessages: { checkOutput: () => true },
+      }));
       const { exec } = await import("child_process");
       const mockStdout = `DRV:0,2,999,1,"BD-ROM HL-DT-ST","Movie 1","/dev/sr0"
 DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"
@@ -257,10 +452,10 @@ DRV:2,0,999,1,"BD-ROM","Empty Drive","/dev/sr2"`;
         },
       }));
 
-      const { DriveService } = await import(
+      const { DriveService: Fresh } = await import(
         "../../src/services/drive.service.js"
       );
-      const result = await DriveService.getDriveMountStatus();
+      const result = await Fresh.getDriveMountStatus();
 
       expect(result).toEqual({
         total: 3,
@@ -294,6 +489,10 @@ DRV:2,0,999,1,"BD-ROM","Empty Drive","/dev/sr2"`;
     });
 
     it("should filter out virtual drives (state 256)", async () => {
+      vi.resetModules();
+      vi.doMock("../../src/utils/makemkv-messages.js", () => ({
+        MakeMKVMessages: { checkOutput: () => true },
+      }));
       const { exec } = await import("child_process");
       const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
 DRV:1,256,999,1,"Virtual Drive","Virtual","/dev/sr1"
@@ -309,10 +508,10 @@ DRV:2,2,999,1,"DVD","Movie 2","/dev/sr2"`;
         },
       }));
 
-      const { DriveService } = await import(
+      const { DriveService: Fresh } = await import(
         "../../src/services/drive.service.js"
       );
-      const result = await DriveService.getDriveMountStatus();
+      const result = await Fresh.getDriveMountStatus();
 
       expect(result).toEqual({
         total: 2, // Only real drives, excluding virtual drive
@@ -365,6 +564,10 @@ DRV:2,2,999,1,"DVD","Movie 2","/dev/sr2"`;
     });
 
     it("should correctly identify mounted vs unmounted drives", async () => {
+      vi.resetModules();
+      vi.doMock("../../src/utils/makemkv-messages.js", () => ({
+        MakeMKVMessages: { checkOutput: () => true },
+      }));
       const { exec } = await import("child_process");
       const mockStdout = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
 DRV:1,0,999,1,"DVD","","/dev/sr1"
@@ -381,10 +584,10 @@ DRV:3,0,999,1,"DVD","","/dev/sr3"`;
         },
       }));
 
-      const { DriveService } = await import(
+      const { DriveService: Fresh } = await import(
         "../../src/services/drive.service.js"
       );
-      const result = await DriveService.getDriveMountStatus();
+      const result = await Fresh.getDriveMountStatus();
 
       expect(result).toEqual({
         total: 4,
