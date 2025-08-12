@@ -19,7 +19,7 @@ We welcome contributions of all kinds:
 
 #### General Development
 
-- **Node.js** >= 22.0.0
+- **Node.js** >= 20.0.0
 - **Git** for version control
 - **MakeMKV** installed for testing
 

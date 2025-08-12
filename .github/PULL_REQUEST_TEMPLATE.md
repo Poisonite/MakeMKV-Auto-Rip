@@ -56,7 +56,7 @@ Please describe the tests that you ran to verify your changes:
 
 - OS: [e.g. Windows 11]
 - Node.js version: [e.g. v22.0.0]
-- MakeMKV version: [e.g. 1.17.x]
+- MakeMKV version: [e.g. 1.18.x]
 - Administrator privileges: [Yes/No]
 
 ## Documentation
