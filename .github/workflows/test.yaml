@@ -43,7 +43,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           name: codecov-node-${{ matrix.node-version }}
-          fail_ci_if_error: false
+          fail_ci_if_error: true
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
