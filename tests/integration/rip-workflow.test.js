@@ -186,6 +186,14 @@ Additional MakeMKV output here`;
     }, 10000); // 10 second timeout
 
     it("should handle partial ripping failures", async () => {
+      // Mock AppConfig
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+      vi.spyOn(AppConfig, "rippingMode", "get").mockReturnValue("async");
+
       const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
 DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
 
@@ -325,6 +333,14 @@ DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"`;
       // Reset fs mock call counts
       fs.mkdirSync.mockClear();
 
+      // Mock AppConfig
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+      vi.spyOn(AppConfig, "rippingMode", "get").mockReturnValue("async");
+
       const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Test Movie","/dev/sr0"
 DRV:1,2,999,1,"DVD","Test Movie","/dev/sr1"`;
 
@@ -395,6 +411,14 @@ Full MakeMKV log output here`;
 
   describe("Performance and concurrency", () => {
     it("should handle concurrent disc ripping", async () => {
+      // Mock AppConfig
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+      vi.spyOn(AppConfig, "rippingMode", "get").mockReturnValue("async");
+
       const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Movie 1","/dev/sr0"
 DRV:1,2,999,1,"DVD","Movie 2","/dev/sr1"
 DRV:2,2,999,1,"BD-ROM","Movie 3","/dev/sr2"`;
@@ -429,6 +453,14 @@ DRV:2,2,999,1,"BD-ROM","Movie 3","/dev/sr2"`;
     });
 
     it("should handle large number of titles on disc", async () => {
+      // Mock AppConfig
+      const { AppConfig } = await import("../../src/config/index.js");
+      vi.spyOn(AppConfig, "getMakeMKVExecutable").mockResolvedValue('"test"');
+      vi.spyOn(AppConfig, "movieRipsDir", "get").mockReturnValue(
+        "./test-media"
+      );
+      vi.spyOn(AppConfig, "rippingMode", "get").mockReturnValue("async");
+
       const mockDriveData = `DRV:0,2,999,1,"BD-ROM","Complex Movie","/dev/sr0"`;
 
       // Generate many title entries

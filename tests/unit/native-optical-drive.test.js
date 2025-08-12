@@ -86,10 +86,21 @@ describe("NativeOpticalDrive", () => {
       mockOs.platform.mockReturnValue("win32");
     });
 
-    it("should handle native addon loading gracefully", () => {
-      // When native addon isn't available, should still function
-      const isAvailable = NativeOpticalDrive.isNativeAvailable;
-      expect(typeof isAvailable).toBe("boolean");
+    it("should handle native addon loading gracefully", async () => {
+      // Mock fs.existsSync to return false to simulate missing addon
+      const fs = await import("fs");
+      const originalExistsSync = fs.default.existsSync;
+      vi.spyOn(fs.default, "existsSync").mockImplementation((path) => {
+        if (path.includes("optical_drive_native.node")) {
+          return false; // Simulate missing addon file
+        }
+        return originalExistsSync(path);
+      });
+
+      // When native addon can't be loaded, should throw an error
+      expect(() => {
+        const isAvailable = NativeOpticalDrive.isNativeAvailable;
+      }).toThrow("Native optical drive addon is required but failed to load");
     });
 
     it("should handle ejectAllDrives with empty array", async () => {
