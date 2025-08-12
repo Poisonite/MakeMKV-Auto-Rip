@@ -133,7 +133,7 @@ If you omit both, trial mode is used automatically.
    - MakeMKV is bundled in our docker image, but it must be downloaded and installed separately for all other systems and install methods
 2. **[Node.js](https://nodejs.org/)** - Runtime environment
    - Latest LTS recommended
-     - Only >= v22 officially tested -others are likely to work back to (at least) v16
+     - Only >= v20 officially tested
 3. **Cross-platform OS support** - Works on Windows, macOS, and Linux
    - Only (officially) tested on Windows 10/11 & Debian/Ubuntu Linux
 

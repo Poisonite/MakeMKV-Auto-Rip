@@ -5,7 +5,7 @@ All notable changes to MakeMKV Auto Rip will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-08-11
+## [1.0.0] - 2025-08-12
 
 ### Added
 
@@ -67,6 +67,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Release pipeline on tags publishes npm (stable → `latest`, pre-release → `next`), Docker (stable → `latest`, pre-release → `next`), and creates GitHub Releases
   - Release notes are sourced from the matching section in `CHANGELOG.md`
   - Docker Hub repository README is kept in sync from this project's `README.md`
+  - New dedicated Tests workflow runs unit tests in CI/CD and uploads coverage to Codecov
+    - Node.js matrix covers `20.x`, `22.x`, and `24.x`
+    - Coverage artifacts are uploaded and a summary is shown in the job output
+    - Codecov integration provides a hosted coverage dashboard and PR annotations
+  - Badges added to `README.md` to showcase project status:
+    - Build status, Tests status, Coverage (Codecov)
+    - License, NPM version/downloads
+    - Docker image version/pulls/size
+    - GitHub release/version/date, last commit, commit activity
+    - Open issues/PRs, contributors
+    - Supported OS platforms, Docker architectures, Node.js version, Module type (ESM), Testing framework (Vitest)
 - **Parallel disc processing** - Multiple discs now rip simultaneously instead of sequentially (originally completed by @Adam8234 and @ThreeHats --- Thank you!!!)
 - **Enhanced error handling** - Comprehensive error handling throughout the application
 - **Improved logging** - Structured logging with consistent formatting and colors
@@ -80,7 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Documentation** - Main `README.md` now highlights Docker as the recommended path; `README-DOCKER.md` contains expanded details
+- **Documentation** - Main `README.md` highlights Docker as the recommended path; `README-DOCKER.md` contains expanded details
+- **Documentation** - `README.md` updated with comprehensive status badges (build/tests/coverage, ecosystem, and technical specs)
 - **Packaging** - `package.json` updated to include web assets and scripts in published package
 - **Configuration format** - Migrated from JSON (`config/Default.json`) to YAML (`config.yaml`) for improved readability and easier editing
 - **Configuration structure** - Reorganized into logical sections: `paths`, `drives`, `ripping`, etc for better organization
@@ -93,7 +105,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **All dependencies updated** - All project dependencies have been updated to their latest versions
 - **Removed `moment` and `colors`** - Replaced with `date-fns` for date/time and `chalk` for colored output
 - **Remove `config`** - Replaced with `yaml` to fit the new configuration style
-- **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to latest LTS (older versions may work, but are not officially supported)
+- **Project now supports the latest Node.js LTS version** - Minimum required Node.js version raised to v20 (older versions may work, but are not officially supported by us or Node.JS as of this release date)
+- **CI Tests matrix expanded** - Continuous Integration now validates against Node.js `20.x`, `22.x`, and `24.x`
 - **Eliminated all batch files** - Replaced with comprehensive npm commands
 - **Project structure** - Code organized into logical modules under `src/` directory
 - **Entry point** - Now uses `index.js` as main entry point instead of `AutoRip.js`
