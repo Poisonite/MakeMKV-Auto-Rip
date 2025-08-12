@@ -36,7 +36,11 @@ jobs:
       - name: Set package.json version
         run: |
           jq '.version = "${{ needs.prepare.outputs.version }}"' package.json > package.json.tmp && mv package.json.tmp package.json
-      - run: npm ci
+      - name: Clear npm cache and install dependencies
+        run: |
+          npm cache clean --force
+          rm -rf node_modules package-lock.json
+          npm install
       - run: npm test --silent
       - name: Publish pre-release to npm with dist-tag "next"
         if: needs.prepare.outputs.is_prerelease == 'true'
