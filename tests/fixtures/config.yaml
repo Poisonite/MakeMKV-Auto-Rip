@@ -1,0 +1,29 @@
+# Test configuration for unit tests
+paths:
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV"  # Using auto-detection for tests
+  movie_rips_dir: "./media"
+  logging:
+    enabled: true
+    dir: "./logs"
+    time_format: "12hr"
+
+drives:
+  auto_load: true
+  auto_eject: true
+  load_delay: 0
+
+mount_detection:
+  wait_timeout: 10
+  poll_interval: 1
+
+ripping:
+  rip_all_titles: false
+  mode: "async"
+
+interface:
+  repeat_mode: true
+
+makemkv:
+  # Test fixture: Temporarily change system date for MakeMKV operations
+  # System date automatically restored after operations complete
+  fake_date: "2023-12-25 10:00:00"

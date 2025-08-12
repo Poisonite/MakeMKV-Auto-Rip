@@ -1,4 +1,60 @@
 node_modules
-*.code-workspace
-Test.js
-.vscode
+
+# Default directories used by the application at runtime
+logs/*
+!logs/.gitkeep
+media/*
+!media/.gitkeep
+
+# Build artifacts (but keep the .node file)
+build/*
+!build/Release/
+build/Release/*
+!build/Release/optical_drive_native.node
+python/*
+python
+.venv/*
+.venv/
+venv/*
+venv/
+
+# Test coverage reports
+coverage/
+.nyc_output/
+
+# Test results
+test-results/
+test-media/
+test-temp/
+test-logs/
+test-*
+
+# Test log files
+test-logs*
+
+# Vitest temporary files
+.vitest/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary folders
+tmp/
+temp/
+
+# Environment files
+.env
+.env*

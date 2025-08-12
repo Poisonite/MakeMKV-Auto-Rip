@@ -1,0 +1,58 @@
+# MakeMKV Auto Rip Configuration
+# This file contains all configuration settings for the application
+# Paths are automatically normalized for the current operating system
+
+# Application paths and directories
+paths:
+  # MakeMKV installation directory
+  # Leave empty or comment out to use automatic detection based on your platform:
+  # makemkv_dir: "C:/Program Files (x86)/MakeMKV" # For Advanced users only - overwrite the automatic detection
+
+  # Directory where ripped movies/tv/media will be saved
+  movie_rips_dir: "./media"
+
+  # Logging configuration
+  logging:
+    # Whether to save logs to files (true/false)
+    enabled: true
+    # Directory where log files will be saved
+    dir: "./logs"
+    # Time format for log timestamps (12hr/24hr)
+    time_format: "12hr"
+
+# Drive operation settings
+drives:
+  # Automatically load/mount optical drives (true/false)
+  auto_load: true
+  # Automatically eject drives after ripping (true/false)
+  auto_eject: true
+  # Delay time when loading drives (in seconds) - allows time for manual drive closing if needed - 0 to disable
+  load_delay: 0
+
+# Mount detection settings
+mount_detection:
+  # Maximum time to wait for drives to mount media before starting rip (in seconds) - 0 to disable
+  wait_timeout: 10
+  # Polling interval to check for newly mounted drives (in seconds)
+  poll_interval: 1
+
+# Ripping behavior settings
+ripping:
+  # Rip all titles (over the MakeMKV minimum length) from disc instead of just the longest title (true/false)
+  rip_all_titles: false
+  # Ripping mode - async for parallel processing, sync for sequential (async/sync)
+  mode: "async"
+
+# Interface behavior settings
+interface:
+  # Enable repeat mode - after ripping, prompt again for another round (true/false)
+  repeat_mode: true
+
+# MakeMKV behavior settings
+makemkv:
+  # Temporarily change system date for MakeMKV operations (leave blank to use real system date)
+  # Supports date only: "2024-01-15" or date with time: "2024-01-15 14:30:00"
+  # System date is automatically restored after ripping operations complete
+  # NOTE: Requires administrative privileges (Run as Administrator on Windows, sudo on Linux/macOS)
+  # WARNING: Not supported in Docker containers - change host system date manually if needed
+  fake_date: ""
