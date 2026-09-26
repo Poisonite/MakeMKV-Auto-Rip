@@ -41,7 +41,10 @@ export class DiscService {
 
             // Merge any newly detected discs with existing ones
             if (additionalDiscs.length > 0) {
-              detectedDiscs = [...detectedDiscs, ...additionalDiscs];
+              detectedDiscs = this.mergeDiscsByDrive(
+                detectedDiscs,
+                additionalDiscs
+              );
               Logger.info(
                 `Total discs found after waiting: ${detectedDiscs.length}`
               );
@@ -72,6 +75,27 @@ export class DiscService {
         reject(error);
       }
     });
+  }
+
+  /**
+   * Combine disc lists, keeping one entry per drive (the latest observation).
+   *
+   * A drive holds exactly one disc, so a repeated drive number always means the
+   * same disc was reported twice - which used to happen when a poll during
+   * mount detection re-reported a disc the initial detection had already found.
+   * Ripping that duplicate ran two MakeMKV jobs against one drive at the same
+   * time, thrashing it and producing a spurious "-1" copy of the title.
+   * @param {...Array<Object>} discLists - Disc lists in observation order
+   * @returns {Array<Object>} - Discs, unique by drive number
+   */
+  static mergeDiscsByDrive(...discLists) {
+    const byDrive = new Map();
+
+    for (const disc of discLists.flat()) {
+      byDrive.set(String(disc.driveNumber), disc);
+    }
+
+    return [...byDrive.values()];
   }
 
   /**
@@ -147,46 +171,41 @@ export class DiscService {
   }
 
   /**
-   * Wait for drives to mount media and retry detection
-   * @returns {Promise<Array>} - Array of basic disc information for newly found discs
+   * Poll until every drive has finished mounting its media, or the configured
+   * wait timeout runs out, and report every disc visible at that point.
+   *
+   * The caller merges this with its own detection by drive number, so returning
+   * the full picture is both simpler and safer than trying to report only the
+   * discs that appeared during polling - a "new since we started" count cannot
+   * survive a detection that fails partway through.
+   *
+   * The timeout is wall-clock rather than a poll count: each poll costs two
+   * makemkvcon invocations, so counting polls could stretch a "10 second" wait
+   * into minutes on a slow drive.
+   * @returns {Promise<Array>} - Basic disc information for every disc detected
    */
   static async waitForDriveMount() {
     const waitTimeout = AppConfig.mountWaitTimeout;
     const pollInterval = AppConfig.mountPollInterval;
-    const maxAttempts = Math.ceil(waitTimeout / pollInterval);
+    const deadline = Date.now() + waitTimeout * 1000;
 
     Logger.info(
       `Waiting up to ${waitTimeout} seconds for additional drives to mount media...`
     );
 
-    let initialDiscCount = 0;
+    let detectedDiscs = [];
+    let attempt = 0;
 
-    // Poll for mounted drives
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      Logger.info(
-        `Polling attempt ${attempt}/${maxAttempts} for newly mounted drives...`
-      );
+    while (true) {
+      attempt++;
 
       try {
         // Use fast detection during polling (no file processing)
-        const allCurrentDiscs = await this.detectAvailableDiscs();
+        detectedDiscs = await this.detectAvailableDiscs();
         const mountStatus = await DriveService.getDriveMountStatus();
 
-        // Set initial count on first attempt
-        if (attempt === 1) {
-          initialDiscCount = allCurrentDiscs.length;
-        }
-
-        const newDiscsFound = allCurrentDiscs.length - initialDiscCount;
-
-        if (newDiscsFound > 0) {
-          Logger.info(
-            `Found ${newDiscsFound} additional disc(s) during polling.`
-          );
-        }
-
         Logger.info(
-          `Current status: ${allCurrentDiscs.length} discs ready, ${mountStatus.unmounted} drives still mounting`
+          `Current status: ${detectedDiscs.length} discs ready, ${mountStatus.unmounted} drives still mounting`
         );
 
         // Only exit when there are no more unmounted drives to wait for
@@ -194,36 +213,27 @@ export class DiscService {
           Logger.info(
             "All optical drives have been checked. No more drives to wait for."
           );
-
-          // Return just the newly found basic disc info (processing happens later)
-          const newDiscs = allCurrentDiscs.slice(initialDiscCount);
-          return newDiscs;
-        }
-
-        // Wait before next attempt (unless this is the last attempt)
-        if (attempt < maxAttempts) {
-          Logger.separator();
-          await this.sleep(pollInterval * 1000);
+          return detectedDiscs;
         }
       } catch (error) {
         Logger.warning(
           `Error during polling attempt ${attempt}: ${error.message}`
         );
       }
+
+      if (Date.now() >= deadline) {
+        break;
+      }
+
+      Logger.separator();
+      await this.sleep(pollInterval * 1000);
     }
 
     Logger.info(
       `Finished waiting ${waitTimeout} seconds for additional drives.`
     );
 
-    // Return any newly found discs after timeout
-    try {
-      const finalDiscs = await this.detectAvailableDiscs();
-      const newDiscs = finalDiscs.slice(initialDiscCount);
-      return newDiscs;
-    } catch (error) {
-      return [];
-    }
+    return detectedDiscs;
   }
 
   /**

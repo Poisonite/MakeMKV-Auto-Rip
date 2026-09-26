@@ -70,30 +70,4 @@ export class MakeMKVMessages {
       Logger.error(`Error parsing MakeMKV version info: ${error.message}`);
     }
   }
-
-  /**
-   * Check if the output contains any critical errors that should stop operations
-   * @param {string} output - The stdout/stderr output from makemkvcon
-   * @returns {boolean} - True if operation should continue, false if should stop
-   */
-  static hasCriticalErrors(output) {
-    if (!output || typeof output !== "string") {
-      return false;
-    }
-
-    const lines = output.split("\n");
-
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-
-      if (!trimmedLine) continue;
-
-      // Check for version too old error
-      if (trimmedLine.includes(MAKEMKV_VERSION_MESSAGES.VERSION_TOO_OLD)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
 }

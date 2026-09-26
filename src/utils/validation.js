@@ -76,10 +76,15 @@ export class ValidationUtils {
       return false;
     }
     const lines = data.split("\n");
-    return lines.some(
-      (line) =>
-        line.startsWith(VALIDATION_CONSTANTS.COPY_COMPLETE_MSG) ||
-        line.startsWith("Copy complete")
-    );
+
+    // Look for specific success indicators
+    const hasSuccess = lines.some(line => {
+      return line.includes(VALIDATION_CONSTANTS.COPY_COMPLETE_MSG) ||
+        line.includes("Copy complete") ||
+        line.includes("Operation successfully completed") ||
+        line.includes("titles saved");
+    });
+
+    return hasSuccess;
   }
 }

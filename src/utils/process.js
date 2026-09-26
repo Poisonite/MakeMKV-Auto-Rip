@@ -2,8 +2,43 @@
  * Process utilities for handling exit scenarios in test-safe way
  */
 
+import { spawn } from "child_process";
 import { Logger } from "./logger.js";
 import { systemDateManager } from "./system-date.js";
+
+/**
+ * Forcibly terminate a child process and ALL of its descendants.
+ *
+ * A plain child.kill() on Windows only signals the named process, so a wrapper
+ * (e.g. bash -lc spawning ddrescue) leaves the real worker orphaned and still
+ * holding the optical drive. On win32 we use `taskkill /T /F` to take down the
+ * whole tree; elsewhere we fall back to child.kill().
+ * @param {import('child_process').ChildProcess} child
+ * @param {NodeJS.Signals} [signal]
+ */
+export function killProcessTree(child, signal = "SIGTERM") {
+  if (!child || typeof child.kill !== "function") {
+    return;
+  }
+
+  if (process.platform === "win32" && child.pid) {
+    try {
+      spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+        windowsHide: true,
+        stdio: "ignore",
+      });
+      return;
+    } catch {
+      // Fall through to the generic kill if taskkill is unavailable.
+    }
+  }
+
+  try {
+    child.kill(signal);
+  } catch {
+    // Best-effort: the process may already be gone.
+  }
+}
 
 /**
  * Check if the current environment is a test environment

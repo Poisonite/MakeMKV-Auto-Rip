@@ -28,7 +28,7 @@ export async function loadDrives(flags = {}) {
     if (!flags.quiet) {
       displayHeader();
     }
-    AppConfig.validate();
+    await AppConfig.validate();
 
     if (!flags.quiet) {
       Logger.info("Loading all drives...");
@@ -54,7 +54,7 @@ export async function ejectDrives(flags = {}) {
     if (!flags.quiet) {
       displayHeader();
     }
-    AppConfig.validate();
+    await AppConfig.validate();
 
     if (!flags.quiet) {
       Logger.info("Ejecting all drives...");
@@ -70,21 +70,26 @@ export async function ejectDrives(flags = {}) {
   }
 }
 
-// Parse command line arguments
-const args = process.argv.slice(2);
-const command = args[0];
-const flags = {
-  quiet: args.includes("--quiet"),
-};
+// Parse command line arguments - only execute if run directly
+import { fileURLToPath } from "url";
+const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);
 
-switch (command) {
-  case "load":
-    loadDrives(flags);
-    break;
-  case "eject":
-    ejectDrives(flags);
-    break;
-  default:
-    Logger.error("Invalid command. Use 'load' or 'eject'");
-    safeExit(1, "Invalid command");
+if (isMainModule) {
+  const args = process.argv.slice(2);
+  const command = args[0];
+  const flags = {
+    quiet: args.includes("--quiet"),
+  };
+
+  switch (command) {
+    case "load":
+      loadDrives(flags);
+      break;
+    case "eject":
+      ejectDrives(flags);
+      break;
+    default:
+      Logger.error("Invalid command. Use 'load' or 'eject'");
+      safeExit(1, "Invalid command");
+  }
 }

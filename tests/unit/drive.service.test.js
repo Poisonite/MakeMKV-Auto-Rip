@@ -78,6 +78,37 @@ describe("DriveService", () => {
     });
   });
 
+  describe("ejectDriveByNumber", () => {
+    it("should eject the matching optical drive", async () => {
+      vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue([
+        { id: "D:", path: "D:", description: "Drive 0" },
+        { id: "E:", path: "E:", description: "Drive 1" },
+      ]);
+      vi.mocked(OpticalDriveUtil.ejectDrive).mockResolvedValue(true);
+
+      const result = await DriveService.ejectDriveByNumber("1");
+
+      expect(result).toBe(true);
+      expect(OpticalDriveUtil.ejectDrive).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "E:" })
+      );
+    });
+
+    it("should warn when the requested drive does not exist", async () => {
+      const { Logger } = await import("../../src/utils/logger.js");
+      vi.mocked(OpticalDriveUtil.getOpticalDrives).mockResolvedValue([
+        { id: "D:", path: "D:", description: "Drive 0" },
+      ]);
+
+      const result = await DriveService.ejectDriveByNumber("3");
+
+      expect(result).toBe(false);
+      expect(Logger.warning).toHaveBeenCalledWith(
+        "No optical drive found for MakeMKV drive number 3."
+      );
+    });
+  });
+
   describe("loadAllDrives logging branches", () => {
     it("should log 'all loaded' when no failures", async () => {
       const { Logger } = await import("../../src/utils/logger.js");

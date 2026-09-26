@@ -101,6 +101,109 @@ describe("Logger and Colors", () => {
     });
   });
 
+  describe("Logger.debug", () => {
+    afterEach(() => {
+      // Reset verbose mode after each test
+      Logger.setVerbose(false);
+    });
+
+    it("should not log debug message when verbose mode is disabled", () => {
+      Logger.setVerbose(false);
+      const message = "Debug message";
+
+      Logger.debug(message);
+
+      expect(consoleSpy.info).not.toHaveBeenCalled();
+    });
+
+    it("should log debug message when verbose mode is enabled", () => {
+      Logger.setVerbose(true);
+      const message = "Debug message";
+
+      Logger.debug(message);
+
+      expect(consoleSpy.info).toHaveBeenCalledTimes(1);
+      const call = consoleSpy.info.mock.calls[0][0];
+      expect(call).toContain("[DEBUG]");
+      expect(call).toContain(message);
+    });
+
+    it("should log debug message with title when verbose mode is enabled", () => {
+      Logger.setVerbose(true);
+      const message = "Debug message";
+      const title = "Test Title";
+
+      Logger.debug(message, title);
+
+      expect(consoleSpy.info).toHaveBeenCalledTimes(1);
+      const call = consoleSpy.info.mock.calls[0][0];
+      expect(call).toContain("[DEBUG]");
+      expect(call).toContain(message);
+    });
+
+    it("should include timestamp in debug message", () => {
+      Logger.setVerbose(true);
+      const message = "Debug with timestamp";
+
+      Logger.debug(message);
+
+      expect(consoleSpy.info).toHaveBeenCalledTimes(1);
+      const call = consoleSpy.info.mock.calls[0][0];
+      expect(call).toMatch(/\d+:\d+:\d+/);
+    });
+  });
+
+  describe("Logger.setVerbose and isVerbose", () => {
+    afterEach(() => {
+      Logger.setVerbose(false);
+    });
+
+    it("should return false by default", () => {
+      expect(Logger.isVerbose()).toBe(false);
+    });
+
+    it("should return true after setting verbose to true", () => {
+      Logger.setVerbose(true);
+      expect(Logger.isVerbose()).toBe(true);
+    });
+
+    it("should return false after setting verbose to false", () => {
+      Logger.setVerbose(true);
+      Logger.setVerbose(false);
+      expect(Logger.isVerbose()).toBe(false);
+    });
+
+    it("should coerce truthy values to boolean", () => {
+      Logger.setVerbose(1);
+      expect(Logger.isVerbose()).toBe(true);
+      
+      Logger.setVerbose(0);
+      expect(Logger.isVerbose()).toBe(false);
+    });
+  });
+
+  describe("Logger sinks", () => {
+    it("should notify registered sinks and allow unsubscribe", () => {
+      const sink = vi.fn();
+      const detach = Logger.addSink(sink);
+
+      Logger.info("Sink message", "Title");
+
+      expect(sink).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "info",
+          message: "Sink message",
+          title: "Title",
+        })
+      );
+
+      detach();
+      Logger.warning("After unsubscribe");
+
+      expect(sink).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("Logger.error", () => {
     it("should log error message without details", () => {
       const message = "Test error message";

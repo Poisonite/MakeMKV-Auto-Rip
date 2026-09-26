@@ -2,7 +2,16 @@
  * End-to-end tests for the complete application
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+  vi,
+} from "vitest";
 import fs from "fs";
 import path from "path";
 import { stringify } from "yaml";
@@ -11,6 +20,33 @@ import { isProcessExitError } from "../../src/utils/process.js";
 describe("Application End-to-End Tests", () => {
   let testTempDir;
   let originalConfigPath;
+  // Back up the real config ONCE via copyFileSync (NOT readFileSync, which the
+  // global test setup mocks to return the fixture). The backup is created only
+  // if it doesn't already exist, so a skipped restore can never let a test stub
+  // overwrite the real config - the original bug that wiped config.yaml.
+  const configBackupPath = "./config.yaml.e2e-backup";
+
+  beforeAll(() => {
+    if (fs.existsSync("./config.yaml") && !fs.existsSync(configBackupPath)) {
+      fs.copyFileSync("./config.yaml", configBackupPath);
+    }
+  });
+
+  const restoreOriginalConfig = () => {
+    if (fs.existsSync(configBackupPath)) {
+      fs.copyFileSync(configBackupPath, "./config.yaml");
+    } else if (fs.existsSync("./config.yaml")) {
+      fs.unlinkSync("./config.yaml");
+    }
+  };
+
+  afterAll(() => {
+    // Final safety net, then drop the backup.
+    restoreOriginalConfig();
+    if (fs.existsSync(configBackupPath)) {
+      fs.unlinkSync(configBackupPath);
+    }
+  });
 
   beforeEach(async () => {
     // Create temporary directories for testing
@@ -41,13 +77,8 @@ describe("Application End-to-End Tests", () => {
       },
     };
 
-    // Backup original config if it exists
+    // Write test configuration (the real config is snapshotted in beforeAll).
     originalConfigPath = "./config.yaml";
-    if (fs.existsSync(originalConfigPath)) {
-      fs.copyFileSync(originalConfigPath, "./config.yaml.backup");
-    }
-
-    // Write test configuration
     fs.writeFileSync(originalConfigPath, stringify(testConfig));
 
     // Clear any cached config - reset modules first then clear cache
@@ -60,12 +91,8 @@ describe("Application End-to-End Tests", () => {
       fs.rmSync(testTempDir, { recursive: true, force: true });
     }
 
-    // Restore original config
-    if (fs.existsSync("./config.yaml.backup")) {
-      fs.renameSync("./config.yaml.backup", originalConfigPath);
-    } else if (fs.existsSync(originalConfigPath)) {
-      fs.unlinkSync(originalConfigPath);
-    }
+    // Restore original config from the in-memory snapshot.
+    restoreOriginalConfig();
 
     // Reset modules to clear any cached imports
     vi.resetModules();
@@ -165,7 +192,7 @@ describe("Application End-to-End Tests", () => {
       vi.resetModules();
 
       // Mock child_process exec before importing services
-      const mockExec = vi.fn((command, callback) => {
+      const mockExec = vi.fn((command, options, callback = options) => {
         if (command.includes("info disc:index")) {
           // Mock drive info response with at least one drive
           const mockOutput = `DRV:0,2,999,1,"BD-ROM HL-DT-ST BD-RE  BH16NS40 1.02d","Test Movie Title","/dev/sr0"`;
@@ -187,6 +214,10 @@ TINFO:1,9,0,"0:45:12"`;
 
       vi.doMock("child_process", () => ({
         exec: mockExec,
+        // handbrake.service.js promisifies execFile at module load, and
+        // recovery.service.js imports spawn; both must exist on the mock.
+        execFile: vi.fn(),
+        spawn: vi.fn(),
       }));
 
       vi.doMock("../../src/services/drive.service.js", () => ({
@@ -277,12 +308,16 @@ TINFO:1,9,0,"0:45:12"`;
 
       // Mock child_process
       vi.doMock("child_process", () => ({
-        exec: vi.fn((command, callback) => {
+        exec: vi.fn((command, options, callback = options) => {
           setTimeout(
             () => callback(null, 'MSG:5036,0,1,"Copy complete."', ""),
             0
           );
         }),
+        // handbrake.service.js promisifies execFile at module load, and
+        // recovery.service.js imports spawn; both must exist on the mock.
+        execFile: vi.fn(),
+        spawn: vi.fn(),
       }));
 
       // Make AppConfig validation pass and provide executable

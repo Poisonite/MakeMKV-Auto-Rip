@@ -39,9 +39,122 @@ mount_detection:
 # Ripping behavior settings
 ripping:
   # Rip all titles (over the MakeMKV minimum length) from disc instead of just the longest title (true/false)
-  rip_all_titles: false
+  rip_all_titles: true
   # Ripping mode - async for parallel processing, sync for sequential (async/sync)
   mode: "async"
+  # MakeMKV read-cache size in MB (makemkvcon --cache). A larger cache smooths
+  # out reads on slow or marginal discs. 0 uses MakeMKV's own default.
+  read_cache_mb: 256
+
+  # Read-error recovery for damaged/scratched discs (Windows-only).
+  # When a title fails to rip because of physical disc read errors, the app images
+  # the disc with GNU ddrescue (skipping unreadable areas) and re-rips the failed
+  # title(s) from that image. You lose only the unreadable seconds instead of the
+  # whole title. Requires MSYS2 with a ddrescue binary (see scripts/ddrescue-recover.sh).
+  # Off by default; normal rips are unaffected.
+  recover_read_errors: true
+  recovery:
+    # MSYS2 installation root (must contain usr\bin\bash.exe and a built ddrescue)
+    msys2_dir: "C:/msys64"
+    # Optical device path inside MSYS2; the MakeMKV drive number is appended,
+    # e.g. drive 0 -> /dev/sr0
+    device_prefix: "/dev/sr"
+    # Optional full device-node override (e.g. "/dev/sr0"). When set, it is used
+    # verbatim and device_prefix + drive number are ignored. Handy for a
+    # single-drive PC where the MSYS2 node number differs from the MakeMKV one.
+    device_path: ""
+    # Directory for the temporary ddrescue image (.iso + .map). Leave empty to use
+    # a dedicated temp dir (recommended) so multi-GB images never land in the media
+    # library. Set a path to keep images on a specific (roomy) drive.
+    work_dir: ""
+    # Keep the ddrescue disc image (.iso + .map) after a successful re-rip (true/false)
+    keep_image: false
+    # How many ddrescue passes to run (1-3). Pass 1 is the fast copy that grabs
+    # everything readable (usually 99%+ of the disc in minutes); passes 2-3 are
+    # slow scraping retries of the damaged areas that typically recover very
+    # little for a large time cost. Default 1 - raise only for badly damaged discs.
+    passes: 1
+    # ddrescue retry count for the scraping passes (only used when passes >= 2)
+    retries: 3
+    # Abort a pass when no data has been read for this long (e.g. "30m", "1h").
+    # Stops a dying drive from spinning for hours. Leave empty to disable.
+    timeout: "30m"
+    # Recovery time budget, as a multiple of how long the failed rip itself took.
+    # 1 means a recovered disc costs roughly twice a normal rip (imaging for as
+    # long as the rip ran, then a fast re-rip from the local image). Raise it for
+    # more thorough best-effort recovery, lower it to give up sooner.
+    max_runtime_ratio: 1
+    # Floor for that budget, so a rip that fails in the first minute still gets a
+    # usable attempt rather than a few seconds.
+    min_runtime: "10m"
+    # Hard wall-clock ceiling for the whole recovery (all passes combined), e.g.
+    # "90m"/"2h". Unlike `timeout` (which only bounds idle time), this stops a disc
+    # that reads slowly-but-steadily through a huge bad region. Empty disables.
+    # Applied on top of the budget above, as an absolute cap.
+    max_runtime: "90m"
+    # Add a reverse-direction scraping pass (the 3rd pass); often recovers a few
+    # extra sectors. Only runs when passes >= 3. (true/false)
+    reverse_pass: true
+    # Use direct disc access (-d / O_DIRECT). More accurate error reporting on raw
+    # devices, but may be unsupported under Cygwin/MSYS2 - leave off unless tested.
+    direct: false
+    # Resume from an existing image+mapfile when one is found (true/false). Turn off
+    # if you swap discs that share a volume label and don't want a stale resume.
+    resume: true
+    # Delete abandoned recovery images (.iso/.map) older than this many days at the
+    # start of a run. 0 disables the sweep.
+    image_retention_days: 7
+    # Require at least this many GB free in the working directory before imaging.
+    min_free_gb: 10
+
+# HandBrake post-processing settings
+handbrake:
+  # Enable HandBrake post-processing after ripping (true/false)
+  enabled: true
+  # Path to HandBrakeCLI executable
+  # Leave empty or comment out to use automatic detection based on your platform
+  # IMPORTANT: HandBrakeCLI is a SEPARATE download from the GUI (different installer/package)
+  #   - GUI: https://handbrake.fr/downloads.php
+  #   - CLI: https://handbrake.fr/downloads2.php (Download the CLI version!)
+  # Windows: Comes as a ZIP file, extract HandBrakeCLI.exe to a folder of your choice
+  # cli_path: "C:/HandBrakeCLI/HandBrakeCLI.exe"
+  # Compression preset to use (see HandBrake documentation for available presets)
+  preset: "Fast 1080p30"
+  # Output format (mp4/m4v)
+  output_format: "mp4"
+  # Delete original MKV file after successful conversion (true/false)
+  delete_original: true
+  # Percentage of available logical CPU cores to use for HandBrake encoding.
+  # Set to 100 to allow HandBrake to use all available logical CPU cores.
+  cpu_percent: 75
+
+  # Subtitle handling (HandBrakeCLI)
+  subtitles:
+    # Enable/disable automatic subtitle selection (true/false)
+    enabled: true
+    # Preferred subtitle languages (comma-separated ISO 639-2 codes).
+    # Tip: include "any" to keep *all* subtitle languages, while still preferring English first.
+    # Default: "eng,any"
+    lang_list: "eng,any"
+    # Select all subtitle tracks that match the language list (true/false)
+    all: true
+    # Which selected subtitle to mark as default (number or "none").
+    # "1" typically becomes English when present due to lang_list ordering.
+    default: "1"
+    # Keep subtitles as selectable tracks only. Burn-in is not supported.
+    burned: "none"
+  # Additional HandBrake CLI arguments (advanced users only)
+  #
+  # Subtitles note:
+  # - By default, HandBrakeCLI may NOT include subtitle tracks unless you tell it to.
+  # - MP4/M4V containers generally cannot carry Blu-ray/DVD bitmap subtitles (PGS/VobSub) as soft subtitles.
+  #   This project does not burn subtitles into the video, so keep the original MKV when those tracks matter.
+  #
+  # Examples:
+  # - Try to include all subtitles (works best for text-based subs): "--all-subtitles"
+  # - Include all English subtitles: "--subtitle-lang-list eng --all-subtitles"
+  # - Override CPU thread calculation directly: "--encopts threads=4"
+  additional_args: ""
 
 # Interface behavior settings
 interface:

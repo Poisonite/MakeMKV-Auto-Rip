@@ -127,6 +127,7 @@ export function broadcastStatusUpdate(status, operation = null, data = {}) {
     type: "status_update",
     status,
     operation,
+    canStop: Boolean(data.canStop),
     data,
   });
 }

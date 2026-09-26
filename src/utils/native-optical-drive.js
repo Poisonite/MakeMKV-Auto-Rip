@@ -73,15 +73,25 @@ class NativeOpticalDrive {
   }
 
   /**
-   * Check if native addon is available
+   * Whether the native addon is loaded and usable.
+   *
+   * Never throws: a failed load is reported by #initNativeAddon and answered
+   * here as "not available", so callers get the same clean answer on the first
+   * attempt as on every later one.
+   * @returns {boolean}
    */
   static get isNativeAvailable() {
     if (os.platform() !== "win32") {
       return false;
     }
 
-    this.#initNativeAddon();
-    return (
+    try {
+      this.#initNativeAddon();
+    } catch {
+      return false;
+    }
+
+    return Boolean(
       this.#nativeAddon && typeof this.#nativeAddon.ejectDrive === "function"
     );
   }
@@ -96,27 +106,20 @@ class NativeOpticalDrive {
       throw new Error("Native drive operations only supported on Windows");
     }
 
-    this.#initNativeAddon();
-
-    if (this.isNativeAvailable) {
-      try {
-        // Ensure proper format: remove any extra colons and normalize
-        const normalizedDriveLetter =
-          driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
-
-        const success = this.#nativeAddon.ejectDrive(normalizedDriveLetter);
-
-        if (!success) {
-          throw new Error(`Eject failed - try running as administrator`);
-        }
-
-        return success;
-      } catch (error) {
-        throw error;
-      }
-    } else {
+    if (!this.isNativeAvailable) {
       throw new Error("Native addon not available");
     }
+
+    // Ensure proper format: remove any extra colons and normalize
+    const normalizedDriveLetter =
+      driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
+
+    const success = this.#nativeAddon.ejectDrive(normalizedDriveLetter);
+    if (!success) {
+      throw new Error(`Eject failed - try running as administrator`);
+    }
+
+    return success;
   }
 
   /**
@@ -129,59 +132,20 @@ class NativeOpticalDrive {
       throw new Error("Native drive operations only supported on Windows");
     }
 
-    this.#initNativeAddon();
-
-    if (this.isNativeAvailable) {
-      try {
-        // Ensure proper format: remove any extra colons and normalize
-        const normalizedDriveLetter =
-          driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
-
-        const success = this.#nativeAddon.loadDrive(normalizedDriveLetter);
-
-        if (!success) {
-          throw new Error(`Load failed - try running as administrator`);
-        }
-
-        return success;
-      } catch (error) {
-        throw error;
-      }
-    } else {
+    if (!this.isNativeAvailable) {
       throw new Error("Native addon not available");
     }
-  }
 
-  /**
-   * Eject all optical drives
-   * @param {Array} drives - Array of drive objects with 'id' property
-   * @returns {Promise<void>}
-   */
-  static async ejectAllDrives(drives) {
-    for (const drive of drives) {
-      try {
-        await this.ejectDrive(drive.id);
-      } catch (error) {
-        Logger.error(`Failed to eject drive ${drive.id}: ${error.message}`);
-        // Continue with other drives
-      }
-    }
-  }
+    // Ensure proper format: remove any extra colons and normalize
+    const normalizedDriveLetter =
+      driveLetter.replace(/::+/g, ":").replace(/:$/, "") + ":";
 
-  /**
-   * Load all optical drives
-   * @param {Array} drives - Array of drive objects with 'id' property
-   * @returns {Promise<void>}
-   */
-  static async loadAllDrives(drives) {
-    for (const drive of drives) {
-      try {
-        await this.loadDrive(drive.id);
-      } catch (error) {
-        Logger.error(`Failed to load drive ${drive.id}: ${error.message}`);
-        // Continue with other drives
-      }
+    const success = this.#nativeAddon.loadDrive(normalizedDriveLetter);
+    if (!success) {
+      throw new Error(`Load failed - try running as administrator`);
     }
+
+    return success;
   }
 }
 

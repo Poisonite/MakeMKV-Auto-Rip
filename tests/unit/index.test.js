@@ -15,6 +15,15 @@ vi.mock("../../src/cli/interface.js", () => ({
 vi.mock("../../src/config/index.js", () => ({
   AppConfig: {
     validate: vi.fn(),
+    handbrake: {
+      enabled: false, // Disable HandBrake by default in tests
+    },
+  },
+}));
+
+vi.mock("../../src/services/handbrake.service.js", () => ({
+  HandBrakeService: {
+    validate: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -38,14 +47,15 @@ describe("Main Application (src/app.js)", () => {
     vi.clearAllMocks();
 
     // Spy on process methods
-    processExitSpy = vi.spyOn(process, "exit").mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    processOnSpy = vi.spyOn(process, "on").mockImplementation(() => {});
+    processExitSpy = vi.spyOn(process, "exit").mockImplementation(() => { });
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+    processOnSpy = vi.spyOn(process, "on").mockImplementation(() => { });
 
     // Get mocked modules
     const { CLIInterface } = await import("../../src/cli/interface.js");
     const { AppConfig } = await import("../../src/config/index.js");
     const { Logger } = await import("../../src/utils/logger.js");
+    const { HandBrakeService } = await import("../../src/services/handbrake.service.js");
 
     mockCLIInterface = CLIInterface;
     mockAppConfig = AppConfig;
@@ -66,7 +76,7 @@ describe("Main Application (src/app.js)", () => {
   describe("Application startup", () => {
     it("should validate configuration before starting CLI", async () => {
       // Mock successful validation and CLI start
-      mockAppConfig.validate.mockImplementation(() => {});
+      mockAppConfig.validate.mockImplementation(() => { });
       mockCLIInterface.mockImplementation(() => ({
         start: vi.fn().mockResolvedValue(undefined),
       }));
@@ -79,7 +89,7 @@ describe("Main Application (src/app.js)", () => {
     });
 
     it("should create CLIInterface instance and call start", async () => {
-      mockAppConfig.validate.mockImplementation(() => {});
+      mockAppConfig.validate.mockImplementation(() => { });
       const mockStart = vi.fn().mockResolvedValue(undefined);
       mockCLIInterface.mockImplementation(() => ({
         start: mockStart,
@@ -114,7 +124,7 @@ describe("Main Application (src/app.js)", () => {
     });
 
     it("should handle CLI start errors", async () => {
-      mockAppConfig.validate.mockImplementation(() => {});
+      mockAppConfig.validate.mockImplementation(() => { });
       const cliError = new Error("CLI failed to start");
       mockCLIInterface.mockImplementation(() => ({
         start: vi.fn().mockRejectedValue(cliError),
@@ -231,7 +241,7 @@ describe("Main Application (src/app.js)", () => {
 
   describe("Integration scenarios", () => {
     it("should handle complete successful startup flow", async () => {
-      mockAppConfig.validate.mockImplementation(() => {});
+      mockAppConfig.validate.mockImplementation(() => { });
       const mockStart = vi.fn().mockResolvedValue(undefined);
       mockCLIInterface.mockImplementation(() => ({
         start: mockStart,
@@ -296,7 +306,7 @@ describe("Main Application (src/app.js)", () => {
     });
 
     it("should format CLI errors properly", async () => {
-      mockAppConfig.validate.mockImplementation(() => {});
+      mockAppConfig.validate.mockImplementation(() => { });
       const cliError = new Error("CLI initialization failed");
       mockCLIInterface.mockImplementation(() => ({
         start: vi.fn().mockRejectedValue(cliError),
@@ -365,7 +375,7 @@ describe("Main Application (src/app.js)", () => {
     });
 
     it("should handle CLI start promise rejection", async () => {
-      mockAppConfig.validate.mockImplementation(() => {});
+      mockAppConfig.validate.mockImplementation(() => { });
 
       let rejectCLI;
       const cliPromise = new Promise((resolve, reject) => {

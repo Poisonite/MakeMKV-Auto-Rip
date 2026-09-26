@@ -142,6 +142,17 @@ describe("WebService - start/stop and routing", () => {
     ).toBe(true);
   });
 
+  it("fails to start when the port is already taken", async () => {
+    await svc.start();
+    const { port } = svc.server.address();
+
+    const second = new WebService();
+    second.port = port;
+
+    await expect(second.start()).rejects.toThrow(/already in use/i);
+    expect(second.isRunning).toBe(false);
+  });
+
   it("propagates errors from listen during start", async () => {
     // Replace listen with a failing implementation
     const err = new Error("listen failed");

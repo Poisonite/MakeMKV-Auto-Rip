@@ -101,13 +101,29 @@ export class WebService {
    */
   async listen() {
     return new Promise((resolve, reject) => {
-      this.server.listen(this.port, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
+      // listen()'s callback is the 'listening' listener, never an error
+      // callback: a failure arrives as an 'error' event. Without this handler a
+      // second instance would keep running headless - polling the drives and
+      // ripping alongside the instance that owns the port.
+      const onError = (error) => {
+        this.server.off("listening", onListening);
+        reject(
+          error?.code === "EADDRINUSE"
+            ? new Error(
+                `Port ${this.port} is already in use. MakeMKV Auto Rip is probably already running - stop it first, or set PORT to a free port.`
+              )
+            : error
+        );
+      };
+
+      const onListening = () => {
+        this.server.off("error", onError);
+        resolve();
+      };
+
+      this.server.once("error", onError);
+      this.server.once("listening", onListening);
+      this.server.listen(this.port);
     });
   }
 

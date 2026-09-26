@@ -23,6 +23,10 @@ Automatically rips DVDs and Blu-ray discs using the MakeMKV console and saves th
 - **📝 Comprehensive logging** - Optional detailed operation logs with configurable 12hr/24hr console timestamps
 - **⚡ Advanced drive management** - Separate control for loading and ejecting drive preferences
 - **🎛️ Flexible options** - Rip longest title or all titles (that are above MakeMKV min title length)
+- **🔄 HandBrake integration** - Optional post-processing to convert MKV files to more efficient formats
+- **🎯 Compression presets** - Use HandBrake's optimized presets for the perfect balance of quality and size
+- **🗑️ Automatic cleanup** - Optional removal of original MKV files after successful conversion
+- **♻️ Resumable encoding** - Encodes keep running while the next disc rips, and the web UI finishes any leftover conversions on startup
 
 ## 🚀 Quick Start
 
@@ -251,6 +255,57 @@ mount_detection:
   # Polling interval to check for newly mounted drives (in seconds)
   poll_interval: 1
 
+# HandBrake post-processing settings
+handbrake:
+  # Enable HandBrake post-processing after ripping (true/false)
+  enabled: false
+
+  # Path to HandBrakeCLI executable (OPTIONAL - auto-detected if not specified)
+  # Uncomment and set only if you need to override the automatic detection
+  # cli_path: "C:/Program Files/HandBrake/HandBrakeCLI.exe"
+
+  # Compression preset to use (see HandBrake documentation for available presets)
+  # Common presets: "Fast 1080p30", "HQ 1080p30 Surround", "Super HQ 1080p30 Surround"
+  preset: "Fast 1080p30"
+
+  # Output format (mp4/m4v)
+  output_format: "mp4"
+
+  # Delete original MKV file after successful conversion (true/false)
+  delete_original: true
+
+   # Percentage of available logical CPU cores to use for HandBrake encoding
+   # Set to 100 to allow HandBrake to use all available logical CPU cores
+   cpu_percent: 75
+
+   # Subtitle handling (HandBrakeCLI)
+   subtitles:
+      # Enable/disable automatic subtitle selection (true/false)
+      enabled: true
+      # Preferred subtitle languages (comma-separated ISO 639-2 codes).
+      # Tip: include "any" to keep *all* subtitle languages, while still preferring English first.
+      # Default: "eng,any"
+      lang_list: "eng,any"
+      # Select all subtitle tracks that match the language list (true/false)
+      all: true
+      # Which selected subtitle to mark as default (number or "none")
+      default: "1"
+      # Keep subtitles as selectable tracks only. Burn-in is not supported.
+      burned: "none"
+
+  # Additional HandBrake CLI arguments (advanced users only)
+   #
+   # Subtitles note:
+   # - HandBrakeCLI may NOT include subtitle tracks unless you tell it to.
+   # - MP4/M4V containers generally cannot carry bitmap subtitles (Blu-ray PGS / DVD VobSub) as soft subtitles.
+   #   This project does not burn subtitles into the video, so keep the original MKV when those tracks matter.
+   #
+   # Examples:
+   # - Keep all subtitles (best for text-based subs): "--all-subtitles"
+   # - Keep all English subtitles: "--subtitle-lang-list eng --all-subtitles"
+   # - Override CPU thread calculation directly: "--encopts threads=4"
+  additional_args: ""
+
 # Interface behavior settings
 interface:
   # Enable repeat mode - after ripping, prompt again for another round (true/false)
@@ -292,6 +347,104 @@ makemkv:
   - **Cross-Platform Support**: Works on Windows, macOS, and Linux
   - **Automatic Restoration**: System date automatically restored after ripping operations
   - ⚠️ **Docker Limitation**: Not supported in Docker containers - change host system date manually if needed
+
+- **HandBrake Configuration**:
+  - **`handbrake.enabled`** - Enable/disable HandBrake post-processing (`true` or `false`)
+  - **`handbrake.cli_path`** - Path to HandBrakeCLI executable (auto-detected if not specified)
+    - **IMPORTANT:** HandBrakeCLI is a **separate download** from the GUI (different installer/package)
+      - GUI version: [https://handbrake.fr/downloads.php](https://handbrake.fr/downloads.php)
+      - **CLI version: [https://handbrake.fr/downloads2.php](https://handbrake.fr/downloads2.php)** ← Download this one!
+    - Windows: Comes as a ZIP file - extract `HandBrakeCLI.exe` to a folder (e.g., `C:/HandBrakeCLI/`)
+    - Supports forward slashes on all platforms
+    - Common locations after installation:
+      - Windows: `"C:/HandBrakeCLI/HandBrakeCLI.exe"` (wherever you extracted it)
+      - Linux: `"/usr/bin/HandBrakeCLI"`
+      - macOS: `"/usr/local/bin/HandBrakeCLI"` or `"/opt/homebrew/bin/HandBrakeCLI"`
+  - **`handbrake.preset`** - HandBrake encoding preset
+    - Common presets:
+      - `"Fast 1080p30"` - Good balance of speed and quality
+      - `"HQ 1080p30 Surround"` - Higher quality, slower encoding
+      - `"Super HQ 1080p30 Surround"` - Best quality, slowest encoding
+    - See [HandBrake documentation](https://handbrake.fr/docs/en/latest/technical/official-presets.html) for more presets
+  - **`handbrake.output_format`** - Output container format (`"mp4"` or `"m4v"`)
+  - **`handbrake.delete_original`** - Delete original MKV after successful conversion (`true` or `false`)
+   - **`handbrake.cpu_percent`** - Percentage of available logical CPU cores to allocate to HandBrake software encoding (default: `75`; set to `100` for all cores)
+   - **`handbrake.subtitles.enabled`** - Enable/disable automatic subtitle selection (`true` or `false`)
+   - **`handbrake.subtitles.lang_list`** - Comma-separated ISO 639-2 subtitle language codes (e.g. `"eng,spa"`)
+      - Tip: include `"any"` to keep all subtitle languages while still preferring English first (default: `"eng,any"`)
+   - **`handbrake.subtitles.all`** - Include all subtitle tracks matching the language list (`true`), or only the first match (`false`)
+   - **`handbrake.subtitles.default`** - Which selected subtitle to mark as default (`"1"`, `"2"`, ... or `"none"`)
+   - **`handbrake.subtitles.burned`** - Subtitle burn-in is disabled; keep this set to `"none"`
+  - **`handbrake.additional_args`** - Additional HandBrakeCLI arguments for advanced users
+      - Subtitles note: MP4/M4V containers generally cannot carry bitmap subtitles (Blu-ray PGS / DVD VobSub) as soft subtitles.
+         - This project does not burn subtitles into the video, so keep the original MKV when those tracks matter.
+      - CPU note: if you pass `--encopts threads=...` here, it overrides the automatic `handbrake.cpu_percent` thread calculation.
+      - Subtitles examples:
+         - Keep all subtitles (best for text-based subs): `--all-subtitles`
+         - Keep all English subtitles: `--subtitle-lang-list eng --all-subtitles`
+      - Audio example: `--audio-lang-list eng --all-audio`
+
+### HandBrake Error Handling & Retry Logic
+
+When HandBrake conversion fails, the system automatically implements an intelligent retry strategy:
+
+1. **First attempt**: Uses your configured preset (e.g., "Fast 1080p30")
+2. **Retry 1**: Falls back to "Fast 1080p30" preset (faster encoding, good quality)
+3. **Retry 2**: Falls back to "Fast 720p30" preset (lower resolution, faster)
+4. **Final retry**: Falls back to "Fast 480p30" preset (lowest quality, fastest)
+
+**Failure Behavior:**
+- Original MKV file is **always preserved** (even if `delete_original: true`)
+- Errors are logged with detailed information for troubleshooting
+- Ripping workflow continues normally (conversion failure doesn't stop disc ejection)
+- Partial/incomplete output files are automatically cleaned up
+
+### Background Encoding & Resuming
+
+In the web UI's rip mode, each disc is ejected as soon as it is ripped and its
+titles join a single HandBrake queue that encodes one file at a time, at
+below-normal priority, while the next disc rips.
+
+- **The queue belongs to the web server, not the rip.** Loading a new disc,
+  pressing **Stop**, or saving the configuration stops ripping only; queued
+  encodes keep going until the queue is empty.
+- **Leftovers are picked up on startup.** `npm run web` scans `movie_rips_dir`
+  (subfolders included) for MKV files that were never converted - for example
+  because the server was closed mid-encode or a conversion failed - and queues
+  them. An interrupted encode starts again from the beginning.
+- The startup scan skips empty MKV files (failed rips) and files modified in
+  the last two minutes (possibly still being written by MakeMKV). With
+  `delete_original: false`, an MKV that already has its `.mp4`/`.m4v` beside it
+  counts as converted, so restarts do not re-encode it.
+- To stop an encode in progress, stop the web server. The MKV is kept and is
+  converted the next time the server starts.
+
+### Converting a Folder Manually
+
+To convert MKV files without ripping (e.g. files copied from elsewhere), run
+the folder script. It uses the same `handbrake` settings from `config.yaml`:
+
+```bash
+node scripts/handbrake-convert-folder.js <folder> [--cpu-percent=N] [--no-recurse]
+```
+
+- `<folder>` - Folder to convert, subfolders included. Absolute paths on other
+  drives and UNC shares (e.g. `\\nas\media`) work too.
+- `--cpu-percent=N` - Share of logical cores for this run (1-100, default 75)
+- `--no-recurse` - Only convert MKV files directly in the folder
+
+Don't point it at a folder the web server is already encoding; two encoders
+working on the same file would clash.
+
+**Common Issues & Solutions:**
+
+| Issue                         | Solution                                                           |
+| ----------------------------- | ------------------------------------------------------------------ |
+| **Timeout errors**            | Increase timeout by using a faster preset or wait for larger files |
+| **Invalid output**            | Check HandBrake installation and permissions                       |
+| **Permission denied**         | Verify output folder permissions and disk space                    |
+| **Header validation warning** | Usually safe to ignore unless file won't play                      |
+| **Process killed**            | System may be low on memory; try faster preset                     |
 
 **Important Notes:**
 

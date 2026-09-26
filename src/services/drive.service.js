@@ -59,6 +59,30 @@ export class DriveService {
   }
 
   /**
+   * Eject a specific optical drive using its MakeMKV drive index
+   * @param {string|number} driveNumber - MakeMKV drive number
+   * @returns {Promise<boolean>} Success status
+   */
+  static async ejectDriveByNumber(driveNumber) {
+    try {
+      const drives = await this.getOpticalDrives();
+      const driveIndex = Number.parseInt(driveNumber, 10);
+
+      if (!Number.isInteger(driveIndex) || !drives[driveIndex]) {
+        Logger.warning(
+          `No optical drive found for MakeMKV drive number ${driveNumber}.`
+        );
+        return false;
+      }
+
+      return await OpticalDriveUtil.ejectDrive(drives[driveIndex]);
+    } catch (error) {
+      Logger.error(`Failed to eject drive ${driveNumber}: ${error.message}`);
+      return false;
+    }
+  }
+
+  /**
    * Load drives and wait with user instruction
    * @returns {Promise<void>}
    */

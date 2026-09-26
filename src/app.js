@@ -7,6 +7,15 @@ import { CLIInterface } from "./cli/interface.js";
 import { AppConfig } from "./config/index.js";
 import { Logger } from "./utils/logger.js";
 import { safeExit, isProcessExitError } from "./utils/process.js";
+import { HandBrakeService } from "./services/handbrake.service.js";
+
+export async function prepareRipRuntime() {
+  await AppConfig.validate();
+
+  if (AppConfig.handbrake?.enabled) {
+    await HandBrakeService.validate();
+  }
+}
 
 /**
  * Main application function
@@ -16,8 +25,15 @@ import { safeExit, isProcessExitError } from "./utils/process.js";
  */
 export async function main(flags = {}) {
   try {
-    // Validate configuration before starting
-    await AppConfig.validate();
+    try {
+      await prepareRipRuntime();
+    } catch (error) {
+      Logger.error("HandBrake validation failed:", error.message);
+      if (error.details) {
+        Logger.error("Details:", error.details);
+      }
+      throw error;
+    }
 
     // Start the CLI interface with flags
     const cli = new CLIInterface(flags);
