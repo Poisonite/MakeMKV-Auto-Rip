@@ -516,8 +516,17 @@ TINFO:2,9,0,"2:15:30"`;
     });
 
     it("should return eligible title numbers when a maximum duration is configured", async () => {
-      mockAppConfig.maxTitleLengthMinutes = 60;
-      mockAppConfig.isRipAllEnabled = true;
+      vi.resetModules();
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          ...mockAppConfig,
+          maxTitleLengthMinutes: 60,
+          isRipAllEnabled: true,
+        },
+      }));
+      const { DiscService: Local } = await import(
+        "../../src/services/disc.service.js"
+      );
       const mockStdout = `TINFO:0,9,0,"0:22:00"
 TINFO:1,9,0,"2:00:00"
 TINFO:2,9,0,"0:23:30"`;
@@ -526,7 +535,7 @@ TINFO:2,9,0,"0:23:30"`;
         callback(null, mockStdout, "");
       });
 
-      const result = await DiscService.getDiscFileInfo({
+      const result = await Local.getDiscFileInfo({
         driveNumber: "0",
         title: "Test Disc",
         mediaType: "dvd",
