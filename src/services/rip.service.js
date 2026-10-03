@@ -127,43 +127,56 @@ export class RipService {
         return;
       }
 
-      const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${commandDataItem.fileNumber} "${dir}"`;
+      const selectors = commandDataItem.fileNumbers?.length
+        ? commandDataItem.fileNumbers
+        : [commandDataItem.fileNumber];
 
-      exec(makeMKVCommand, async (err, stdout, stderr) => {
-        // Check for critical MakeMKV messages (not first call, so only check for errors)
-        const shouldContinue = MakeMKVMessages.checkOutput(
-          stdout + (stderr || ""),
-          false
-        );
+      try {
+        const outputs = [];
+        for (const selector of selectors) {
+          outputs.push(
+            await new Promise((resolveCommand, rejectCommand) => {
+              const makeMKVCommand = `${makeMKVExecutable} -r mkv disc:${commandDataItem.driveNumber} ${selector} "${dir}"`;
 
-        if (!shouldContinue) {
-          Logger.error(
-            "MakeMKV version is too old, please update to the latest version"
+              exec(makeMKVCommand, (err, stdout, stderr) => {
+                // Check for critical MakeMKV messages (not first call, so only check for errors)
+                const shouldContinue = MakeMKVMessages.checkOutput(
+                  stdout + (stderr || ""),
+                  false
+                );
+
+                if (!shouldContinue) {
+                  Logger.error(
+                    "MakeMKV version is too old, please update to the latest version"
+                  );
+                  rejectCommand(
+                    new Error(
+                      "MakeMKV version is too old, please update to the latest version"
+                    )
+                  );
+                  return;
+                }
+
+                if (err || stderr) {
+                  Logger.error(
+                    `Critical Error Ripping ${commandDataItem.title}`,
+                    err || stderr
+                  );
+                  rejectCommand(err || stderr);
+                  return;
+                }
+
+                resolveCommand(stdout);
+              });
+            })
           );
-          reject(
-            new Error(
-              "MakeMKV version is too old, please update to the latest version"
-            )
-          );
-          return;
         }
 
-        if (err || stderr) {
-          Logger.error(
-            `Critical Error Ripping ${commandDataItem.title}`,
-            err || stderr
-          );
-          reject(err || stderr);
-          return;
-        }
-
-        try {
-          await this.handleRipCompletion(stdout, commandDataItem);
-          resolve(commandDataItem.title);
-        } catch (error) {
-          reject(error);
-        }
-      });
+        await this.handleRipCompletion(outputs.join("\n"), commandDataItem);
+        resolve(commandDataItem.title);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 

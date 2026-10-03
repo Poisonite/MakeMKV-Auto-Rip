@@ -121,6 +121,12 @@ export class AppConfig {
     return Boolean(config.ripping?.rip_all_titles);
   }
 
+  static get maxTitleLengthMinutes() {
+    const config = this.#loadConfig();
+    const maximum = config.ripping?.max_title_length_minutes;
+    return typeof maximum === "number" && maximum > 0 ? maximum : null;
+  }
+
   static get rippingMode() {
     const config = this.#loadConfig();
     const mode = config.ripping?.mode;

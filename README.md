@@ -240,6 +240,9 @@ ripping:
   # Rip all titles from disc instead of just the main title (true/false)
   rip_all_titles: false
 
+   # Optional maximum title duration in minutes; titles longer than this are skipped
+   max_title_length_minutes: 60
+
   # Ripping mode - async for parallel processing, sync for sequential (async/sync)
   mode: "async"
 
@@ -279,6 +282,7 @@ makemkv:
 - **`drives.auto_eject`** - Auto-eject drives after ripping completion (`true` or `false`)
 - **`drives.load_delay`** - Delay time (in seconds) when loading drives, allows time for manual drive closing (`0` to disable, default: `0`)
 - **`ripping.rip_all_titles`** - Rip all titles that are above MakeMKV min length (`true`) or longest title only (`false`)
+- **`ripping.max_title_length_minutes`** - Optional maximum duration for selected titles; titles over this limit are skipped. Omit or comment out to disable.
 - **`ripping.mode`** - Ripping mode (`"async"` for parallel processing or `"sync"` for sequential processing)
 - **`mount_detection.wait_timeout`** - Maximum time (in seconds) to wait for drives to mount media before starting rip (`0` to disable, default: `10`)
 - **`mount_detection.poll_interval`** - Polling interval (in seconds) to check for newly mounted drives (default: `1`)
