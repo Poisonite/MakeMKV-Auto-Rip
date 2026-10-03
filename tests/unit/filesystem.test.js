@@ -80,6 +80,9 @@ describe("FileSystemUtils", () => {
       const result = await FileSystemUtils.detectMakeMKVInstallation();
       expect(result).toBe("C:/Program Files/MakeMKV");
       expect(mockedFsPromises.access).toHaveBeenCalled();
+      expect(mockedFsPromises.access).toHaveBeenLastCalledWith(
+        expect.stringMatching(/makemkvcon64\.exe$/)
+      );
     });
 
     it("should detect MakeMKV on Linux", async () => {
@@ -125,7 +128,9 @@ describe("FileSystemUtils", () => {
         "C:/Program Files/MakeMKV"
       );
       expect(result).toBe(true);
-      expect(mockedFsPromises.access).toHaveBeenCalled();
+      expect(mockedFsPromises.access).toHaveBeenCalledWith(
+        expect.stringMatching(/makemkvcon64\.exe$/)
+      );
     });
 
     it("should validate Unix installation", async () => {
