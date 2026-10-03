@@ -249,6 +249,7 @@ describe("RipService", () => {
   describe("Ripping Process", () => {
     it("should rip each title selected by the duration filter separately", async () => {
       const { exec } = await import("child_process");
+      mockAppConfig.getMakeMKVExecutable.mockResolvedValue("makemkvcon");
 
       await ripService.ripSingleDisc(
         {
