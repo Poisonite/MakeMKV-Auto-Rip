@@ -121,7 +121,7 @@ export class FileSystemUtils {
 
         // Check if makemkvcon executable exists in this path
         const executableName =
-          platform === "win32" ? "makemkvcon.exe" : "makemkvcon";
+          platform === "win32" ? "makemkvcon64.exe" : "makemkvcon";
         const executablePath = join(basePath, executableName);
 
         try {
@@ -155,7 +155,7 @@ export class FileSystemUtils {
     try {
       const platform = os.platform();
       const executableName =
-        platform === "win32" ? "makemkvcon.exe" : "makemkvcon";
+        platform === "win32" ? "makemkvcon64.exe" : "makemkvcon";
       const executablePath = join(mkvDir, executableName);
 
       await access(executablePath);
