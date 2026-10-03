@@ -676,7 +676,12 @@ TINFO:2,9,0,"malformed"`;
   });
 
   describe("getFileNumbers", () => {
-    it("should select every title within the maximum when rip-all is enabled", () => {
+    it("should select every title within the maximum when rip-all is enabled", async () => {
+      const { ValidationUtils } = await import("../../src/utils/validation.js");
+      const { getTimeInSeconds } = ValidationUtils;
+      getTimeInSeconds.mockImplementation((timeArray) =>
+        +timeArray[0] * 3600 + +timeArray[1] * 60 + +timeArray[2]
+      );
       const mockOutput = `TINFO:0,9,0,"0:22:00"
 TINFO:1,9,0,"2:00:00"
 TINFO:2,9,0,"0:23:30"`;
@@ -687,7 +692,12 @@ TINFO:2,9,0,"0:23:30"`;
       ]);
     });
 
-    it("should select the longest eligible title when rip-all is disabled", () => {
+    it("should select the longest eligible title when rip-all is disabled", async () => {
+      const { ValidationUtils } = await import("../../src/utils/validation.js");
+      const { getTimeInSeconds } = ValidationUtils;
+      getTimeInSeconds.mockImplementation((timeArray) =>
+        +timeArray[0] * 3600 + +timeArray[1] * 60 + +timeArray[2]
+      );
       const mockOutput = `TINFO:0,9,0,"0:22:00"
 TINFO:1,9,0,"2:00:00"
 TINFO:2,9,0,"0:23:30"`;
