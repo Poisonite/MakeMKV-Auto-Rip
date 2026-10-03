@@ -247,6 +247,23 @@ describe("RipService", () => {
   });
 
   describe("Ripping Process", () => {
+    it("should rip each title selected by the duration filter separately", async () => {
+      const { exec } = await import("child_process");
+
+      await ripService.ripSingleDisc(
+        {
+          driveNumber: "0",
+          title: "Simpsons Disc",
+          fileNumbers: ["0", "2"],
+        },
+        "./test-output"
+      );
+
+      expect(exec).toHaveBeenCalledTimes(2);
+      expect(exec.mock.calls[0][0]).toContain("disc:0 0");
+      expect(exec.mock.calls[1][0]).toContain("disc:0 2");
+    });
+
     it("should create unique folders for each disc", async () => {
       await ripService.startRipping();
 
