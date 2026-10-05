@@ -80,6 +80,9 @@ describe("FileSystemUtils", () => {
       const result = await FileSystemUtils.detectMakeMKVInstallation();
       expect(result).toBe("C:/Program Files/MakeMKV");
       expect(mockedFsPromises.access).toHaveBeenCalled();
+      expect(mockedFsPromises.access).toHaveBeenLastCalledWith(
+        expect.stringMatching(/makemkvcon64\.exe$/)
+      );
     });
 
     it("should detect MakeMKV on Linux", async () => {
@@ -125,7 +128,21 @@ describe("FileSystemUtils", () => {
         "C:/Program Files/MakeMKV"
       );
       expect(result).toBe(true);
-      expect(mockedFsPromises.access).toHaveBeenCalled();
+      expect(mockedFsPromises.access).toHaveBeenCalledWith(
+        expect.stringMatching(/makemkvcon64\.exe$/)
+      );
+    });
+
+    it("should fall back to makemkvcon.exe on Windows", async () => {
+      mockedOs.platform.mockReturnValue("win32");
+      mockedFsPromises.access.mockImplementation(async (path) => {
+        if (path.endsWith("makemkvcon64.exe")) throw new Error("ENOENT");
+      });
+
+      const result = await FileSystemUtils.findMakeMKVExecutable(
+        "C:/Program Files/MakeMKV"
+      );
+      expect(result).toMatch(/[\\/]makemkvcon\.exe$/);
     });
 
     it("should validate Unix installation", async () => {
