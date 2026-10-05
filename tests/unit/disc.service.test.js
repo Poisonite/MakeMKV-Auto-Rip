@@ -14,6 +14,7 @@ const mockAppConfig = {
     .fn()
     .mockResolvedValue('"C:\\Program Files (x86)\\MakeMKV\\makemkvcon.exe"'),
   isRipAllEnabled: false,
+  maxTitleLengthMinutes: null,
 };
 
 // Mock the config with async methods
@@ -76,6 +77,7 @@ describe("DiscService", () => {
       '"C:\\Program Files (x86)\\MakeMKV\\makemkvcon.exe"'
     );
     mockAppConfig.isRipAllEnabled = false;
+    mockAppConfig.maxTitleLengthMinutes = null;
 
     // Import DiscService after mocks are set up
     const module = await import("../../src/services/disc.service.js");
@@ -513,6 +515,40 @@ TINFO:2,9,0,"2:15:30"`;
       });
     });
 
+    it("should return eligible title numbers when a maximum duration is configured", async () => {
+      vi.resetModules();
+      vi.doMock("../../src/config/index.js", () => ({
+        AppConfig: {
+          ...mockAppConfig,
+          maxTitleLengthMinutes: 60,
+          isRipAllEnabled: true,
+        },
+      }));
+      const { DiscService: Local } = await import(
+        "../../src/services/disc.service.js"
+      );
+      const { ValidationUtils } = await import("../../src/utils/validation.js");
+      ValidationUtils.getTimeInSeconds.mockImplementation((timeArray) =>
+        +timeArray[0] * 3600 + +timeArray[1] * 60 + +timeArray[2]
+      );
+      const mockStdout = `TINFO:0,9,0,"0:22:00"
+TINFO:1,9,0,"2:00:00"
+TINFO:2,9,0,"0:23:30"`;
+
+      exec.mockImplementation((command, callback) => {
+        callback(null, mockStdout, "");
+      });
+
+      const result = await Local.getDiscFileInfo({
+        driveNumber: "0",
+        title: "Test Disc",
+        mediaType: "dvd",
+      });
+
+      expect(result.fileNumbers).toEqual(["0", "2"]);
+      expect(result.fileNumber).toBeUndefined();
+    });
+
     it("should return 'all' when rip all is enabled", async () => {
       vi.resetModules();
       vi.doMock("../../src/config/index.js", () => ({
@@ -632,6 +668,54 @@ TINFO:2,9,0,"malformed"`;
 
       const result = DiscService.getFileNumber(mockOutput);
       expect(result).toBe("1"); // Only valid entry
+    });
+  });
+
+  describe("getCompleteDiscInfo", () => {
+    it("should omit discs skipped by title-duration filtering", async () => {
+      vi.spyOn(DiscService, "getDiscFileInfo")
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ driveNumber: "1", title: "Eligible Disc" });
+
+      const result = await DiscService.getCompleteDiscInfo([
+        { driveNumber: "0", title: "Skipped Disc" },
+        { driveNumber: "1", title: "Eligible Disc" },
+      ]);
+
+      expect(result).toEqual([
+        { driveNumber: "1", title: "Eligible Disc" },
+      ]);
+    });
+  });
+
+  describe("getFileNumbers", () => {
+    it("should select every title within the maximum when rip-all is enabled", async () => {
+      const { ValidationUtils } = await import("../../src/utils/validation.js");
+      const { getTimeInSeconds } = ValidationUtils;
+      getTimeInSeconds.mockImplementation((timeArray) =>
+        +timeArray[0] * 3600 + +timeArray[1] * 60 + +timeArray[2]
+      );
+      const mockOutput = `TINFO:0,9,0,"0:22:00"
+TINFO:1,9,0,"2:00:00"
+TINFO:2,9,0,"0:23:30"`;
+
+      expect(DiscService.getFileNumbers(mockOutput, 60, true)).toEqual([
+        "0",
+        "2",
+      ]);
+    });
+
+    it("should select the longest eligible title when rip-all is disabled", async () => {
+      const { ValidationUtils } = await import("../../src/utils/validation.js");
+      const { getTimeInSeconds } = ValidationUtils;
+      getTimeInSeconds.mockImplementation((timeArray) =>
+        +timeArray[0] * 3600 + +timeArray[1] * 60 + +timeArray[2]
+      );
+      const mockOutput = `TINFO:0,9,0,"0:22:00"
+TINFO:1,9,0,"2:00:00"
+TINFO:2,9,0,"0:23:30"`;
+
+      expect(DiscService.getFileNumbers(mockOutput, 60, false)).toEqual(["2"]);
     });
   });
 

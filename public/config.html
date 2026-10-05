@@ -338,6 +338,24 @@
                 </div>
 
                 <div class="form-group">
+                  <label for="max_title_length_minutes"
+                    >Maximum Title Length (minutes)</label
+                  >
+                  <input
+                    type="number"
+                    id="max_title_length_minutes"
+                    name="ripping.max_title_length_minutes"
+                    min="1"
+                    placeholder="No limit"
+                    class="form-control"
+                  />
+                  <small class="help-text">
+                    Skip titles longer than this, e.g. a "play all" title on a
+                    TV disc (leave empty for no limit)
+                  </small>
+                </div>
+
+                <div class="form-group">
                   <label for="ripping_mode">Ripping Mode</label>
                   <select
                     id="ripping_mode"

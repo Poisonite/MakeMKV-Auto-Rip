@@ -143,7 +143,7 @@ export class DiscService {
       this.getDiscFileInfo(drive)
     );
 
-    return Promise.all(drivePromises);
+    return Promise.all(drivePromises).then((discs) => discs.filter(Boolean));
   }
 
   /**
@@ -322,9 +322,23 @@ export class DiscService {
         }
 
         try {
-          const fileNumber = AppConfig.isRipAllEnabled
-            ? "all"
-            : this.getFileNumber(stdout);
+          const maxTitleLength = AppConfig.maxTitleLengthMinutes;
+          const ripAll = AppConfig.isRipAllEnabled;
+          const fileNumbers = maxTitleLength
+            ? this.getFileNumbers(stdout, maxTitleLength, ripAll)
+            : null;
+          if (fileNumbers && fileNumbers.length === 0) {
+            Logger.info(
+              `No titles at or below ${maxTitleLength} minutes found on ${driveInfo.title}; skipping disc.`
+            );
+            resolve(null);
+            return;
+          }
+          const fileNumber = fileNumbers
+            ? undefined
+            : ripAll
+              ? "all"
+              : this.getFileNumber(stdout);
 
           Logger.info(
             `Got file info for ${driveInfo.driveNumber}-${driveInfo.title}.`
@@ -334,6 +348,7 @@ export class DiscService {
             driveNumber: driveInfo.driveNumber,
             title: driveInfo.title,
             fileNumber: fileNumber,
+            fileNumbers: fileNumbers || undefined,
             mediaType: driveInfo.mediaType,
           });
         } catch (error) {
@@ -378,5 +393,52 @@ export class DiscService {
     });
 
     return myTitleSectionValue || "0";
+  }
+
+  /**
+   * Get title IDs at or below a configured duration, respecting rip-all mode.
+   * @param {string} data - Raw MakeMKV output
+   * @param {number} maximumMinutes - Maximum title duration in minutes
+   * @param {boolean} ripAll - Whether to select every eligible title
+   * @returns {Array<string>} - Selected title IDs
+   */
+  static getFileNumbers(
+    data,
+    maximumMinutes,
+    ripAll = AppConfig.isRipAllEnabled
+  ) {
+    const validationMessage = ValidationUtils.validateFileData(data);
+    if (validationMessage) {
+      throw new Error(validationMessage);
+    }
+
+    const eligibleTitles = data.split("\n").flatMap((line) => {
+      const lineArray = line.split(",");
+      if (
+        !lineArray[0].startsWith("TINFO:") ||
+        lineArray[1] != VALIDATION_CONSTANTS.TITLE_LENGTH_CODE
+      ) {
+        return [];
+      }
+
+      const duration = lineArray[3]?.replace(/[\"']+/g, "").split(":");
+      const durationSeconds = ValidationUtils.getTimeInSeconds(duration);
+      return durationSeconds > 0 && durationSeconds <= maximumMinutes * 60
+        ? [{ id: lineArray[0].replace("TINFO:", ""), durationSeconds }]
+        : [];
+    });
+
+    if (ripAll) {
+      return eligibleTitles.map((title) => title.id);
+    }
+
+    const longestTitle = eligibleTitles.reduce(
+      (longest, title) =>
+        !longest || title.durationSeconds > longest.durationSeconds
+          ? title
+          : longest,
+      null
+    );
+    return longestTitle ? [longestTitle.id] : [];
   }
 }

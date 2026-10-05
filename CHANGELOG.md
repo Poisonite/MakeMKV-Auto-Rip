@@ -5,6 +5,15 @@ All notable changes to MakeMKV Auto Rip will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Maximum title length** - New optional `ripping.max_title_length_minutes` setting skips titles longer than the limit, such as "play all" titles on TV discs
+  - With `rip_all_titles: true`, every title within the limit is ripped; otherwise the longest title within the limit is ripped
+  - Discs with no title within the limit are skipped
+  - Configurable from the web UI config page
+
 ## [1.0.0] - 2025-08-12
 
 ### Added

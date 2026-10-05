@@ -18,6 +18,7 @@ mount_detection:
 
 ripping:
   rip_all_titles: false
+  max_title_length_minutes: 60
   mode: "async"
 
 interface:

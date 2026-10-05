@@ -321,6 +321,10 @@ class ConfigEditor {
       "ripping.rip_all_titles",
       config.ripping?.rip_all_titles ?? false
     );
+    this.setFieldValue(
+      "ripping.max_title_length_minutes",
+      config.ripping?.max_title_length_minutes ?? ""
+    );
     this.setFieldValue("ripping.mode", config.ripping?.mode || "async");
 
     // Interface section

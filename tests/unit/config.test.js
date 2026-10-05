@@ -106,6 +106,12 @@ describe("AppConfig", () => {
       expect(result).toBe(false);
     });
 
+    it("should return the configured maximum title length", async () => {
+      const { AppConfig } = await import("../../src/config/index.js");
+
+      expect(AppConfig.maxTitleLengthMinutes).toBe(60);
+    });
+
     it("should return correct ripping mode", async () => {
       const { AppConfig } = await import("../../src/config/index.js");
 
