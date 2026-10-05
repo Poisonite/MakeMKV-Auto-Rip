@@ -120,17 +120,9 @@ export class FileSystemUtils {
         await access(basePath);
 
         // Check if makemkvcon executable exists in this path
-        const executableName =
-          platform === "win32" ? "makemkvcon64.exe" : "makemkvcon";
-        const executablePath = join(basePath, executableName);
-
-        try {
-          await access(executablePath);
+        if (await this.findMakeMKVExecutable(basePath)) {
           Logger.info(`Found MakeMKV installation at: ${basePath}`);
           return basePath;
-        } catch {
-          // Executable not found in this directory, try next
-          continue;
         }
       } catch {
         // Directory doesn't exist, try next
@@ -151,17 +143,30 @@ export class FileSystemUtils {
    */
   static async validateMakeMKVInstallation(mkvDir) {
     if (!mkvDir) return false;
+    return Boolean(await this.findMakeMKVExecutable(mkvDir));
+  }
 
-    try {
-      const platform = os.platform();
-      const executableName =
-        platform === "win32" ? "makemkvcon64.exe" : "makemkvcon";
+  /**
+   * Find the makemkvcon executable in a MakeMKV directory.
+   * On Windows, prefers makemkvcon64.exe and falls back to makemkvcon.exe.
+   * @param {string} mkvDir - Path to MakeMKV directory
+   * @returns {Promise<string|null>} - Full executable path or null if not found
+   */
+  static async findMakeMKVExecutable(mkvDir) {
+    const executableNames =
+      os.platform() === "win32"
+        ? ["makemkvcon64.exe", "makemkvcon.exe"]
+        : ["makemkvcon"];
+
+    for (const executableName of executableNames) {
       const executablePath = join(mkvDir, executableName);
-
-      await access(executablePath);
-      return true;
-    } catch {
-      return false;
+      try {
+        await access(executablePath);
+        return executablePath;
+      } catch {
+        // Not found, try next name
+      }
     }
+    return null;
   }
 }

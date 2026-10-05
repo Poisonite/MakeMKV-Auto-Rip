@@ -133,6 +133,18 @@ describe("FileSystemUtils", () => {
       );
     });
 
+    it("should fall back to makemkvcon.exe on Windows", async () => {
+      mockedOs.platform.mockReturnValue("win32");
+      mockedFsPromises.access.mockImplementation(async (path) => {
+        if (path.endsWith("makemkvcon64.exe")) throw new Error("ENOENT");
+      });
+
+      const result = await FileSystemUtils.findMakeMKVExecutable(
+        "C:/Program Files/MakeMKV"
+      );
+      expect(result).toMatch(/[\\/]makemkvcon\.exe$/);
+    });
+
     it("should validate Unix installation", async () => {
       mockedOs.platform.mockReturnValue("linux");
       mockedFsPromises.access.mockResolvedValue(); // Simulates successful access

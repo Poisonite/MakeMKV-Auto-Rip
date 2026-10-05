@@ -3,12 +3,19 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { join } from "path";
 
 // Partially mock FileSystemUtils for detection/validation only
 const mockFileSystemUtils = {
   detectMakeMKVInstallation: vi.fn().mockResolvedValue("/usr/bin"),
   validateMakeMKVInstallation: vi.fn().mockResolvedValue(true),
+  findMakeMKVExecutable: vi.fn(),
 };
+const platformExecutable = async (mkvDir) =>
+  join(
+    mkvDir,
+    process.platform === "win32" ? "makemkvcon64.exe" : "makemkvcon"
+  );
 vi.mock("../../src/utils/filesystem.js", async () => {
   const actual = await vi.importActual("../../src/utils/filesystem.js");
   return {
@@ -33,6 +40,9 @@ describe("AppConfig", () => {
     // Reset mock implementation
     mockFileSystemUtils.detectMakeMKVInstallation.mockResolvedValue("/usr/bin");
     mockFileSystemUtils.validateMakeMKVInstallation.mockResolvedValue(true);
+    mockFileSystemUtils.findMakeMKVExecutable.mockImplementation(
+      platformExecutable
+    );
   });
 
   afterEach(() => {

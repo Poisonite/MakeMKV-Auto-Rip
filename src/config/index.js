@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { dirname, join, resolve, normalize, sep } from "path";
+import { dirname, resolve, normalize, sep } from "path";
 import { fileURLToPath } from "url";
 import { parse } from "yaml";
 import { FileSystemUtils } from "../utils/filesystem.js";
@@ -168,10 +168,8 @@ export class AppConfig {
     const mkvDir = await this.getMkvDir();
     if (!mkvDir) return null;
 
-    // Handle cross-platform executable names
-    const executableName =
-      process.platform === "win32" ? "makemkvcon64.exe" : "makemkvcon";
-    const executablePath = join(mkvDir, executableName);
+    const executablePath = await FileSystemUtils.findMakeMKVExecutable(mkvDir);
+    if (!executablePath) return null;
 
     // Quote the path if it contains spaces (important for Windows paths)
     return executablePath.includes(" ")

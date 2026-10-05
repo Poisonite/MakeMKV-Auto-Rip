@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Windows MakeMKV detection** - Installation detection and validation now look for `makemkvcon64.exe`, matching the executable the app runs
+- **Windows MakeMKV detection** - Detection, validation and the executable the app runs now all use `makemkvcon64.exe`, falling back to `makemkvcon.exe` when the 64-bit executable is not installed
 
 ## [1.0.0] - 2025-08-12
 
