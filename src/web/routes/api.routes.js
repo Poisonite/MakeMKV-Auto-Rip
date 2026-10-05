@@ -503,6 +503,17 @@ function updateYamlValues(yamlContent, config) {
     }
   }
 
+  // Comment out max_title_length_minutes if the field was cleared
+  if (
+    config.ripping &&
+    !config.ripping.hasOwnProperty("max_title_length_minutes")
+  ) {
+    updatedContent = updatedContent.replace(
+      /^(\s+)(max_title_length_minutes\s*:.*$)/m,
+      "$1# $2"
+    );
+  }
+
   // Process all the config updates
   processConfigObject(config);
 
