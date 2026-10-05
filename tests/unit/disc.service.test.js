@@ -527,6 +527,10 @@ TINFO:2,9,0,"2:15:30"`;
       const { DiscService: Local } = await import(
         "../../src/services/disc.service.js"
       );
+      const { ValidationUtils } = await import("../../src/utils/validation.js");
+      ValidationUtils.getTimeInSeconds.mockImplementation((timeArray) =>
+        +timeArray[0] * 3600 + +timeArray[1] * 60 + +timeArray[2]
+      );
       const mockStdout = `TINFO:0,9,0,"0:22:00"
 TINFO:1,9,0,"2:00:00"
 TINFO:2,9,0,"0:23:30"`;
