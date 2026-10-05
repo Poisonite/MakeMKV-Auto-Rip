@@ -240,8 +240,8 @@ ripping:
   # Rip all titles from disc instead of just the main title (true/false)
   rip_all_titles: false
 
-   # Optional maximum title duration in minutes; titles longer than this are skipped
-   max_title_length_minutes: 60
+  # Optional maximum title duration in minutes; titles longer than this are skipped
+  # max_title_length_minutes: 60
 
   # Ripping mode - async for parallel processing, sync for sequential (async/sync)
   mode: "async"
